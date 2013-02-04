@@ -123,8 +123,8 @@ QMozContext::QMozContext(QObject* parent)
     LoadEmbedLite();
     d->mApp = XRE_GetEmbedLite();
     d->mApp->SetListener(d);
-    d->mApp->AddManifestLocation("/usr/local/lib/mozembedlite/components/EmbedLiteBinComponents.manifest");
-    d->mApp->AddManifestLocation("/usr/local/lib/mozembedlite/components/EmbedLiteJSComponents.manifest");
+    d->mApp->AddManifestLocation("/usr/lib/mozembedlite/components/EmbedLiteBinComponents.manifest");
+    d->mApp->AddManifestLocation("/usr/lib/mozembedlite/components/EmbedLiteJSComponents.manifest");
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
     QTimer::singleShot(0, this, SLOT(runEmbedding()));
 }
