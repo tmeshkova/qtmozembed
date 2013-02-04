@@ -49,6 +49,9 @@ public:
 Q_SIGNALS:
     void onInitialized();
 
+public Q_SLOTS:
+    void addComponentManifest(const QString& manifestPath);
+
 private Q_SLOTS:
     void runEmbedding();
     void onLastWindowClosed();
