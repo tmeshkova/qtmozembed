@@ -1,0 +1,25 @@
+Source: qtmozembed
+Section: libs
+Priority: extra
+Maintainer: unknown <tmeshkova@github.com>
+Build-Depends: debhelper (>= 7), libqt4-opengl-dev | libqtbase5-dev
+Standards-Version: 3.8.4
+Homepage: <insert the upstream URL, if relevant>
+
+Package: libqtmozembed
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libqtmozembed-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqtmozembed (= ${Source-Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libqtmozembed-dbg
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqtmozembed (= ${Source-Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
