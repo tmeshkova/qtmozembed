@@ -78,7 +78,7 @@ Q_SIGNALS:
     void recvAsyncMessage(const QString message, const QString data);
     bool recvSyncMessage(const QString message, const QString data, QSyncMessageResponse* response);
     void loadRedirect();
-    void securityChanged(QString status, uint32_t state);
+    void securityChanged(QString status, uint state);
     void firstPaint(int32_t offx, int32_t offy);
     void contentLoaded(QString docuri);
     void alert(QVariant data);
