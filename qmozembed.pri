@@ -8,17 +8,21 @@ isEmpty(OBJ_PATH) {
   SDK_HOME=$$system(pkg-config --variable=sdkdir libxul-embedding)
   GECKO_LIB_DIR = $$SDK_HOME/lib
   GECKO_INCLUDE_DIR = $$SDK_HOME/include
+  BIN_DIR=$$replace(SDK_HOME, -devel-, -)
+  message($$BIN_DIR - binary dir)
 } else {
   message(OBJ_PATH defined $$OBJ_PATH)
   GECKO_LIB_DIR = $$OBJ_PATH/dist/lib
   GECKO_INCLUDE_DIR = $$OBJ_PATH/dist/include
+  BIN_DIR=$$OBJ_PATH/dist/bin
+  message($$BIN_DIR - binary dir)
 }
 
 INCLUDEPATH += $$GECKO_INCLUDE_DIR $$GECKO_INCLUDE_DIR/nspr
 LIBS += -L$$GECKO_LIB_DIR -lxpcomglue -Wl,--whole-archive -lmozglue
 LIBS += -Wl,--no-whole-archive -rdynamic -ldl
 
-DEFINES += BUILD_GRE_HOME=\"\\\"$$GRE_HOME\\\"\"
+DEFINES += BUILD_GRE_HOME=\"\\\"$$BIN_DIR\\\"\"
 
 # Copy default mozilla flags to avoid some gcc warnings
 *-g++*: QMAKE_CXXFLAGS += -Wno-attributes

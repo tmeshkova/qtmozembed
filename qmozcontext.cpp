@@ -120,6 +120,7 @@ QMozContext::QMozContext(QObject* parent)
     : QObject(parent)
     , d(new QMozContextPrivate(this))
 {
+    setenv("BUILD_GRE_HOME", BUILD_GRE_HOME, 1);
     LoadEmbedLite();
     d->mApp = XRE_GetEmbedLite();
     d->mApp->SetListener(d);
