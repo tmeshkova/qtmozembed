@@ -79,8 +79,8 @@ public:
         mApp->LoadGlobalStyleSheet("chrome://global/content/embedScrollStyles.css", true);
         Q_EMIT q->onInitialized();
         // Listen history notifications
-        // mApp->AddObserver("history:checkurivisited");
-        // mApp->AddObserver("history:markurivisited");
+        mApp->AddObserver("history:checkurivisited");
+        mApp->AddObserver("history:markurivisited");
     }
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {

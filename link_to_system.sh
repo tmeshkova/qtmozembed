@@ -30,7 +30,7 @@ for str in $FILES_LIST; do
 done
 
 rm -f $PREFIX/pkgconfig/qtembedwidget.pc;
-ln -s $(pwd)/release/pkgconfig/qtembedwidget.pc $PREFIX/pkgconfig/qtembedwidget.pc
+ln -s $(pwd)/$OBJDIR/pkgconfig/qtembedwidget.pc $PREFIX/pkgconfig/qtembedwidget.pc
 
 PREFIX=$TARGET_DIR/include
 mkdir -p $PREFIX
