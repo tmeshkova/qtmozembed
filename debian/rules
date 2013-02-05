@@ -63,7 +63,9 @@ clean:
 	rm -f $(CURDIR)/build-stamp
 	rm -rf $(CURDIR)/pkgconfig
 	rm -f $(CURDIR)/configure-stamp
-	rm -rf $(CURDIR)/$(shell cat $(CURDIR)/objdir-name)
+	if [ -f $(CURDIR)/objdir-name ]; then \
+	    rm -rf $(CURDIR)/$(shell cat $(CURDIR)/objdir-name); \
+	fi
 	rm -f Makefile
 	dh_clean
 
