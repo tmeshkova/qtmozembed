@@ -20,10 +20,14 @@ CONFIG(opengl) {
      message(OpenGL support is not available.)
 }
 
-OBJECTS_DIR += release
-DESTDIR = ./release
-MOC_DIR += ./release/tmp/moc/release_static
-RCC_DIR += ./release/tmp/rcc/release_static
+isEmpty(OBJ_DEB_DIR) {
+  OBJ_DEB_DIR=obj-dir
+}
+
+OBJECTS_DIR += ./$$OBJ_DEB_DIR
+DESTDIR = ./$$OBJ_DEB_DIR
+MOC_DIR += ./$$OBJ_DEB_DIR/tmp/moc/release_static
+RCC_DIR += ./$$OBJ_DEB_DIR/tmp/rcc/release_static
 
 include(qmozembed.pri)
 

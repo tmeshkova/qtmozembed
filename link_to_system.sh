@@ -6,14 +6,21 @@ if [ "$TARGET_DIR" = "" ]; then
   TARGET_DIR=/usr
 fi
 
+OBJDIR="obj-dir"
+
+if [ -f $(pwd)/objdir-name ]; then
+  OBJDIR=`cat $(pwd)/objdir-name`;
+  echo "objdir-stamp detected: $OBJDIR"
+fi
+
 PREFIX=$TARGET_DIR/lib
 mkdir -p $PREFIX
 
 FILES_LIST="
-release/libqtembedwidget.so
-release/libqtembedwidget.so.1
-release/libqtembedwidget.so.1.0
-release/libqtembedwidget.so.1.0.0
+$OBJDIR/libqtembedwidget.so
+$OBJDIR/libqtembedwidget.so.1
+$OBJDIR/libqtembedwidget.so.1.0
+$OBJDIR/libqtembedwidget.so.1.0.0
 "
 
 for str in $FILES_LIST; do
