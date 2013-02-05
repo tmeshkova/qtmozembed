@@ -124,8 +124,6 @@ QMozContext::QMozContext(QObject* parent)
     LoadEmbedLite();
     d->mApp = XRE_GetEmbedLite();
     d->mApp->SetListener(d);
-    addComponentManifest("/usr/lib/mozembedlite/components/EmbedLiteBinComponents.manifest");
-    addComponentManifest("/usr/lib/mozembedlite/components/EmbedLiteJSComponents.manifest");
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
     QTimer::singleShot(0, this, SLOT(runEmbedding()));
 }
