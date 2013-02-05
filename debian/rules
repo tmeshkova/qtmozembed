@@ -39,9 +39,6 @@ endif
 MAKEFLAGS += $(NJOBS)
 DEST_OBJ_DIR=objdir-$(DEB_HOST_ARCH)
 
-config.status: configure
-	dh_testdir
-
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -51,10 +48,10 @@ configure-stamp:
 	touch configure-stamp
 
 build: build-stamp
-
-build-stamp: config.status
+build-stamp: configure-stamp
 	dh_testdir
 	$(MAKE)
+
 	touch build-stamp
 
 clean:
