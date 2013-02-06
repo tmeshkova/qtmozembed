@@ -6,7 +6,7 @@ if [ "$TARGET_DIR" = "" ]; then
   TARGET_DIR=/usr
 fi
 
-OBJDIR="obj-dir"
+OBJDIR="obj--dir"
 
 if [ -f $(pwd)/objdir-name ]; then
   OBJDIR=`cat $(pwd)/objdir-name`;

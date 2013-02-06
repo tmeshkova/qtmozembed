@@ -21,7 +21,7 @@ CONFIG(opengl) {
 }
 
 isEmpty(OBJ_DEB_DIR) {
-  OBJ_DEB_DIR=obj-dir
+  OBJ_DEB_DIR=obj-$$OBJ_ARCH-dir
 }
 
 OBJECTS_DIR += ./$$OBJ_DEB_DIR
