@@ -42,7 +42,6 @@ DEST_OBJ_DIR=objdir-$(DEB_HOST_ARCH)
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	echo "$(DEST_OBJ_DIR)" > $(CURDIR)/objdir-name
 	qmake OBJ_DEB_DIR=$(DEST_OBJ_DIR)
 
 	touch configure-stamp
