@@ -92,7 +92,7 @@ binary-arch: build install
 	dh_strip --dbg-package=$(package)-dbg
 	dh_makeshlibs
 	dh_installdeb
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
+	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
