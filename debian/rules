@@ -56,12 +56,10 @@ build-stamp: configure-stamp
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f $(CURDIR)/build-stamp
-	rm -rf $(CURDIR)/pkgconfig
-	rm -f $(CURDIR)/configure-stamp
-	if [ -f $(CURDIR)/objdir-name ]; then \
-	    rm -rf $(CURDIR)/$(shell cat $(CURDIR)/objdir-name); \
-	fi
+	-rm -f $(CURDIR)/build-stamp
+	-rm -rf $(CURDIR)/pkgconfig
+	-rm -f $(CURDIR)/configure-stamp
+	-rm -rf $(DEST_OBJ_DIR)
 	rm -f Makefile
 	dh_clean
 
