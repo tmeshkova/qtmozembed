@@ -412,6 +412,11 @@ void QGraphicsMozView::load(const QString& url)
     d->mView->LoadURL(QUrl::fromUserInput(url).toString().toUtf8().data());
 }
 
+void QGraphicsMozView::addMessageListener(const QString& name)
+{
+    d->mView->AddMessageListener(name.toAscii());
+}
+
 void QGraphicsMozView::sendAsyncMessage(const QString& name, const QVariant& variant)
 {
     if (!d->mViewInitialized)
