@@ -66,6 +66,7 @@ public Q_SLOTS:
     void load(const QString&);
     void sendAsyncMessage(const QString& name, const QString& message);
     void sendAsyncMessage(const QString& name, const QVariant& variant);
+    void addMessageListener(const QString& name);
 
 Q_SIGNALS:
     void viewInitialized();
