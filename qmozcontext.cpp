@@ -78,6 +78,12 @@ public:
         setDefaultPrefs();
         mApp->LoadGlobalStyleSheet("chrome://global/content/embedScrollStyles.css", true);
         Q_EMIT q->onInitialized();
+        QListIterator<QString> i(mObserversList);
+        while (i.hasNext()) {
+            const QString& str = i.next();
+            mApp->AddObserver(str.toUtf8().data());
+        }
+        mObserversList.clear();
     }
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {
@@ -103,7 +109,9 @@ public:
         }
         mApp->SetBoolPref("layout.build_layers_for_scrollable_views", getenv("USE_SCROLL_VIEWS") != 0);
     }
+    bool IsInitialized() { return mApp && mInitialized; }
 
+    QList<QString> mObserversList;
 private:
     QMozContext* q;
     EmbedLiteApp* mApp;
@@ -141,8 +149,10 @@ QMozContext::addComponentManifest(const QString& manifestPath)
 void
 QMozContext::addObserver(const QString& aTopic)
 {
-    if (!d->mApp)
+    if (!d->IsInitialized()) {
+        d->mObserversList.append(aTopic);
         return;
+    }
 
     d->mApp->AddObserver(aTopic.toUtf8().data());
 }
