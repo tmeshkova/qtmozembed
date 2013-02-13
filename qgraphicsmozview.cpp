@@ -330,6 +330,7 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
         d->mLastIsGoodRotation = matr.PreservesAxisAlignedRectangles();
         if (d->mContext->GetApp()->IsAccelerated()) {
             d->mView->SetGLViewTransform(matr);
+            // d->mView->SetViewSize(0, 0, mSize.width(), mSize.height());
             if (changedState) {
                 d->UpdateViewSize();
             }

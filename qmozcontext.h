@@ -51,6 +51,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void addComponentManifest(const QString& manifestPath);
+    void addObserver(const QString& aTopic);
 
 private Q_SLOTS:
     void runEmbedding();

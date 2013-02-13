@@ -78,9 +78,6 @@ public:
         setDefaultPrefs();
         mApp->LoadGlobalStyleSheet("chrome://global/content/embedScrollStyles.css", true);
         Q_EMIT q->onInitialized();
-        // Listen history notifications
-        mApp->AddObserver("history:checkurivisited");
-        mApp->AddObserver("history:markurivisited");
     }
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {
@@ -139,6 +136,15 @@ QMozContext::addComponentManifest(const QString& manifestPath)
     if (!d->mApp)
         return;
     d->mApp->AddManifestLocation(manifestPath.toUtf8().data());
+}
+
+void
+QMozContext::addObserver(const QString& aTopic)
+{
+    if (!d->mApp)
+        return;
+
+    d->mApp->AddObserver(aTopic.toUtf8().data());
 }
 
 QMozContext*
