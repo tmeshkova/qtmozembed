@@ -235,10 +235,10 @@ public:
                                   float aDisplayResolution, bool aLayersUpdated,
                                   nsIntPoint& aScrollOffset, float& aScaleX, float& aScaleY) { LOGT(); }
     virtual void SetPageRect(const gfxRect& aCssPageRect) { LOGT(); }
-    virtual bool SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize) { 
+    virtual bool SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize) {
         mContentRect = QRect(aContentRect.x, aContentRect.y, aContentRect.width, aContentRect.height);
         mScrollableSize = QSize(aScrollableSize.width, aScrollableSize.height);
-        return true; 
+        return false;
     }
 
     QGraphicsMozView* q;
