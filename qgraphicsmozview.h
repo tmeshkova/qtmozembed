@@ -43,6 +43,8 @@ class QGraphicsMozView : public QGraphicsWidget
     Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY navigationHistoryChanged FINAL)
     Q_PROPERTY(int loadProgress READ loadProgress NOTIFY loadProgressChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged FINAL)
+    Q_PROPERTY(QRect contentRect READ contentRect)
+    Q_PROPERTY(QSize scrollableSize READ scrollableSize)
 
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
@@ -56,6 +58,8 @@ public:
     bool canGoBack() const;
     bool canGoForward() const;
     bool loading() const;
+    QRect contentRect() const;
+    QSize scrollableSize() const;
 
 public Q_SLOTS:
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl());
