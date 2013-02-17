@@ -260,6 +260,8 @@ public:
     bool mLastIsGoodRotation;
     bool mIsPasswordField;
     bool mGraphicsViewAssigned;
+    QRect mContentRect;
+    QSize mScrollableSize;
 };
 
 QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
