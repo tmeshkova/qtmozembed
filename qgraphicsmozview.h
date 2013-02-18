@@ -43,8 +43,10 @@ class QGraphicsMozView : public QGraphicsWidget
     Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY navigationHistoryChanged FINAL)
     Q_PROPERTY(int loadProgress READ loadProgress NOTIFY loadProgressChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged FINAL)
-    Q_PROPERTY(QRect contentRect READ contentRect)
+    Q_PROPERTY(QRect contentRect READ contentRect NOTIFY viewAreaChanged FINAL)
     Q_PROPERTY(QSize scrollableSize READ scrollableSize)
+    Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset)
+    Q_PROPERTY(float resolution READ resolution)
 
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
@@ -60,6 +62,8 @@ public:
     bool loading() const;
     QRect contentRect() const;
     QSize scrollableSize() const;
+    QPointF scrollableOffset() const;
+    float resolution() const;
 
 public Q_SLOTS:
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl());
@@ -90,6 +94,7 @@ Q_SIGNALS:
     void confirm(QVariant data);
     void prompt(QVariant data);
     void authRequired(QVariant data);
+    void viewAreaChanged();
 
 protected:
     virtual void setGeometry(const QRectF& rect);

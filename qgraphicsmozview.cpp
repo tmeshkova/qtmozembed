@@ -52,6 +52,8 @@ public:
       , mGraphicsViewAssigned(false)
       , mContentRect(0,0,0,0)
       , mScrollableSize(0,0)
+      , mScrollableOffset(0,0)
+      , mContentResolution(1.0)
     {
     }
     virtual ~QGraphicsMozViewPrivate() {}
@@ -238,6 +240,14 @@ public:
     virtual bool SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize) {
         mContentRect = QRect(aContentRect.x, aContentRect.y, aContentRect.width, aContentRect.height);
         mScrollableSize = QSize(aScrollableSize.width, aScrollableSize.height);
+        Q_EMIT q->viewAreaChanged();
+        return false;
+    }
+    virtual bool ScrollUpdate(const gfxPoint& aPosition, const float aResolution)
+    {
+        mScrollableOffset = QPointF(aPosition.x, aPosition.y);
+        mContentResolution = aResolution;
+        Q_EMIT q->viewAreaChanged();
         return false;
     }
 
@@ -262,6 +272,8 @@ public:
     bool mGraphicsViewAssigned;
     QRect mContentRect;
     QSize mScrollableSize;
+    QPointF mScrollableOffset;
+    float mContentResolution;
 };
 
 QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
@@ -443,6 +455,16 @@ QGraphicsMozView::sendAsyncMessage(const QString& name, const QString& message)
     if (!d->mViewInitialized)
         return;
     d->mView->SendAsyncMessage((const PRUnichar*)name.constData(), (const PRUnichar*)message.constData());
+}
+
+QPointF QGraphicsMozView::scrollableOffset() const
+{
+    return d->mScrollableOffset;
+}
+
+float QGraphicsMozView::resolution() const
+{
+    return d->mContentResolution;
 }
 
 QRect QGraphicsMozView::contentRect() const
