@@ -33,6 +33,10 @@ include(qmozembed.pri)
 
 PREFIX = /usr
 
+contains(QT_MAJOR_VERSION, 4) {
+  PKGCONFIG += QJson
+}
+
 target.path = $$PREFIX/lib
 
 QMAKE_PKGCONFIG_NAME = qtembedwidget
