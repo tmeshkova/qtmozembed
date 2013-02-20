@@ -84,7 +84,7 @@ Q_SIGNALS:
     void navigationHistoryChanged();
     void loadingChanged();
     void viewDestroyed();
-    void recvAsyncMessage(const QString message, const QString data);
+    void recvAsyncMessage(const QString message, const QVariant data);
     bool recvSyncMessage(const QString message, const QString data, QSyncMessageResponse* response);
     void loadRedirect();
     void securityChanged(QString status, uint state);
