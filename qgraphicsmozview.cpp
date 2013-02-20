@@ -150,17 +150,18 @@ public:
         NS_ConvertUTF16toUTF8 message(aMessage);
         NS_ConvertUTF16toUTF8 data(aData);
 
-        if (!strncmp(message.get(), "embed:", 6) || !strncmp(message.get(), "chrome:", 7)) {
-            bool ok = false;
+        bool ok = false;
 #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
-            QJson::Parser parser;
-            QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
+        QJson::Parser parser;
+        QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
 #else
-            QJsonParseError error;
-            QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
-            ok = error.error == QJsonParseError::NoError;
-            QVariant vdata = doc.toVariant();
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
+        ok = error.error == QJsonParseError::NoError;
+        QVariant vdata = doc.toVariant();
 #endif
+
+        if (!strncmp(message.get(), "embed:", 6) || !strncmp(message.get(), "chrome:", 7)) {
             if (ok) {
                 if (!strcmp(message.get(), "embed:alert")) {
                     Q_EMIT q->alert(vdata);
@@ -189,7 +190,7 @@ public:
             }
         }
         LOGT("mesg:%s, data:%s", message.get(), data.get());
-        Q_EMIT q->recvAsyncMessage(message.get(), data.get());
+        Q_EMIT q->recvAsyncMessage(message.get(), vdata);
     }
     virtual char* RecvSyncMessage(const PRUnichar* aMessage, const PRUnichar*  aData) {
         QSyncMessageResponse response;
