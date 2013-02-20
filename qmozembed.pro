@@ -1,4 +1,3 @@
-QT += opengl
 CONFIG += qt thread debug ordered create_pc create_prl no_install_prl
 
 TARGET = qtembedwidget
@@ -13,6 +12,11 @@ HEADERS += qmozcontext.h \
            EmbedQtKeyUtils.h \
            qdeclarativemozview.h \
            qgraphicsmozview.h
+
+!contains(QT_MAJOR_VERSION, 4) {
+SOURCES += quickmozview.cpp
+HEADERS += quickmozview.h
+}
 
 CONFIG(opengl) {
      message(Building with OpenGL support.)
@@ -34,7 +38,10 @@ include(qmozembed.pri)
 PREFIX = /usr
 
 contains(QT_MAJOR_VERSION, 4) {
+  QT += opengl
   PKGCONFIG += QJson
+} else {
+  QT += quick opengl
 }
 
 target.path = $$PREFIX/lib
