@@ -49,12 +49,14 @@ public:
 
 Q_SIGNALS:
     void onInitialized();
+    void newWindowRequested(const QString& url);
 
 public Q_SLOTS:
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
     void setClipboard(QString text);
     QString getClipboard();
+    void newWindow(const QString& url);
 
 private Q_SLOTS:
     void runEmbedding();
@@ -64,6 +66,16 @@ private:
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
     QClipboard* clipboard;
+};
+
+class QmlMozContext : public QObject
+{
+    Q_OBJECT
+public:
+    QmlMozContext(QObject* parent = 0) : QObject(parent) {}
+    virtual ~QmlMozContext() {}
+public Q_SLOTS:
+    void newWindow(const QString& url = "about:mozilla");
 };
 
 #endif /* qmozcontext_h */

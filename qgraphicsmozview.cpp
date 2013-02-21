@@ -28,11 +28,8 @@
 #include "mozilla/embedlite/EmbedLiteApp.h"
 
 #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
-#pragma GCC system_header
-#pragma GCC visibility push(default)
-#include_next <qjson/serializer.h>
-#include_next <qjson/parser.h>
-#pragma GCC visibility pop
+#include <qjson/serializer.h>
+#include <qjson/parser.h>
 #else
 #include <QJsonParseError>
 #include <QJsonDocument>
@@ -798,4 +795,10 @@ QGraphicsMozView::inputMethodQuery(Qt::InputMethodQuery aQuery) const
 {
     static bool commitNow = getenv("DO_FAST_COMMIT") != 0;
     return commitNow ? QVariant(0) : QVariant();
+}
+
+void
+QGraphicsMozView::newWindow(const QString& url)
+{
+    LOGT("New Window: %s", url.toUtf8().data());
 }

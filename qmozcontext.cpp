@@ -55,8 +55,8 @@ public:
     }
 
     virtual bool ExecuteChildThread() {
-        LOGT();
         if (!getenv("GECKO_THREAD")) {
+            LOGT("Execute in child Native thread: %p", mThread);
             mThread->start();
             mThread->setPriority(QThread::LowPriority);
             return true;
@@ -65,8 +65,8 @@ public:
     }
     // Native thread must be stopped here
     virtual bool StopChildThread() {
-        LOGT();
         if (mThread) {
+            LOGT("Stop Native thread: %p", mThread);
             mThread->Quit();
             return true;
         }
@@ -87,14 +87,13 @@ public:
     }
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {
-        LOGT();
+        LOGT("");
     }
     virtual void OnObserve(const char* aTopic, const PRUnichar* aData) {
         LOGT("aTopic: %s, data: %s", aTopic, NS_ConvertUTF16toUTF8(aData).get());
     }
     void setDefaultPrefs()
     {
-        LOGT();
         if (getenv("DS_UA")) {
             mApp->SetCharPref("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20130124 Firefox/20.0");
         } else if (getenv("CT_UA")) {
@@ -125,6 +124,7 @@ QMozContext::QMozContext(QObject* parent)
     : QObject(parent)
     , d(new QMozContextPrivate(this))
 {
+    LOGT("Create new Context: %p, parent:%p", (void*)this, (void*)parent);
     setenv("BUILD_GRE_HOME", BUILD_GRE_HOME, 1);
     LoadEmbedLite();
     d->mApp = XRE_GetEmbedLite();
@@ -200,4 +200,16 @@ QMozContext::GetApp()
 void QMozContext::onLastWindowClosed()
 {
     GetApp()->Stop();
+}
+
+void
+QMozContext::newWindow(const QString& url)
+{
+    Q_EMIT(this, newWindowRequested(url));
+}
+
+void
+QmlMozContext::newWindow(const QString& url)
+{
+    QMozContext::GetInstance()->newWindow(url);
 }
