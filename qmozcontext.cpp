@@ -18,7 +18,7 @@
 
 using namespace mozilla::embedlite;
 
-static QMozContext* sSingleton = nullptr;
+static QMozContext* protectSingleton = nullptr;
 
 void
 GeckoThread::Quit()
@@ -124,6 +124,8 @@ QMozContext::QMozContext(QObject* parent)
     : QObject(parent)
     , d(new QMozContextPrivate(this))
 {
+    Q_ASSERT(protectSingleton == nullptr);
+    protectSingleton = this;
     LOGT("Create new Context: %p, parent:%p", (void*)this, (void*)parent);
     setenv("BUILD_GRE_HOME", BUILD_GRE_HOME, 1);
     LoadEmbedLite();
@@ -136,6 +138,7 @@ QMozContext::QMozContext(QObject* parent)
 
 QMozContext::~QMozContext()
 {
+    protectSingleton = nullptr;
     delete d;
 }
 
@@ -173,11 +176,12 @@ QMozContext::addObserver(const QString& aTopic)
 QMozContext*
 QMozContext::GetInstance()
 {
-    if (!sSingleton) {
-        sSingleton = new QMozContext();
-        NS_ASSERTION(sSingleton, "not initialized");
+    static QMozContext* lsSingleton = nullptr;
+    if (!lsSingleton) {
+        lsSingleton = new QMozContext();
+        NS_ASSERTION(lsSingleton, "not initialized");
     }
-    return sSingleton;
+    return lsSingleton;
 }
 
 void QMozContext::runEmbedding()
