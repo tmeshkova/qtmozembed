@@ -131,11 +131,24 @@ QMozContext::QMozContext(QObject* parent)
     d->mApp->SetListener(d);
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
     QTimer::singleShot(0, this, SLOT(runEmbedding()));
+    clipboard = QApplication::clipboard();
 }
 
 QMozContext::~QMozContext()
 {
     delete d;
+}
+
+void
+QMozContext::setClipboard(QString text)
+{
+    clipboard->setText(text);
+}
+
+QString
+QMozContext::getClipboard()
+{
+    return clipboard->text();
 }
 
 void

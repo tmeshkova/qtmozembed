@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QClipboard>
 
 class QMozContextPrivate;
 
@@ -52,6 +53,8 @@ Q_SIGNALS:
 public Q_SLOTS:
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
+    void setClipboard(QString text);
+    QString getClipboard();
 
 private Q_SLOTS:
     void runEmbedding();
@@ -60,6 +63,7 @@ private Q_SLOTS:
 private:
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
+    QClipboard* clipboard;
 };
 
 #endif /* qmozcontext_h */
