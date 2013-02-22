@@ -33,7 +33,7 @@ public:
     Q_INVOKABLE QObject* child() const;
 
 public Q_SLOTS:
-    uint32_t uniqueID() const;
+    quint32 uniqueID() const;
 
 Q_SIGNALS:
     void preferredWidthChanged();

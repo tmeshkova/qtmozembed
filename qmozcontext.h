@@ -56,7 +56,7 @@ public Q_SLOTS:
     void addObserver(const QString& aTopic);
     void setClipboard(QString text);
     QString getClipboard();
-    unsigned int newWindow(const QString& url, const uint32_t& parentId);
+    quint32 newWindow(const QString& url, const quint32& parentId);
 
 private Q_SLOTS:
     void runEmbedding();

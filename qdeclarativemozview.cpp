@@ -135,7 +135,7 @@ QDeclarativeMozView::child() const
     return d->view;
 }
 
-uint32_t
+quint32
 QDeclarativeMozView::uniqueID() const
 {
     LOGT();

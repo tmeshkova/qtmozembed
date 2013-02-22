@@ -76,7 +76,7 @@ public Q_SLOTS:
     void sendAsyncMessage(const QString& name, const QVariant& variant);
     void addMessageListener(const QString& name);
     void newWindow(const QString& url = "about:blank");
-    uint32_t uniqueID() const;
+    quint32 uniqueID() const;
     void setParentID(unsigned aParentID);
 
 Q_SIGNALS:

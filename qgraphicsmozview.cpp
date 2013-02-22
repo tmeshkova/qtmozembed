@@ -352,7 +352,7 @@ QGraphicsMozView::onInitialized()
     }
 }
 
-uint32_t
+quint32
 QGraphicsMozView::uniqueID() const
 {
     return d->mView ? d->mView->GetUniqueID() : 0;

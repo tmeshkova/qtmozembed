@@ -111,7 +111,7 @@ public:
     }
     bool IsInitialized() { return mApp && mInitialized; }
 
-    virtual unsigned int CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView)
+    virtual uint32_t CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView)
     {
         LOGT("QtMozEmbedContext new Window requested: parent:%p", aParentView);
         uint32_t retval = QMozContext::GetInstance()->newWindow(QString(), aParentView->GetUniqueID());
@@ -214,10 +214,10 @@ void QMozContext::onLastWindowClosed()
     GetApp()->Stop();
 }
 
-unsigned int
-QMozContext::newWindow(const QString& url, const uint32_t& parentId)
+quint32
+QMozContext::newWindow(const QString& url, const quint32& parentId)
 {
-    uint32_t retval = Q_EMIT(this, newWindowRequested(url, parentId));
+    quint32 retval = Q_EMIT(this, newWindowRequested(url, parentId));
     return retval;
 }
 
