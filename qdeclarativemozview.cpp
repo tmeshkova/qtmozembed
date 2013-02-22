@@ -42,6 +42,14 @@ QDeclarativeMozView::~QDeclarativeMozView()
     delete d;
 }
 
+void
+QDeclarativeMozView::setParentID(unsigned aParentID)
+{
+    if (d->view) {
+        d->view->setParentID(aParentID);
+    }
+}
+
 GraphicsMozView::GraphicsMozView(QDeclarativeMozView* parent)
     : QGraphicsMozView(parent)
     , parent(parent)
@@ -125,4 +133,11 @@ QObject*
 QDeclarativeMozView::child() const
 {
     return d->view;
+}
+
+uint32_t
+QDeclarativeMozView::uniqueID() const
+{
+    LOGT();
+    return d->view->uniqueID();
 }

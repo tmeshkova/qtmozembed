@@ -304,8 +304,8 @@ public:
 QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     : QGraphicsWidget(parent)
     , d(new QGraphicsMozViewPrivate(this))
+    , mParentID(0)
 {
-    LOGT();
     setFlag(QGraphicsItem::ItemUsesExtendedStyleOption, true);
     setAcceptDrops(true);
     setAcceptTouchEvents(true);
@@ -327,6 +327,16 @@ QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     }
 }
 
+void
+QGraphicsMozView::setParentID(unsigned aParentID)
+{
+    LOGT("mParentID:%u", aParentID);
+    mParentID = aParentID;
+    if (mParentID) {
+        onInitialized();
+    }
+}
+
 QGraphicsMozView::~QGraphicsMozView()
 {
     delete d;
@@ -335,9 +345,17 @@ QGraphicsMozView::~QGraphicsMozView()
 void
 QGraphicsMozView::onInitialized()
 {
-    LOGT();
-    d->mView = d->mContext->GetApp()->CreateView();
-    d->mView->SetListener(d);
+    LOGT("mParentID:%u", mParentID);
+    if (!d->mView) {
+        d->mView = d->mContext->GetApp()->CreateView(mParentID);
+        d->mView->SetListener(d);
+    }
+}
+
+uint32_t
+QGraphicsMozView::uniqueID() const
+{
+    return d->mView ? d->mView->GetUniqueID() : 0;
 }
 
 void QGraphicsMozView::EraseBackgroundGL(QPainter* painter, const QRect& r)

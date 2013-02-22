@@ -76,6 +76,8 @@ public Q_SLOTS:
     void sendAsyncMessage(const QString& name, const QVariant& variant);
     void addMessageListener(const QString& name);
     void newWindow(const QString& url = "about:blank");
+    uint32_t uniqueID() const;
+    void setParentID(unsigned aParentID);
 
 Q_SIGNALS:
     void viewInitialized();
@@ -123,6 +125,7 @@ private:
 
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;
+    unsigned mParentID;
 };
 
 #endif /* qgraphicsmozview_h */

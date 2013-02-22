@@ -15,6 +15,7 @@
 #include "nsDebug.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/embedlite/EmbedInitGlue.h"
+#include "mozilla/embedlite/EmbedLiteView.h"
 
 using namespace mozilla::embedlite;
 
@@ -109,6 +110,13 @@ public:
         mApp->SetBoolPref("layout.build_layers_for_scrollable_views", getenv("USE_SCROLL_VIEWS") != 0);
     }
     bool IsInitialized() { return mApp && mInitialized; }
+
+    virtual unsigned int CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView)
+    {
+        LOGT("QtMozEmbedContext new Window requested: parent:%p", aParentView);
+        uint32_t retval = QMozContext::GetInstance()->newWindow(QString(), aParentView->GetUniqueID());
+        return retval;
+    }
 
     QList<QString> mObserversList;
 private:
@@ -206,14 +214,15 @@ void QMozContext::onLastWindowClosed()
     GetApp()->Stop();
 }
 
-void
-QMozContext::newWindow(const QString& url)
+unsigned int
+QMozContext::newWindow(const QString& url, const uint32_t& parentId)
 {
-    Q_EMIT(this, newWindowRequested(url));
+    uint32_t retval = Q_EMIT(this, newWindowRequested(url, parentId));
+    return retval;
 }
 
 void
 QmlMozContext::newWindow(const QString& url)
 {
-    QMozContext::GetInstance()->newWindow(url);
+    QMozContext::GetInstance()->newWindow(url, 0);
 }

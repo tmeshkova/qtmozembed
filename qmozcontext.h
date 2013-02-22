@@ -49,14 +49,14 @@ public:
 
 Q_SIGNALS:
     void onInitialized();
-    void newWindowRequested(const QString& url);
+    unsigned newWindowRequested(const QString& url, const unsigned& parentId);
 
 public Q_SLOTS:
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
     void setClipboard(QString text);
     QString getClipboard();
-    void newWindow(const QString& url);
+    unsigned int newWindow(const QString& url, const uint32_t& parentId);
 
 private Q_SLOTS:
     void runEmbedding();
