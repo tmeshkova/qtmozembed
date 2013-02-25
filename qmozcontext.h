@@ -39,7 +39,6 @@ class QMozContext : public QObject
 {
     Q_OBJECT
 public:
-    QMozContext(QObject* parent = 0);
     virtual ~QMozContext();
 
     bool initialized();
@@ -63,6 +62,8 @@ private Q_SLOTS:
     void onLastWindowClosed();
 
 private:
+    QMozContext(QObject* parent = 0);
+
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
     QClipboard* clipboard;
