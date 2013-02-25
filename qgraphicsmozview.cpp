@@ -87,6 +87,20 @@ public:
             mView->SetViewSize(mSize.width(), mSize.height());
         }
     }
+    virtual bool RequestCurrentGLContext()
+    {
+        QGraphicsView* view = GetViewWidget();
+        if (view) {
+            QGLWidget* qglwidget = qobject_cast<QGLWidget*>(view->viewport());
+            if (qglwidget) {
+                qglwidget->makeCurrent();
+                QGLContext* context = const_cast<QGLContext*>(QGLContext::currentContext());
+                if (context)
+                    return true;
+            }
+        }
+        return false;
+    }
     virtual void ViewInitialized() {
         mViewInitialized = true;
         UpdateViewSize();
