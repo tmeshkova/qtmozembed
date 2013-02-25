@@ -9,6 +9,7 @@
 
 #include <QTimer>
 #include <QApplication>
+#include <QVariant>
 
 #include "qmozcontext.h"
 
@@ -219,6 +220,43 @@ QMozContext::newWindow(const QString& url, const quint32& parentId)
 {
     quint32 retval = Q_EMIT(this, newWindowRequested(url, parentId));
     return retval;
+}
+
+QmlMozContext::QmlMozContext(QObject* parent)
+  : QObject(parent)
+{
+}
+
+void
+QmlMozContext::setPref(const QString& aName, const QVariant& aPref)
+{
+    LOGT("name:%s, type:%i", aName.toUtf8().data(), aPref.type());
+    mozilla::embedlite::EmbedLiteApp* mApp = QMozContext::GetInstance()->GetApp();
+    switch (aPref.type()) {
+    case QVariant::String:
+        mApp->SetCharPref(aName.toUtf8().data(), aPref.toString().toUtf8().data());
+        break;
+    case QVariant::Int:
+    case QVariant::UInt:
+    case QVariant::LongLong:
+    case QVariant::ULongLong:
+        mApp->SetIntPref(aName.toUtf8().data(), aPref.toInt());
+        break;
+    case QVariant::Bool:
+        mApp->SetBoolPref(aName.toUtf8().data(), aPref.toBool());
+        break;
+    case QMetaType::Float:
+    case QMetaType::Double:
+        bool ok;
+        if (aPref.canConvert<int>()) {
+            mApp->SetIntPref(aName.toUtf8().data(), aPref.toInt());
+        } else {
+            mApp->SetCharPref(aName.toUtf8().data(), aPref.toString().toUtf8().data());
+        }
+        break;
+    default:
+        LOGT("Unknown pref type: %i", aPref.type());
+    }
 }
 
 void

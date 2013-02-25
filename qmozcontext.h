@@ -73,9 +73,11 @@ class QmlMozContext : public QObject
 {
     Q_OBJECT
 public:
-    QmlMozContext(QObject* parent = 0) : QObject(parent) {}
+    QmlMozContext(QObject* parent = 0);
     virtual ~QmlMozContext() {}
+
 public Q_SLOTS:
+    void setPref(const QString& aName, const QVariant& aPref);
     void newWindow(const QString& url = "about:mozilla");
 };
 
