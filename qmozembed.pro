@@ -25,7 +25,7 @@ CONFIG(opengl) {
 }
 
 isEmpty(OBJ_DEB_DIR) {
-  OBJ_DEB_DIR=obj-$$OBJ_ARCH-dir
+  OBJ_DEB_DIR=$$OBJ_BUILD_PATH
 }
 
 OBJECTS_DIR += ./$$OBJ_DEB_DIR

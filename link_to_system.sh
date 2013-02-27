@@ -6,17 +6,20 @@ if [ "$TARGET_DIR" = "" ]; then
   TARGET_DIR=/usr
 fi
 
-BARCH=`uname -m`
-OBJDIR="obj-$BARCH-dir"
+OBJPREFIX=$2
+if [ "$OBJPREFIX" = "" ]; then
+  BARCH=`uname -m`
+  OBJPREFIX=objdir-$BARCH
+fi
 
 PREFIX=$TARGET_DIR/lib
 mkdir -p $PREFIX
 
 FILES_LIST="
-$OBJDIR/libqtembedwidget.so
-$OBJDIR/libqtembedwidget.so.1
-$OBJDIR/libqtembedwidget.so.1.0
-$OBJDIR/libqtembedwidget.so.1.0.0
+$OBJPREFIX/libqtembedwidget.so
+$OBJPREFIX/libqtembedwidget.so.1
+$OBJPREFIX/libqtembedwidget.so.1.0
+$OBJPREFIX/libqtembedwidget.so.1.0.0
 "
 
 for str in $FILES_LIST; do
@@ -26,7 +29,7 @@ for str in $FILES_LIST; do
 done
 
 rm -f $PREFIX/pkgconfig/qtembedwidget.pc;
-ln -s $(pwd)/$OBJDIR/pkgconfig/qtembedwidget.pc $PREFIX/pkgconfig/qtembedwidget.pc
+ln -s $(pwd)/$OBJPREFIX/pkgconfig/qtembedwidget.pc $PREFIX/pkgconfig/qtembedwidget.pc
 
 PREFIX=$TARGET_DIR/include
 mkdir -p $PREFIX
