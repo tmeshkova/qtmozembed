@@ -100,6 +100,8 @@ Q_SIGNALS:
     void authRequired(QVariant data);
     void viewAreaChanged();
     void handleLongTap(QPoint point);
+    void handleSingleTap(QPoint point);
+    void handleDoubleTap(QPoint point);
 
 protected:
     virtual void setGeometry(const QRectF& rect);

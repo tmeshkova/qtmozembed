@@ -285,6 +285,14 @@ public:
         Q_EMIT q->handleLongTap(QPoint(aPoint.x, aPoint.y));
         return false;
     }
+    virtual bool HandleSingleTap(const nsIntPoint& aPoint) {
+        Q_EMIT q->handleSingleTap(QPoint(aPoint.x, aPoint.y));
+        return false;
+    }
+    virtual bool HandleDoubleTap(const nsIntPoint& aPoint) {
+        Q_EMIT q->handleDoubleTap(QPoint(aPoint.x, aPoint.y));
+        return false;
+    }
 
     QGraphicsMozView* q;
     QMozContext* mContext;
