@@ -99,6 +99,7 @@ Q_SIGNALS:
     void prompt(QVariant data);
     void authRequired(QVariant data);
     void viewAreaChanged();
+    void handleLongTap(QPoint point);
 
 protected:
     virtual void setGeometry(const QRectF& rect);

@@ -281,6 +281,10 @@ public:
         Q_EMIT q->viewAreaChanged();
         return false;
     }
+    virtual bool HandleLongTap(const nsIntPoint& aPoint) {
+        Q_EMIT q->handleLongTap(QPoint(aPoint.x, aPoint.y));
+        return false;
+    }
 
     QGraphicsMozView* q;
     QMozContext* mContext;
