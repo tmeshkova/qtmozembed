@@ -145,8 +145,10 @@ public:
     }
 
     // View finally destroyed and deleted
-    virtual void Destroyed() {
+    virtual void ViewDestroyed() {
         LOGT();
+        mView = NULL;
+        mViewInitialized = false;
         Q_EMIT q->viewDestroyed();
     }
     virtual void RecvAsyncMessage(const PRUnichar* aMessage, const PRUnichar* aData) {
