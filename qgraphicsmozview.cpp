@@ -256,13 +256,7 @@ public:
         }
     }
 
-    virtual void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
-    {
-        LOGT();
-#if defined(Q_WS_MAEMO_5)
-        UpdateViewSize();
-#endif
-    }
+    virtual void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight) { LOGT(); }
     virtual void OnScrollChanged(int32_t offSetX, int32_t offSetY) { }
     virtual void SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
                                        const nsIntRect& aPageRect, const gfxRect& aCssPageRect) { LOGT(); }
