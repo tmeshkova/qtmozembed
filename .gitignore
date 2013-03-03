@@ -1,0 +1,12 @@
+Makefile
+build-stamp
+configure-stamp
+debian/files
+debian/libqtmozembed-dbg/
+debian/libqtmozembed-dev/
+debian/libqtmozembed.postinst.debhelper
+debian/libqtmozembed.postrm.debhelper
+debian/libqtmozembed.substvars
+debian/libqtmozembed/
+debian/tmp/
+objdir-*/
