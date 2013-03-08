@@ -12,7 +12,7 @@
 #include <QTimer>
 #include <QTime>
 #include <QtOpenGL/QGLContext>
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QInputContext>
 #endif
 #include <QApplication>
@@ -234,7 +234,7 @@ public:
         q->setInputMethodHints(aIstate == 2 ? Qt::ImhHiddenText : Qt::ImhPreferLowercase);
         QWidget* focusWidget = qApp->focusWidget();
         if (focusWidget && aFocusChange) {
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
             QInputContext *inputContext = qApp->inputContext();
             if (!inputContext) {
                 LOGT("Requesting SIP: but no input context");
