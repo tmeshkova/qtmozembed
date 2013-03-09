@@ -14,6 +14,8 @@
 #include <QtOpenGL/QGLContext>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QInputContext>
+#else
+#include <QJsonDocument>
 #endif
 #include <QApplication>
 #include <QVariantMap>
@@ -156,7 +158,7 @@ public:
         NS_ConvertUTF16toUTF8 data(aData);
 
         bool ok = false;
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
         QJson::Parser parser;
         QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
 #else
@@ -187,7 +189,7 @@ public:
                     return;
                 }
             } else {
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
                 LOGT("parse: err:%s, errLine:%i", parser.errorString().toUtf8().data(), parser.errorLine());
 #else
                 LOGT("parse: err:%s, errLine:%i", error.errorString().toUtf8().data(), error.offset);
@@ -203,7 +205,7 @@ public:
         NS_ConvertUTF16toUTF8 data(aData);
         Q_EMIT q->recvSyncMessage(message.get(), data.get(), &response);
 
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
         QJson::Serializer serializer;
         QByteArray array = serializer.serialize(response.getMessage());
 #else
@@ -508,7 +510,7 @@ void QGraphicsMozView::sendAsyncMessage(const QString& name, const QVariant& var
     if (!d->mViewInitialized)
         return;
 
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
     QJson::Serializer serializer;
     QByteArray array = serializer.serialize(variant);
 #else
