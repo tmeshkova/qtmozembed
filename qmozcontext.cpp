@@ -142,7 +142,6 @@ QMozContext::QMozContext(QObject* parent)
     d->mApp->SetListener(d);
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
     QTimer::singleShot(0, this, SLOT(runEmbedding()));
-    clipboard = QApplication::clipboard();
 }
 
 QMozContext::~QMozContext()
@@ -152,13 +151,13 @@ QMozContext::~QMozContext()
 }
 
 void
-QMozContext::setClipboard(QString text)
+QmlMozContext::setClipboard(QString text)
 {
     clipboard->setText(text);
 }
 
 QString
-QMozContext::getClipboard()
+QmlMozContext::getClipboard()
 {
     return clipboard->text();
 }
@@ -225,6 +224,7 @@ QMozContext::newWindow(const QString& url, const quint32& parentId)
 QmlMozContext::QmlMozContext(QObject* parent)
   : QObject(parent)
 {
+    clipboard = QApplication::clipboard();
 }
 
 void
