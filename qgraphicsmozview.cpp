@@ -641,12 +641,18 @@ bool QGraphicsMozView::event(QEvent* event)
 
 void QGraphicsMozView::onDisplayEntered()
 {
+    if (!d->mView) {
+        return;
+    }
     d->mView->SetIsActive(true);
     d->mView->ResumeTimeouts();
 }
 
 void QGraphicsMozView::onDisplayExited()
 {
+    if (!d->mView) {
+        return;
+    }
     d->mView->SetIsActive(false);
     d->mView->SuspendTimeouts();
 }
