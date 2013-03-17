@@ -6,6 +6,8 @@
 
 #define LOG_COMPONENT "QDeclarativeMozView"
 
+#include <QSharedPointer>
+
 #include "mozilla-config.h"
 #include "qdeclarativemozview.h"
 #include "qgraphicsmozview.h"
@@ -21,7 +23,7 @@ public:
     }
 
     QDeclarativeMozView* q;
-    GraphicsMozView* view;
+    QSharedPointer<GraphicsMozView> view;
     int preferredwidth, preferredheight;
 };
 
@@ -64,7 +66,7 @@ QDeclarativeMozView::init()
     setFlag(QGraphicsItem::ItemIsFocusScope, true);
     setClip(true);
 
-    d->view = new GraphicsMozView(this);
+    d->view = QSharedPointer<GraphicsMozView>(new GraphicsMozView(this));
     d->view->setFocus();
     if (!preferredWidth())
         setPreferredWidth(d->view->preferredWidth());
@@ -130,9 +132,9 @@ void QDeclarativeMozView::geometryChanged(const QRectF& newGeometry, const QRect
 }
 
 QObject*
-QDeclarativeMozView::child() const
+QDeclarativeMozView::getChild() const
 {
-    return d->view;
+    return d->view.data();
 }
 
 quint32
