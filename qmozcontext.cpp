@@ -151,18 +151,6 @@ QMozContext::~QMozContext()
 }
 
 void
-QmlMozContext::setClipboard(QString text)
-{
-    clipboard->setText(text);
-}
-
-QString
-QmlMozContext::getClipboard()
-{
-    return clipboard->text();
-}
-
-void
 QMozContext::addComponentManifest(const QString& manifestPath)
 {
     if (!d->mApp)
@@ -224,7 +212,6 @@ QMozContext::newWindow(const QString& url, const quint32& parentId)
 QmlMozContext::QmlMozContext(QObject* parent)
   : QObject(parent)
 {
-    clipboard = QApplication::clipboard();
 }
 
 void
