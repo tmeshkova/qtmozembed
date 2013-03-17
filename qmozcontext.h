@@ -9,7 +9,6 @@
 
 #include <QObject>
 #include <QThread>
-#include <QClipboard>
 
 class QMozContextPrivate;
 
@@ -73,14 +72,9 @@ public:
     QmlMozContext(QObject* parent = 0);
     virtual ~QmlMozContext() {}
 
-private:
-    QClipboard* clipboard;
-
 public Q_SLOTS:
     void setPref(const QString& aName, const QVariant& aPref);
     void newWindow(const QString& url = "about:mozilla");
-    void setClipboard(QString text);
-    QString getClipboard();
 };
 
 #endif /* qmozcontext_h */
