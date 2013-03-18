@@ -6,12 +6,14 @@ TEMPLATE = lib
 SOURCES += qmozcontext.cpp \
            EmbedQtKeyUtils.cpp \
            qdeclarativemozview.cpp \
-           qgraphicsmozview.cpp
+           qgraphicsmozview.cpp \
+           qgraphicsmozview_p.cpp
 
 HEADERS += qmozcontext.h \
            EmbedQtKeyUtils.h \
            qdeclarativemozview.h \
-           qgraphicsmozview.h
+           qgraphicsmozview.h \
+           qgraphicsmozview_p.h
 
 !contains(QT_MAJOR_VERSION, 4) {
 SOURCES += quickmozview.cpp
