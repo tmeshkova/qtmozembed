@@ -99,6 +99,12 @@ void QGraphicsMozViewPrivate::ViewInitialized()
 {
     mViewInitialized = true;
     UpdateViewSize();
+    // This is currently part of official API, so let's subscribe to these messages by default
+    mView->AddMessageListener("chrome:title");
+    mView->AddMessageListener("embed:auth");
+    mView->AddMessageListener("embed:prompt");
+    mView->AddMessageListener("embed:confirm");
+    mView->AddMessageListener("embed:alert");
     Q_EMIT q->viewInitialized();
     Q_EMIT q->navigationHistoryChanged();
 }
