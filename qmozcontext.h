@@ -68,9 +68,15 @@ private:
 class QmlMozContext : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(QObject* child READ getChild)
+
 public:
     QmlMozContext(QObject* parent = 0);
     virtual ~QmlMozContext() {}
+
+private:
+    QObject* getChild() const;
 
 public Q_SLOTS:
     void setPref(const QString& aName, const QVariant& aPref);

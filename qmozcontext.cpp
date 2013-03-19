@@ -214,6 +214,12 @@ QmlMozContext::QmlMozContext(QObject* parent)
 {
 }
 
+QObject*
+QmlMozContext::getChild() const
+{
+    return QMozContext::GetInstance();
+}
+
 void
 QmlMozContext::setPref(const QString& aName, const QVariant& aPref)
 {
