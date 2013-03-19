@@ -100,7 +100,6 @@ void QGraphicsMozViewPrivate::ViewInitialized()
     mViewInitialized = true;
     UpdateViewSize();
     // This is currently part of official API, so let's subscribe to these messages by default
-    mView->AddMessageListener("chrome:title");
     mView->AddMessageListener("embed:auth");
     mView->AddMessageListener("embed:prompt");
     mView->AddMessageListener("embed:confirm");
@@ -196,11 +195,6 @@ void QGraphicsMozViewPrivate::RecvAsyncMessage(const PRUnichar* aMessage, const 
             } else if (!strcmp(message.get(), "embed:auth")) {
                 Q_EMIT q->authRequired(vdata);
                 return;
-            } else if (!strcmp(message.get(), "chrome:title")) {
-                QMap<QString, QVariant> map = vdata.toMap();
-                mTitle = map["title"].toString();
-                Q_EMIT q->titleChanged();
-                return;
             }
         } else {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
@@ -282,7 +276,15 @@ void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigne
     LOGT();
 }
 
-void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY) { }
+void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
+{
+}
+
+void QGraphicsMozViewPrivate::OnTitleChanged(const PRUnichar* aTitle)
+{
+    mTitle = NS_ConvertUTF16toUTF8(aTitle).get();
+    Q_EMIT q->titleChanged();
+}
 
 void QGraphicsMozViewPrivate::SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
                                                     const nsIntRect& aPageRect, const gfxRect& aCssPageRect)

@@ -50,6 +50,7 @@ public:
 
     virtual void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight);
     virtual void OnScrollChanged(int32_t offSetX, int32_t offSetY);
+    virtual void OnTitleChanged(const PRUnichar* aTitle);
     virtual void SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
                                        const nsIntRect& aPageRect, const gfxRect& aCssPageRect);
     virtual void SyncViewportInfo(const nsIntRect& aDisplayPort,
