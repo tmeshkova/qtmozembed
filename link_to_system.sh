@@ -35,10 +35,10 @@ PREFIX=$TARGET_DIR/include
 mkdir -p $PREFIX
 
 FILES_LIST="
-EmbedQtKeyUtils.h
-qdeclarativemozview.h
-qgraphicsmozview.h
-qmozcontext.h
+src/EmbedQtKeyUtils.h
+src/qdeclarativemozview.h
+src/qgraphicsmozview.h
+src/qmozcontext.h
 "
 
 for str in $FILES_LIST; do
