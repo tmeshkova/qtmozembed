@@ -10,6 +10,13 @@
 #include <QTimer>
 #include <QApplication>
 #include <QVariant>
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#include <qjson/serializer.h>
+#include <qjson/parser.h>
+#else
+#include <QJsonDocument>
+#include <QJsonParseError>
+#endif
 
 #include "qmozcontext.h"
 
@@ -86,6 +93,7 @@ public:
             mApp->AddObserver(str.toUtf8().data());
         }
         mObserversList.clear();
+        mApp->SendObserve("embed:getdownloadlist", 0);
     }
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {
@@ -93,6 +101,28 @@ public:
     }
     virtual void OnObserve(const char* aTopic, const PRUnichar* aData) {
         LOGT("aTopic: %s, data: %s", aTopic, NS_ConvertUTF16toUTF8(aData).get());
+        NS_ConvertUTF16toUTF8 data(aData);
+        bool ok = false;
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+        QJson::Parser parser;
+        QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
+#else
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
+        ok = error.error == QJsonParseError::NoError;
+        QVariant vdata = doc.toVariant();
+#endif
+
+        if (ok) {
+            LOGT("mesg:%s, data:%s", aTopic, data.get());
+            Q_EMIT q->recvObserve(aTopic, vdata);
+        } else {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+            LOGT("parse: err:%s, errLine:%i", parser.errorString().toUtf8().data(), parser.errorLine());
+#else
+            LOGT("parse: err:%s, errLine:%i", error.errorString().toUtf8().data(), error.offset);
+#endif
+        }
     }
     void setDefaultPrefs()
     {
@@ -148,6 +178,23 @@ QMozContext::~QMozContext()
 {
     protectSingleton = nullptr;
     delete d;
+}
+
+void
+QMozContext::sendObserve(const QString& aTopic, const QVariant& variant)
+{
+    if (!d->mApp)
+        return;
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    QJson::Serializer serializer;
+    QByteArray array = serializer.serialize(variant);
+#else
+    QJsonDocument doc = QJsonDocument::fromVariant(variant);
+    QByteArray array = doc.toJson();
+#endif
+
+    d->mApp->SendObserve(aTopic.toUtf8().data(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }
 
 void

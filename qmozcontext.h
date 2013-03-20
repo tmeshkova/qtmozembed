@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QVariant>
 
 class QMozContextPrivate;
 
@@ -48,11 +49,13 @@ public:
 Q_SIGNALS:
     void onInitialized();
     unsigned newWindowRequested(const QString& url, const unsigned& parentId);
+    void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
     quint32 newWindow(const QString& url, const quint32& parentId);
+    void sendObserve(const QString& aTopic, const QVariant& variant);
 
 private Q_SLOTS:
     void runEmbedding();

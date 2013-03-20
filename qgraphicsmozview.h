@@ -72,7 +72,6 @@ public Q_SLOTS:
     void stop();
     void reload();
     void load(const QString&);
-    void sendAsyncMessage(const QString& name, const QString& message);
     void sendAsyncMessage(const QString& name, const QVariant& variant);
     void addMessageListener(const QString& name);
     void loadFrameScript(const QString& name);

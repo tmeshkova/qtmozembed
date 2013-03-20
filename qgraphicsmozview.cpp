@@ -235,14 +235,6 @@ void QGraphicsMozView::sendAsyncMessage(const QString& name, const QVariant& var
     d->mView->SendAsyncMessage((const PRUnichar*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }
 
-void
-QGraphicsMozView::sendAsyncMessage(const QString& name, const QString& message)
-{
-    if (!d->mViewInitialized)
-        return;
-    d->mView->SendAsyncMessage((const PRUnichar*)name.constData(), (const PRUnichar*)message.constData());
-}
-
 QPointF QGraphicsMozView::scrollableOffset() const
 {
     return d->mScrollableOffset;
