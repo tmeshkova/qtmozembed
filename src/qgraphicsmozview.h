@@ -93,10 +93,6 @@ Q_SIGNALS:
     void securityChanged(QString status, uint state);
     void firstPaint(int32_t offx, int32_t offy);
     void contentLoaded(QString docuri);
-    void alert(QVariant data);
-    void confirm(QVariant data);
-    void prompt(QVariant data);
-    void authRequired(QVariant data);
     void viewAreaChanged();
     void handleLongTap(QPoint point);
     void handleSingleTap(QPoint point);

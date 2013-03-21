@@ -100,10 +100,6 @@ void QGraphicsMozViewPrivate::ViewInitialized()
     mViewInitialized = true;
     UpdateViewSize();
     // This is currently part of official API, so let's subscribe to these messages by default
-    mView->AddMessageListener("embed:auth");
-    mView->AddMessageListener("embed:prompt");
-    mView->AddMessageListener("embed:confirm");
-    mView->AddMessageListener("embed:alert");
     Q_EMIT q->viewInitialized();
     Q_EMIT q->navigationHistoryChanged();
 }
@@ -181,31 +177,16 @@ void QGraphicsMozViewPrivate::RecvAsyncMessage(const PRUnichar* aMessage, const 
     QVariant vdata = doc.toVariant();
 #endif
 
-    if (!strncmp(message.get(), "embed:", 6) || !strncmp(message.get(), "chrome:", 7)) {
-        if (ok) {
-            if (!strcmp(message.get(), "embed:alert")) {
-                Q_EMIT q->alert(vdata);
-                return;
-            } else if (!strcmp(message.get(), "embed:confirm")) {
-                Q_EMIT q->confirm(vdata);
-                return;
-            } else if (!strcmp(message.get(), "embed:prompt")) {
-                Q_EMIT q->prompt(vdata);
-                return;
-            } else if (!strcmp(message.get(), "embed:auth")) {
-                Q_EMIT q->authRequired(vdata);
-                return;
-            }
-        } else {
+    if (ok) {
+        LOGT("mesg:%s, data:%s", message.get(), data.get());
+        Q_EMIT q->recvAsyncMessage(message.get(), vdata);
+    } else {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-            LOGT("parse: err:%s, errLine:%i", parser.errorString().toUtf8().data(), parser.errorLine());
+        LOGT("parse: err:%s, errLine:%i", parser.errorString().toUtf8().data(), parser.errorLine());
 #else
-            LOGT("parse: err:%s, errLine:%i", error.errorString().toUtf8().data(), error.offset);
+        LOGT("parse: err:%s, errLine:%i", error.errorString().toUtf8().data(), error.offset);
 #endif
-        }
     }
-    LOGT("mesg:%s, data:%s", message.get(), data.get());
-    Q_EMIT q->recvAsyncMessage(message.get(), vdata);
 }
 
 char* QGraphicsMozViewPrivate::RecvSyncMessage(const PRUnichar* aMessage, const PRUnichar*  aData)
