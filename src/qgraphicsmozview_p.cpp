@@ -263,7 +263,7 @@ void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
 
 void QGraphicsMozViewPrivate::OnTitleChanged(const PRUnichar* aTitle)
 {
-    mTitle = NS_ConvertUTF16toUTF8(aTitle).get();
+    mTitle = QString((QChar*)aTitle);
     Q_EMIT q->titleChanged();
 }
 
