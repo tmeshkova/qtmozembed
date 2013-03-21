@@ -170,6 +170,11 @@ QMozContext::QMozContext(QObject* parent)
     LoadEmbedLite();
     d->mApp = XRE_GetEmbedLite();
     d->mApp->SetListener(d);
+#ifdef GL_PROVIDER_EGL
+        if (d->mApp->GetRenderType() == EmbedLiteApp::RENDER_AUTO) {
+            d->mApp->SetIsAccelerated(true);
+        }
+#endif
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
     QTimer::singleShot(0, this, SLOT(runEmbedding()));
 }
