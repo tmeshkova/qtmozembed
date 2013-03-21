@@ -109,6 +109,13 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
 {
     if (!d->mGraphicsViewAssigned) {
         d->mGraphicsViewAssigned = true;
+        // Disable for future gl context in case if we did not get it yet
+        if (d->mViewInitialized &&
+            d->mContext->GetApp()->IsAccelerated() &&
+            !QGLContext::currentContext()) {
+            LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
+            d->mContext->setIsAccelerated(false);
+        }
         QGraphicsView* view = d->GetViewWidget();
         if (view) {
             connect(view, SIGNAL(displayEntered()), this, SLOT(onDisplayEntered()));
@@ -328,9 +335,6 @@ bool QGraphicsMozView::event(QEvent* event)
     }
     case QEvent::Show: {
         LOGT("Event Show: curCtx:%p", QGLContext::currentContext());
-        if (QGLContext::currentContext() && !getenv("SWRENDER")) {
-            d->mContext->GetApp()->SetIsAccelerated(true);
-        }
         break;
     }
     case QEvent::Hide: {

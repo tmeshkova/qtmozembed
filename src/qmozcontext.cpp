@@ -256,6 +256,15 @@ QMozContext::newWindow(const QString& url, const quint32& parentId)
     return retval;
 }
 
+void
+QMozContext::setIsAccelerated(bool aIsAccelerated)
+{
+    if (!d->mApp)
+        return;
+
+    d->mApp->SetIsAccelerated(aIsAccelerated);
+}
+
 QmlMozContext::QmlMozContext(QObject* parent)
   : QObject(parent)
 {

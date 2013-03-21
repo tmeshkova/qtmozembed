@@ -52,6 +52,7 @@ Q_SIGNALS:
     void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
+    void setIsAccelerated(bool aIsAccelerated);
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
     quint32 newWindow(const QString& url, const quint32& parentId);
