@@ -285,6 +285,10 @@ void
 QmlMozContext::setPref(const QString& aName, const QVariant& aPref)
 {
     LOGT("name:%s, type:%i", aName.toUtf8().data(), aPref.type());
+    if (!QMozContext::GetInstance()->initialized()) {
+        LOGT("Error: context not yet initialized");
+        return;
+    }
     mozilla::embedlite::EmbedLiteApp* mApp = QMozContext::GetInstance()->GetApp();
     switch (aPref.type()) {
     case QVariant::String:
@@ -316,5 +320,15 @@ QmlMozContext::setPref(const QString& aName, const QVariant& aPref)
 void
 QmlMozContext::newWindow(const QString& url)
 {
+    if (!QMozContext::GetInstance()->initialized()) {
+        LOGT("Error: context not yet initialized");
+        return;
+    }
     QMozContext::GetInstance()->newWindow(url, 0);
+}
+
+void
+QmlMozContext::init()
+{
+    QMozContext::GetInstance();
 }

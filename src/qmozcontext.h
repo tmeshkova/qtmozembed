@@ -83,6 +83,7 @@ private:
     QObject* getChild() const;
 
 public Q_SLOTS:
+    void init();
     void setPref(const QString& aName, const QVariant& aPref);
     void newWindow(const QString& url = "about:mozilla");
 };
