@@ -57,6 +57,7 @@ public:
     , mApp(NULL)
     , mInitialized(false)
     , mThread(new GeckoThread(qq))
+    , mEmbedStarted(false)
     {
     }
     virtual ~QMozContextPrivate() {
@@ -84,6 +85,11 @@ public:
     // App Initialized and ready to API call
     virtual void Initialized() {
         mInitialized = true;
+#ifdef GL_PROVIDER_EGL
+        if (mApp->GetRenderType() == EmbedLiteApp::RENDER_AUTO) {
+            mApp->SetIsAccelerated(true);
+        }
+#endif
         setDefaultPrefs();
         mApp->LoadGlobalStyleSheet("chrome://global/content/embedScrollStyles.css", true);
         Q_EMIT q->onInitialized();
@@ -157,9 +163,10 @@ private:
     friend class QMozContext;
     friend class GeckoThread;
     GeckoThread* mThread;
+    bool mEmbedStarted;
 };
 
-QMozContext::QMozContext(QObject* parent)
+QMozContext::QMozContext(QObject* parent, bool autoInit)
     : QObject(parent)
     , d(new QMozContextPrivate(this))
 {
@@ -170,13 +177,10 @@ QMozContext::QMozContext(QObject* parent)
     LoadEmbedLite();
     d->mApp = XRE_GetEmbedLite();
     d->mApp->SetListener(d);
-#ifdef GL_PROVIDER_EGL
-        if (d->mApp->GetRenderType() == EmbedLiteApp::RENDER_AUTO) {
-            d->mApp->SetIsAccelerated(true);
-        }
-#endif
-    QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
-    QTimer::singleShot(0, this, SLOT(runEmbedding()));
+    QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(stopEmbedding()));
+    if (autoInit) {
+        QTimer::singleShot(0, this, SLOT(runEmbedding()));
+    }
 }
 
 QMozContext::~QMozContext()
@@ -222,11 +226,11 @@ QMozContext::addObserver(const QString& aTopic)
 }
 
 QMozContext*
-QMozContext::GetInstance()
+QMozContext::GetInstance(bool autoInit)
 {
     static QMozContext* lsSingleton = nullptr;
     if (!lsSingleton) {
-        lsSingleton = new QMozContext();
+        lsSingleton = new QMozContext(0, autoInit);
         NS_ASSERTION(lsSingleton, "not initialized");
     }
     return lsSingleton;
@@ -234,7 +238,11 @@ QMozContext::GetInstance()
 
 void QMozContext::runEmbedding()
 {
-    d->mApp->Start(EmbedLiteApp::EMBED_THREAD);
+    if (!d->mEmbedStarted) {
+        d->mEmbedStarted = true;
+        d->mApp->Start(EmbedLiteApp::EMBED_THREAD);
+        d->mEmbedStarted = false;
+    }
 }
 
 bool
@@ -249,7 +257,7 @@ QMozContext::GetApp()
     return d->mApp;
 }
 
-void QMozContext::onLastWindowClosed()
+void QMozContext::stopEmbedding()
 {
     GetApp()->Stop();
 }
@@ -268,6 +276,14 @@ QMozContext::setIsAccelerated(bool aIsAccelerated)
         return;
 
     d->mApp->SetIsAccelerated(aIsAccelerated);
+}
+
+bool
+QMozContext::isAccelerated()
+{
+    if (!d->mApp)
+        return false;
+    return d->mApp->IsAccelerated();
 }
 
 QmlMozContext::QmlMozContext(QObject* parent)
@@ -328,7 +344,18 @@ QmlMozContext::newWindow(const QString& url)
 }
 
 void
-QmlMozContext::init()
+QmlMozContext::setAutoInit(bool aAutoInit)
 {
-    QMozContext::GetInstance();
+    QMozContext::GetInstance(aAutoInit);
+}
+
+void
+QmlMozContext::classBegin()
+{
+}
+
+void
+QmlMozContext::componentComplete()
+{
+    QMozContext::GetInstance(true);
 }

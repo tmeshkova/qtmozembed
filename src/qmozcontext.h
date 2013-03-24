@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QThread>
 #include <QVariant>
+#include <QtDeclarative/QDeclarativeParserStatus>
 
 class QMozContextPrivate;
 
@@ -41,10 +42,9 @@ class QMozContext : public QObject
 public:
     virtual ~QMozContext();
 
-    bool initialized();
     mozilla::embedlite::EmbedLiteApp* GetApp();
 
-    static QMozContext* GetInstance();
+    static QMozContext* GetInstance(bool autoInit = true);
 
 Q_SIGNALS:
     void onInitialized();
@@ -52,27 +52,30 @@ Q_SIGNALS:
     void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
+    bool initialized();
     void setIsAccelerated(bool aIsAccelerated);
+    bool isAccelerated();
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
     quint32 newWindow(const QString& url, const quint32& parentId);
     void sendObserve(const QString& aTopic, const QVariant& variant);
-
-private Q_SLOTS:
     void runEmbedding();
-    void onLastWindowClosed();
+    void stopEmbedding();
 
 private:
-    QMozContext(QObject* parent = 0);
+    QMozContext(QObject* parent = 0, bool autoInit = true);
 
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
 };
 
 class QmlMozContext : public QObject
+                    , public QDeclarativeParserStatus
 {
     Q_OBJECT
+    Q_INTERFACES(QDeclarativeParserStatus)
 
+    Q_PROPERTY(bool autoinit WRITE setAutoInit)
     Q_PROPERTY(QObject* child READ getChild)
 
 public:
@@ -81,9 +84,13 @@ public:
 
 private:
     QObject* getChild() const;
+    void setAutoInit(bool aAutoInit);
+
+protected:
+    void classBegin();
+    void componentComplete();
 
 public Q_SLOTS:
-    void init();
     void setPref(const QString& aName, const QVariant& aPref);
     void newWindow(const QString& url = "about:mozilla");
 };
