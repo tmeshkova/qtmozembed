@@ -76,7 +76,7 @@ class QmlMozContext : public QObject
     Q_INTERFACES(QDeclarativeParserStatus)
 
     Q_PROPERTY(bool autoinit WRITE setAutoInit)
-    Q_PROPERTY(QObject* child READ getChild)
+    Q_PROPERTY(QObject* child READ getChild CONSTANT)
 
 public:
     QmlMozContext(QObject* parent = 0);
