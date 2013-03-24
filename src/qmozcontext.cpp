@@ -236,8 +236,12 @@ QMozContext::GetInstance(bool autoInit)
     return lsSingleton;
 }
 
-void QMozContext::runEmbedding()
+void QMozContext::runEmbedding(int aDelay)
 {
+    if (aDelay != -1) {
+        QTimer::singleShot(aDelay, this, SLOT(runEmbedding()));
+        return;
+    }
     if (!d->mEmbedStarted) {
         d->mEmbedStarted = true;
         d->mApp->Start(EmbedLiteApp::EMBED_THREAD);

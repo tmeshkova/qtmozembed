@@ -59,7 +59,7 @@ public Q_SLOTS:
     void addObserver(const QString& aTopic);
     quint32 newWindow(const QString& url, const quint32& parentId);
     void sendObserve(const QString& aTopic, const QVariant& variant);
-    void runEmbedding();
+    void runEmbedding(int aDelay = -1);
     void stopEmbedding();
 
 private:
