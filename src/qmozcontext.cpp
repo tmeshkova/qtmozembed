@@ -90,6 +90,11 @@ public:
             mApp->SetIsAccelerated(true);
         }
 #endif
+        // There is the bug with gstreamer which crashes async video in HW Accelerated mode
+        // Disable async video for now
+        if (mApp->GetRenderType() == EmbedLiteApp::RENDER_HW) {
+            setenv("DISABLE_ASYNC_VIDEO", "1", 1);
+        }
         setDefaultPrefs();
         mApp->LoadGlobalStyleSheet("chrome://global/content/embedScrollStyles.css", true);
         Q_EMIT q->onInitialized();
@@ -290,6 +295,40 @@ QMozContext::isAccelerated()
     return d->mApp->IsAccelerated();
 }
 
+void
+QMozContext::setPref(const QString& aName, const QVariant& aPref)
+{
+    LOGT("name:%s, type:%i", aName.toUtf8().data(), aPref.type());
+    if (!d->mInitialized) {
+        LOGT("Error: context not yet initialized");
+        return;
+    }
+    switch (aPref.type()) {
+    case QVariant::String:
+        d->mApp->SetCharPref(aName.toUtf8().data(), aPref.toString().toUtf8().data());
+        break;
+    case QVariant::Int:
+    case QVariant::UInt:
+    case QVariant::LongLong:
+    case QVariant::ULongLong:
+        d->mApp->SetIntPref(aName.toUtf8().data(), aPref.toInt());
+        break;
+    case QVariant::Bool:
+        d->mApp->SetBoolPref(aName.toUtf8().data(), aPref.toBool());
+        break;
+    case QMetaType::Float:
+    case QMetaType::Double:
+        if (aPref.canConvert<int>()) {
+            d->mApp->SetIntPref(aName.toUtf8().data(), aPref.toInt());
+        } else {
+            d->mApp->SetCharPref(aName.toUtf8().data(), aPref.toString().toUtf8().data());
+        }
+        break;
+    default:
+        LOGT("Unknown pref type: %i", aPref.type());
+    }
+}
+
 QmlMozContext::QmlMozContext(QObject* parent)
   : QObject(parent)
 {
@@ -299,42 +338,6 @@ QObject*
 QmlMozContext::getChild() const
 {
     return QMozContext::GetInstance();
-}
-
-void
-QmlMozContext::setPref(const QString& aName, const QVariant& aPref)
-{
-    LOGT("name:%s, type:%i", aName.toUtf8().data(), aPref.type());
-    if (!QMozContext::GetInstance()->initialized()) {
-        LOGT("Error: context not yet initialized");
-        return;
-    }
-    mozilla::embedlite::EmbedLiteApp* mApp = QMozContext::GetInstance()->GetApp();
-    switch (aPref.type()) {
-    case QVariant::String:
-        mApp->SetCharPref(aName.toUtf8().data(), aPref.toString().toUtf8().data());
-        break;
-    case QVariant::Int:
-    case QVariant::UInt:
-    case QVariant::LongLong:
-    case QVariant::ULongLong:
-        mApp->SetIntPref(aName.toUtf8().data(), aPref.toInt());
-        break;
-    case QVariant::Bool:
-        mApp->SetBoolPref(aName.toUtf8().data(), aPref.toBool());
-        break;
-    case QMetaType::Float:
-    case QMetaType::Double:
-        bool ok;
-        if (aPref.canConvert<int>()) {
-            mApp->SetIntPref(aName.toUtf8().data(), aPref.toInt());
-        } else {
-            mApp->SetCharPref(aName.toUtf8().data(), aPref.toString().toUtf8().data());
-        }
-        break;
-    default:
-        LOGT("Unknown pref type: %i", aPref.type());
-    }
 }
 
 void

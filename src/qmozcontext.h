@@ -61,6 +61,7 @@ public Q_SLOTS:
     void sendObserve(const QString& aTopic, const QVariant& variant);
     void runEmbedding(int aDelay = -1);
     void stopEmbedding();
+    void setPref(const QString& aName, const QVariant& aPref);
 
 private:
     QMozContext(QObject* parent = 0, bool autoInit = true);
@@ -91,7 +92,6 @@ protected:
     void componentComplete();
 
 public Q_SLOTS:
-    void setPref(const QString& aName, const QVariant& aPref);
     void newWindow(const QString& url = "about:mozilla");
 };
 
