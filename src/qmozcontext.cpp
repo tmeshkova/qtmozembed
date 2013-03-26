@@ -191,6 +191,9 @@ QMozContext::QMozContext(QObject* parent, bool autoInit)
 QMozContext::~QMozContext()
 {
     protectSingleton = nullptr;
+    if (d->mApp) {
+        d->mApp->SetListener(NULL);
+    }
     delete d;
 }
 

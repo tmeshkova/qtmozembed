@@ -48,7 +48,9 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(QGraphicsMozView* view)
 {
 }
 
-QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate() {}
+QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
+{
+}
 
 QGraphicsView* QGraphicsMozViewPrivate::GetViewWidget()
 {
