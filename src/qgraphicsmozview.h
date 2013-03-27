@@ -88,7 +88,7 @@ Q_SIGNALS:
     void loadingChanged();
     void viewDestroyed();
     void recvAsyncMessage(const QString message, const QVariant data);
-    bool recvSyncMessage(const QString message, const QString data, QSyncMessageResponse* response);
+    bool recvSyncMessage(const QString message, const QVariant data, QSyncMessageResponse* response);
     void loadRedirect();
     void securityChanged(QString status, uint state);
     void firstPaint(int32_t offx, int32_t offy);

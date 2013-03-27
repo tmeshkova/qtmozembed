@@ -196,7 +196,18 @@ char* QGraphicsMozViewPrivate::RecvSyncMessage(const PRUnichar* aMessage, const 
     QSyncMessageResponse response;
     NS_ConvertUTF16toUTF8 message(aMessage);
     NS_ConvertUTF16toUTF8 data(aData);
-    Q_EMIT q->recvSyncMessage(message.get(), data.get(), &response);
+
+    bool ok = false;
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    QJson::Parser parser;
+    QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
+#else
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
+    ok = error.error == QJsonParseError::NoError;
+    QVariant vdata = doc.toVariant();
+#endif
+    Q_EMIT q->recvSyncMessage(message.get(), vdata, &response);
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
     QJson::Serializer serializer;
