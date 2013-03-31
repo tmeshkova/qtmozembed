@@ -8,7 +8,6 @@
 #define qmozcontext_h
 
 #include <QObject>
-#include <QThread>
 #include <QVariant>
 
 class QMozContextPrivate;
@@ -17,23 +16,6 @@ namespace mozilla {
 namespace embedlite {
 class EmbedLiteApp;
 }}
-
-class QEventLoop;
-class QMozContext;
-class GeckoThread : public QThread
-{
-    Q_OBJECT
-public:
-    GeckoThread(QMozContext* aContext) : mContext(aContext), mEventLoop(NULL) {}
-    void run();
-
-public Q_SLOTS:
-    void Quit();
-
-public:
-    QMozContext* mContext;
-    QEventLoop* mEventLoop;
-};
 
 class QMozContext : public QObject
 {
