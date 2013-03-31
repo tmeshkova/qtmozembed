@@ -10,7 +10,6 @@
 #include <QObject>
 #include <QThread>
 #include <QVariant>
-#include <QtDeclarative/QDeclarativeParserStatus>
 
 class QMozContextPrivate;
 
@@ -70,29 +69,6 @@ private:
 
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
-};
-
-class QmlMozContext : public QObject
-                    , public QDeclarativeParserStatus
-{
-    Q_OBJECT
-    Q_INTERFACES(QDeclarativeParserStatus)
-
-    Q_PROPERTY(QObject* child READ getChild CONSTANT)
-
-public:
-    QmlMozContext(QObject* parent = 0);
-    virtual ~QmlMozContext() {}
-
-private:
-    QObject* getChild() const;
-
-protected:
-    void classBegin();
-    void componentComplete();
-
-public Q_SLOTS:
-    void newWindow(const QString& url = "about:mozilla");
 };
 
 #endif /* qmozcontext_h */

@@ -325,34 +325,3 @@ QMozContext::setPref(const QString& aName, const QVariant& aPref)
         LOGT("Unknown pref type: %i", aPref.type());
     }
 }
-
-QmlMozContext::QmlMozContext(QObject* parent)
-  : QObject(parent)
-{
-}
-
-QObject*
-QmlMozContext::getChild() const
-{
-    return QMozContext::GetInstance();
-}
-
-void
-QmlMozContext::newWindow(const QString& url)
-{
-    if (!QMozContext::GetInstance()->initialized()) {
-        LOGT("Error: context not yet initialized");
-        return;
-    }
-    QMozContext::GetInstance()->newWindow(url, 0);
-}
-
-void
-QmlMozContext::classBegin()
-{
-}
-
-void
-QmlMozContext::componentComplete()
-{
-}
