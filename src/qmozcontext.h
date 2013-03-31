@@ -44,10 +44,7 @@ public:
 
     mozilla::embedlite::EmbedLiteApp* GetApp();
 
-    // autoInit - if true then runEmbedding will be executed in next event loop iteration
-    // after first GetInstance call.
-    //   if false, then manual call runEmbedding required in order to start Gecko/Qt synchronized event loop
-    static QMozContext* GetInstance(bool autoInit = true);
+    static QMozContext* GetInstance();
 
 Q_SIGNALS:
     void onInitialized();
@@ -69,7 +66,7 @@ public Q_SLOTS:
     void setPref(const QString& aName, const QVariant& aPref);
 
 private:
-    QMozContext(QObject* parent = 0, bool autoInit = true);
+    QMozContext(QObject* parent = 0);
 
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
@@ -81,7 +78,6 @@ class QmlMozContext : public QObject
     Q_OBJECT
     Q_INTERFACES(QDeclarativeParserStatus)
 
-    Q_PROPERTY(bool autoinit WRITE setAutoInit)
     Q_PROPERTY(QObject* child READ getChild CONSTANT)
 
 public:
@@ -90,7 +86,6 @@ public:
 
 private:
     QObject* getChild() const;
-    void setAutoInit(bool aAutoInit);
 
 protected:
     void classBegin();

@@ -171,7 +171,7 @@ private:
     bool mEmbedStarted;
 };
 
-QMozContext::QMozContext(QObject* parent, bool autoInit)
+QMozContext::QMozContext(QObject* parent)
     : QObject(parent)
     , d(new QMozContextPrivate(this))
 {
@@ -183,9 +183,7 @@ QMozContext::QMozContext(QObject* parent, bool autoInit)
     d->mApp = XRE_GetEmbedLite();
     d->mApp->SetListener(d);
     QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(stopEmbedding()));
-    if (autoInit) {
-        QTimer::singleShot(0, this, SLOT(runEmbedding()));
-    }
+    QTimer::singleShot(0, this, SLOT(runEmbedding()));
 }
 
 QMozContext::~QMozContext()
@@ -234,11 +232,11 @@ QMozContext::addObserver(const QString& aTopic)
 }
 
 QMozContext*
-QMozContext::GetInstance(bool autoInit)
+QMozContext::GetInstance()
 {
     static QMozContext* lsSingleton = nullptr;
     if (!lsSingleton) {
-        lsSingleton = new QMozContext(0, autoInit);
+        lsSingleton = new QMozContext(0);
         NS_ASSERTION(lsSingleton, "not initialized");
     }
     return lsSingleton;
@@ -246,10 +244,6 @@ QMozContext::GetInstance(bool autoInit)
 
 void QMozContext::runEmbedding(int aDelay)
 {
-    if (aDelay != -1) {
-        QTimer::singleShot(aDelay, this, SLOT(runEmbedding()));
-        return;
-    }
     if (!d->mEmbedStarted) {
         d->mEmbedStarted = true;
         d->mApp->Start(EmbedLiteApp::EMBED_THREAD);
@@ -354,12 +348,6 @@ QmlMozContext::newWindow(const QString& url)
 }
 
 void
-QmlMozContext::setAutoInit(bool aAutoInit)
-{
-    QMozContext::GetInstance(aAutoInit);
-}
-
-void
 QmlMozContext::classBegin()
 {
 }
@@ -367,5 +355,4 @@ QmlMozContext::classBegin()
 void
 QmlMozContext::componentComplete()
 {
-    QMozContext::GetInstance(true);
 }
