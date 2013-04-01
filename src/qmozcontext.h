@@ -44,6 +44,9 @@ public:
 
     mozilla::embedlite::EmbedLiteApp* GetApp();
 
+    // autoInit - if true then runEmbedding will be executed in next event loop iteration
+    // after first GetInstance call.
+    //   if false, then manual call runEmbedding required in order to start Gecko/Qt synchronized event loop
     static QMozContext* GetInstance(bool autoInit = true);
 
 Q_SIGNALS:
@@ -57,8 +60,10 @@ public Q_SLOTS:
     bool isAccelerated();
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
-    quint32 newWindow(const QString& url, const quint32& parentId);
+    quint32 newWindow(const QString& url, const quint32& parentId = 0);
     void sendObserve(const QString& aTopic, const QVariant& variant);
+    // running this without delay specified will execute Gecko/Qt nested main loop
+    // and block this call until stopEmbedding called
     void runEmbedding(int aDelay = -1);
     void stopEmbedding();
     void setPref(const QString& aName, const QVariant& aPref);
