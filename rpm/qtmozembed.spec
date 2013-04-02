@@ -2,8 +2,8 @@
 
 Name:       qtmozembed
 Summary:    Qt MozEmbed
-Version:    %{qtmozembedversion}
-Release:    1
+Version:    1.0.3+master
+Release:    10.19.1.jolla
 Group:      Applications/Internet
 License:    Mozilla License
 URL:        http://www.mozilla.com
@@ -13,6 +13,9 @@ BuildRequires:  pkgconfig(QtOpenGL)
 BuildRequires:  pkgconfig(QtGui)
 BuildRequires:  pkgconfig(QJson)
 BuildRequires:  pkgconfig(libxul-embedding)
+BuildRequires:  pkgconfig(nspr)
+BuildRequires:  pkgconfig(QtTest)
+BuildRequires:  qtest-qml-devel
 
 %description
 Mozilla XUL runner
@@ -24,6 +27,14 @@ Summary: Headers for qtmozembed
 
 %description devel
 Development files for qtmozembed.
+
+%package tests
+Summary:    Unit tests for QtMozEmbed tests
+Group:      Applications/Multimedia
+Requires:   %{name} = %{version}-%{release}
+
+%description tests
+This package contains QML unit tests for QtMozEmbed library
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -47,4 +58,12 @@ qmake
 %{_libdir}/pkgconfig
 %{_includedir}/*
 
+%files tests
+%defattr(-,root,root,-)
+# >> files tests
+/opt/tests/qtmozembed/*
+/usr/bin/*
+# << files tests
+
 %changelog
+* Tue Mar 19 2013 Tatiana Meshkova <tanya.meshkova@gmail.com> - 1.0.1

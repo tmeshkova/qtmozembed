@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testdefinition version="1.0">
+   <suite name="qtmozembed-tests" domain="ui">
+       <description>QtMozEmbed Application automatic tests</description>
+       <set name="unit-tests" feature="QtMozEmbed">
+           <description>QML component unit tests</description>
+           <case manual="false" name="unittests">
+               <step>cd /opt/tests/qtmozembed/auto/ &amp;&amp;DISPLAY=:0 ./run-tests.sh</step>
+           </case>
+       </set>
+   </suite>
+</testdefinition>
