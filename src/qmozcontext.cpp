@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QApplication>
 #include <QVariant>
+#include <QThread>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
@@ -19,6 +20,7 @@
 #endif
 
 #include "qmozcontext.h"
+#include "geckoworker.h"
 
 #include "nsDebug.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
@@ -29,46 +31,36 @@ using namespace mozilla::embedlite;
 
 static QMozContext* protectSingleton = nullptr;
 
-void
-GeckoThread::Quit()
-{
-    if (mEventLoop)
-        mEventLoop->quit();
-    quit();
-    wait();
-}
-
-void
-GeckoThread::run()
-{
-    mContext->GetApp()->StartChildThread();
-    mEventLoop = new QEventLoop();
-    mEventLoop->exec();
-    printf("Call Term StopChildThread\n");
-    mContext->GetApp()->StopChildThread();
-    delete mEventLoop;
-    mEventLoop = 0;
-}
-
 class QMozContextPrivate : public EmbedLiteAppListener {
 public:
     QMozContextPrivate(QMozContext* qq)
     : q(qq)
     , mApp(NULL)
     , mInitialized(false)
-    , mThread(new GeckoThread(qq))
+    , mThread(new QThread())
     , mEmbedStarted(false)
     {
     }
+
     virtual ~QMozContextPrivate() {
+        // deleting a running thread may result in a crash
+        if (!mThread->isFinished()) {
+            mThread->exit(0);
+            mThread->wait();
+        }
         delete mThread;
     }
 
     virtual bool ExecuteChildThread() {
         if (!getenv("GECKO_THREAD")) {
             LOGT("Execute in child Native thread: %p", mThread);
-            mThread->start();
-            mThread->setPriority(QThread::LowPriority);
+            GeckoWorker *worker = new GeckoWorker(mApp);
+
+            QObject::connect(mThread, SIGNAL(started()), worker, SLOT(doWork()));
+            QObject::connect(mThread, SIGNAL(finished()), worker, SLOT(quit()));
+            worker->moveToThread(mThread);
+
+            mThread->start(QThread::LowPriority);
             return true;
         }
         return false;
@@ -77,7 +69,8 @@ public:
     virtual bool StopChildThread() {
         if (mThread) {
             LOGT("Stop Native thread: %p", mThread);
-            mThread->Quit();
+            mThread->exit(0);
+            mThread->wait();
             return true;
         }
         return false;
@@ -166,12 +159,11 @@ private:
     EmbedLiteApp* mApp;
     bool mInitialized;
     friend class QMozContext;
-    friend class GeckoThread;
-    GeckoThread* mThread;
+    QThread* mThread;
     bool mEmbedStarted;
 };
 
-QMozContext::QMozContext(QObject* parent, bool autoInit)
+QMozContext::QMozContext(QObject* parent)
     : QObject(parent)
     , d(new QMozContextPrivate(this))
 {
@@ -182,10 +174,6 @@ QMozContext::QMozContext(QObject* parent, bool autoInit)
     LoadEmbedLite();
     d->mApp = XRE_GetEmbedLite();
     d->mApp->SetListener(d);
-    QObject::connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(stopEmbedding()));
-    if (autoInit) {
-        QTimer::singleShot(0, this, SLOT(runEmbedding()));
-    }
 }
 
 QMozContext::~QMozContext()
@@ -234,11 +222,11 @@ QMozContext::addObserver(const QString& aTopic)
 }
 
 QMozContext*
-QMozContext::GetInstance(bool autoInit)
+QMozContext::GetInstance()
 {
     static QMozContext* lsSingleton = nullptr;
     if (!lsSingleton) {
-        lsSingleton = new QMozContext(0, autoInit);
+        lsSingleton = new QMozContext(0);
         NS_ASSERTION(lsSingleton, "not initialized");
     }
     return lsSingleton;
@@ -246,10 +234,6 @@ QMozContext::GetInstance(bool autoInit)
 
 void QMozContext::runEmbedding(int aDelay)
 {
-    if (aDelay != -1) {
-        QTimer::singleShot(aDelay, this, SLOT(runEmbedding()));
-        return;
-    }
     if (!d->mEmbedStarted) {
         d->mEmbedStarted = true;
         d->mApp->Start(EmbedLiteApp::EMBED_THREAD);
@@ -330,42 +314,4 @@ QMozContext::setPref(const QString& aName, const QVariant& aPref)
     default:
         LOGT("Unknown pref type: %i", aPref.type());
     }
-}
-
-QmlMozContext::QmlMozContext(QObject* parent)
-  : QObject(parent)
-{
-}
-
-QObject*
-QmlMozContext::getChild() const
-{
-    return QMozContext::GetInstance();
-}
-
-void
-QmlMozContext::newWindow(const QString& url)
-{
-    if (!QMozContext::GetInstance()->initialized()) {
-        LOGT("Error: context not yet initialized");
-        return;
-    }
-    QMozContext::GetInstance()->newWindow(url, 0);
-}
-
-void
-QmlMozContext::setAutoInit(bool aAutoInit)
-{
-    QMozContext::GetInstance(aAutoInit);
-}
-
-void
-QmlMozContext::classBegin()
-{
-}
-
-void
-QmlMozContext::componentComplete()
-{
-    QMozContext::GetInstance(true);
 }

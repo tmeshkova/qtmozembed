@@ -7,13 +7,15 @@ SOURCES += qmozcontext.cpp \
            EmbedQtKeyUtils.cpp \
            qdeclarativemozview.cpp \
            qgraphicsmozview.cpp \
-           qgraphicsmozview_p.cpp
+           qgraphicsmozview_p.cpp \
+           geckoworker.cpp
 
 HEADERS += qmozcontext.h \
            EmbedQtKeyUtils.h \
            qdeclarativemozview.h \
            qgraphicsmozview.h \
-           qgraphicsmozview_p.h
+           qgraphicsmozview_p.h \
+           geckoworker.h
 
 !contains(QT_MAJOR_VERSION, 4) {
 SOURCES += quickmozview.cpp
