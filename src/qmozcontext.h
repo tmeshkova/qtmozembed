@@ -45,6 +45,7 @@ public Q_SLOTS:
     void runEmbedding(int aDelay = -1);
     void stopEmbedding();
     void setPref(const QString& aName, const QVariant& aPref);
+    void notifyFirstUIInitialized();
 
 private:
     QMozContext(QObject* parent = 0);

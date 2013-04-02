@@ -315,3 +315,13 @@ QMozContext::setPref(const QString& aName, const QVariant& aPref)
         LOGT("Unknown pref type: %i", aPref.type());
     }
 }
+
+void
+QMozContext::notifyFirstUIInitialized()
+{
+    static bool sCalledOnce = false;
+    if (!sCalledOnce) {
+        d->mApp->SendObserve("final-ui-startup", NULL);
+        sCalledOnce = true;
+    }
+}
