@@ -59,5 +59,14 @@ ApplicationWindow {
             compare(webViewport.child.loadProgress, 100)
             mozContext.dumpTS("end")
         }
+        function test_Test2LoadAboutMozillaCheckTitle()
+        {
+            mozContext.dumpTS("start")
+            webViewport.child.url = "about:mozilla";
+            verify(MyScript.waitLoadStarted(webViewport))
+            verify(MyScript.waitLoadFinished(webViewport))
+            compare(webViewport.child.title, "The Book of Mozilla, 15:1")
+            mozContext.dumpTS("end")
+        }
     }
 }
