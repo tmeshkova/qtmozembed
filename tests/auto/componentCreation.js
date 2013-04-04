@@ -2,7 +2,7 @@ var component;
 var sprite;
 
 function createSpriteObjects() {
-     component = Qt.createComponent("ViewComponent.qml");
+     component = Qt.createComponent("../ViewComponent.qml");
      if (component.status == Component.Ready) {
          finishCreation();
      } 
@@ -32,7 +32,7 @@ function waitMozContext() {
         return true;
     }
     while (!mozContext.instance.initialized()) {
-        testcaseid.wait(10);
+        mozContext.waitLoop();
     }
     return true;
 }
@@ -42,7 +42,7 @@ function waitMozView() {
         return true;
     }
     while (!appWindow.mozViewInitialized) {
-        testcaseid.wait(10)
+        mozContext.waitLoop();
     }
     return true;
 }
@@ -52,7 +52,7 @@ function waitLoadStarted(view) {
         return true;
     }
     while (!view.child.loading) {
-        testcaseid.wait()
+        mozContext.waitLoop();
     }
     return true;
 }
@@ -62,7 +62,11 @@ function waitLoadFinished(view) {
         return true;
     }
     while (view.child.loading) {
-        testcaseid.wait()
+        mozContext.waitLoop();
     }
     return true;
+}
+
+function dumpTs(message) {
+    print("TimeStamp:" + message + ", " + Qt.formatTime(new Date(), "hh:mm:ss::ms") + "\n");
 }

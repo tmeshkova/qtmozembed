@@ -2,7 +2,7 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "componentCreation.js" as MyScript
+import "../componentCreation.js" as MyScript
 
 ApplicationWindow {
     id: appWindow
@@ -33,20 +33,22 @@ ApplicationWindow {
         when: windowShown
 
         function cleanup() {
-            // Return to the start page
-            appWindow.pageStack.pop(null, PageStackAction.Immediate)
+            mozContext.dumpTS("cleanup")
         }
 
         function test_1contextPrepareViewContext()
         {
+            mozContext.dumpTS("start")
             verify(mozContext.instance !== undefined)
             while (mozContext.instance.initialized() === false) {
                 wait(500)
             }
             verify(mozContext.instance.initialized())
+            mozContext.dumpTS("end")
         }
         function test_2viewInit()
         {
+            mozContext.dumpTS("start")
             verify(mozContext.instance.initialized())
             MyScript.createSpriteObjects();
             while (mozView === null) {
@@ -56,14 +58,17 @@ ApplicationWindow {
                 wait(500)
             }
             verify(mozView.child !== undefined)
+            mozContext.dumpTS("end")
         }
         function test_3viewLoadURL()
         {
+            mozContext.dumpTS("start")
             verify(mozView.child !== undefined)
             mozView.child.url = "about:mozilla";
             verify(MyScript.waitLoadStarted(mozView))
             verify(MyScript.waitLoadFinished(mozView))
             compare(mozView.child.url, "about:mozilla")
+            mozContext.dumpTS("end")
         }
     }
 }

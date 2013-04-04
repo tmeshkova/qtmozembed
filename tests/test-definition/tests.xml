@@ -4,8 +4,14 @@
        <description>QtMozEmbed Application automatic tests</description>
        <set name="unit-tests" feature="QtMozEmbed">
            <description>QML component unit tests</description>
-           <case manual="false" name="unittests">
-               <step>cd /opt/tests/qtmozembed/auto/ &amp;&amp;DISPLAY=:0 ./run-tests.sh</step>
+           <case manual="false" timeout="200" name="unittests-context">
+               <step>cd /opt/tests/qtmozembed/auto/context &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-basicview">
+               <step>cd /opt/tests/qtmozembed/auto/basicview &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-view">
+               <step>cd /opt/tests/qtmozembed/auto/view &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
            </case>
        </set>
    </suite>

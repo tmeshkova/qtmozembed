@@ -15,6 +15,9 @@ class QmlMozContext : public QDeclarativeItem
 
 public:
     QObject* instance() const;
+public Q_SLOTS:
+    void waitLoop(bool mayWait = true, int aTimeout = -1);
+    void dumpTS(const QString& msg);
 };
 
 #endif

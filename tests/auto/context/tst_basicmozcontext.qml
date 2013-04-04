@@ -2,7 +2,7 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "componentCreation.js" as MyScript
+import "../componentCreation.js" as MyScript
 
 ApplicationWindow {
     id: appWindow
@@ -13,7 +13,7 @@ ApplicationWindow {
 
     property bool mozViewInitialized : false
     property variant mozView : null
-    property variant lastObserveMessage : null
+    property variant lastObserveMessage
 
     QmlMozContext {
         id: mozContext
@@ -37,38 +37,47 @@ ApplicationWindow {
         when: windowShown
 
         function cleanup() {
-            // Return to the start page
-            appWindow.pageStack.pop(null, PageStackAction.Immediate)
+            mozContext.dumpTS("cleanup")
         }
 
         function test_context1Init()
         {
+            mozContext.dumpTS("start")
             verify(mozContext.instance !== undefined)
             while (mozContext.instance.initialized() === false) {
                 wait(500)
             }
             verify(mozContext.instance.initialized())
+            mozContext.dumpTS("end")
         }
         function test_context2AcceleratedAPI()
         {
+            mozContext.dumpTS("start")
             mozContext.instance.setIsAccelerated(true);
             verify(mozContext.instance.isAccelerated() === true)
             mozContext.instance.setIsAccelerated(false);
             verify(mozContext.instance.isAccelerated() === false)
+            mozContext.dumpTS("end")
         }
         function test_context3PrefAPI()
         {
+            mozContext.dumpTS("start")
             mozContext.instance.setPref("test.embedlite.pref", "result");
+            mozContext.dumpTS("end")
         }
         function test_context4ObserveAPI()
         {
+            mozContext.dumpTS("start")
             mozContext.instance.sendObserve("memory-pressure", null);
             mozContext.instance.addObserver("test-observe-message");
             mozContext.instance.sendObserve("test-observe-message", {msg: "testMessage", val: 1});
-            wait(50)
+            while (lastObserveMessage === undefined) {
+                mozContext.waitLoop()
+            }
             compare(lastObserveMessage.msg, "test-observe-message");
             compare(lastObserveMessage.data.val, 1);
             compare(lastObserveMessage.data.msg, "testMessage");
+            mozContext.dumpTS("end")
         }
     }
 }
