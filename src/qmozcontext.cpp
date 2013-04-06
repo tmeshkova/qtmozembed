@@ -83,11 +83,6 @@ public:
             mApp->SetIsAccelerated(true);
         }
 #endif
-        // There is the bug with gstreamer which crashes async video in HW Accelerated mode
-        // Disable async video for now
-        if (mApp->GetRenderType() == EmbedLiteApp::RENDER_HW) {
-            setenv("DISABLE_ASYNC_VIDEO", "1", 1);
-        }
         setDefaultPrefs();
         mApp->LoadGlobalStyleSheet("chrome://global/content/embedScrollStyles.css", true);
         Q_EMIT q->onInitialized();
