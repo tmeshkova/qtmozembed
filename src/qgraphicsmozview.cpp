@@ -215,7 +215,7 @@ void QGraphicsMozView::load(const QString& url)
         return;
     }
     LOGT("url: %s", url.toUtf8().data());
-    d->mView->LoadURL(QUrl::fromUserInput(url).toString().toUtf8().data());
+    d->mView->LoadURL(url.toUtf8().data());
 }
 
 void QGraphicsMozView::loadFrameScript(const QString& name)
