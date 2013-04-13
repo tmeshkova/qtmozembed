@@ -46,7 +46,7 @@ public:
     virtual void OnLoadRedirect(void);
     virtual void OnSecurityChanged(const char* aStatus, unsigned int aState);
     virtual void OnFirstPaint(int32_t aX, int32_t aY);
-    virtual void IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange);
+    virtual void IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange, const PRUnichar* inputType, const PRUnichar* inputMode);
 
     virtual void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight);
     virtual void OnScrollChanged(int32_t offSetX, int32_t offSetY);

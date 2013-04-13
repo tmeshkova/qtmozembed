@@ -237,10 +237,28 @@ void QGraphicsMozViewPrivate::OnFirstPaint(int32_t aX, int32_t aY)
     Q_EMIT q->firstPaint(aX, aY);
 }
 
-void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange)
+void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
+                                              const PRUnichar* inputType, const PRUnichar* inputMode)
 {
-    LOGT("imeState:%i", aIstate);
-    q->setInputMethodHints(aIstate == 2 ? Qt::ImhHiddenText : Qt::ImhPreferLowercase);
+    Qt::InputMethodHints hints = Qt::ImhNone;
+    hints = aIstate == 2 ? Qt::ImhHiddenText : Qt::ImhPreferLowercase;
+
+    QString imType((QChar*)inputType);
+    if (imType.contains("number", Qt::CaseInsensitive)) {
+        //hints |= Qt::ImhDigitsOnly;
+        hints |= Qt::ImhFormattedNumbersOnly;
+    }
+    else if (imType.contains("tel", Qt::CaseInsensitive)) {
+        hints |= Qt::ImhDialableCharactersOnly;
+    }
+    else if (imType.contains("email", Qt::CaseInsensitive)) {
+        hints |= Qt::ImhEmailCharactersOnly;
+    }
+    else if (imType.contains("url", Qt::CaseInsensitive)) {
+        hints |= Qt::ImhUrlCharactersOnly;
+    }
+    q->setInputMethodHints(hints);
+
     QWidget* focusWidget = qApp->focusWidget();
     if (focusWidget && aFocusChange) {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
