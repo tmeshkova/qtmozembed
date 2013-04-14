@@ -281,6 +281,7 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
         LOGT("Fixme IME for Qt5");
 #endif
     }
+    Q_EMIT q->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
 
 void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)

@@ -458,7 +458,6 @@ void QGraphicsMozView::keyPressEvent(QKeyEvent* event)
     if (!d->mViewInitialized)
         return;
 
-    LOGT();
     int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
     int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
     int32_t charCode = 0;
@@ -476,7 +475,6 @@ void QGraphicsMozView::keyReleaseEvent(QKeyEvent* event)
     if (!d->mViewInitialized)
         return;
 
-    LOGT();
     int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
     int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
     int32_t charCode = 0;

@@ -91,12 +91,13 @@ Q_SIGNALS:
     bool recvSyncMessage(const QString message, const QVariant data, QSyncMessageResponse* response);
     void loadRedirect();
     void securityChanged(QString status, uint state);
-    void firstPaint(int32_t offx, int32_t offy);
+    void firstPaint(int offx, int offy);
     void contentLoaded(QString docuri);
     void viewAreaChanged();
     void handleLongTap(QPoint point);
     void handleSingleTap(QPoint point);
     void handleDoubleTap(QPoint point);
+    void imeNotification(int state, bool open, int cause, int focusChange, const QString& type);
 
 protected:
     virtual void setGeometry(const QRectF& rect);

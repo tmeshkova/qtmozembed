@@ -13,6 +13,9 @@
            <case manual="false" timeout="200" name="unittests-view">
                <step>cd /opt/tests/qtmozembed/auto/view &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
            </case>
+           <case manual="false" timeout="200" name="unittests-basicinput">
+               <step>cd /opt/tests/qtmozembed/auto/basicinput &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+           </case>
        </set>
    </suite>
 </testdefinition>
