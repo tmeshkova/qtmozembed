@@ -92,7 +92,6 @@ public:
             mApp->AddObserver(str.toUtf8().data());
         }
         mObserversList.clear();
-        mApp->SendObserve("embed:getdownloadlist", 0);
     }
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {
