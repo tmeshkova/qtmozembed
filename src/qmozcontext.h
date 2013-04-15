@@ -39,6 +39,7 @@ public Q_SLOTS:
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
     quint32 newWindow(const QString& url, const quint32& parentId = 0);
+    void sendObserve(const QString& aTopic, const QString& string);
     void sendObserve(const QString& aTopic, const QVariant& variant);
     // running this without delay specified will execute Gecko/Qt nested main loop
     // and block this call until stopEmbedding called
