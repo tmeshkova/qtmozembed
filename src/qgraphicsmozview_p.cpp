@@ -400,7 +400,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         // We should append previous touches to start event in order
         // to make Gecko recognize it as new added touches to existing session
         // and not evict it here http://hg.mozilla.org/mozilla-central/annotate/1d9c510b3742/layout/base/nsPresShell.cpp#l6135
-        if (meventMove.mTouches.Length() && event->type() == QEvent::TouchUpdate) {
+        if (meventMove.mTouches.Length()) {
             meventStart.mTouches.AppendElements(meventMove.mTouches);
         }
         ReceiveInputEvent(meventStart);
