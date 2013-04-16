@@ -70,3 +70,26 @@ function waitLoadFinished(view) {
 function dumpTs(message) {
     print("TimeStamp:" + message + ", " + Qt.formatTime(new Date(), "hh:mm:ss::ms") + "\n");
 }
+
+function scrollBy(startX, startY, dx, dy, timeMs, isKinetic)
+{
+    var frameMs = 16;
+    var timeMsStep = timeMs / frameMs;
+    var stepRX = dx / timeMsStep;
+    var stepRY = dy / timeMsStep;
+    var curRX = startX;
+    var curRY = startY;
+    var endRX = curRX + dx;
+    var endRY = curRY + dy;
+    testcaseid.mousePress(webViewport, curRX, curRY, 1);
+    while (curRX != endRX || curRY != endRY) {
+        curRX = stepRX > 0 ? Math.min(curRX + stepRX, endRX) : Math.max(curRX + stepRX, endRX);
+        curRY = stepRY > 0 ? Math.min(curRY + stepRY, endRY) : Math.max(curRY + stepRY, endRY);
+        testcaseid.mouseMove(webViewport, curRX, curRY, -1, 1);
+    }
+    testcaseid.mouseRelease(webViewport, curRX, curRY, 1);
+//    if (!isKinetic) {
+        testcaseid.mousePress(webViewport, curRX, curRY, 1);
+        testcaseid.mouseRelease(webViewport, curRX, curRY, 1);
+//    }
+}
