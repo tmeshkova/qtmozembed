@@ -32,7 +32,7 @@ ApplicationWindow {
             // Gecko does not switch to SW mode if gl context failed to init
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
-            mozContext.instance.setIsAccelerated(false);
+            mozContext.instance.setIsAccelerated(true);
             mozContext.instance.addComponentManifest("/opt/tests/qtmozembed/components/TestHelpers.manifest");
         }
     }
@@ -48,6 +48,9 @@ ApplicationWindow {
                 webViewport.child.loadFrameScript("chrome://tests/content/testHelper.js");
                 appWindow.mozViewInitialized = true
                 webViewport.child.addMessageListener("testembed:elementpropvalue");
+            }
+            onHandleSingleTap: {
+                print("HandleSingleTap: [",point.x,",",point.y,"]");
             }
             onRecvAsyncMessage: {
                 // print("onRecvAsyncMessage:" + message + ", data:" + data)
@@ -86,9 +89,11 @@ ApplicationWindow {
             verify(MyScript.waitMozContext())
             verify(MyScript.waitMozView())
             webViewport.child.url = "data:text/html,<input id=myelem value=''>";
-            verify(MyScript.waitLoadStarted(webViewport))
             verify(MyScript.waitLoadFinished(webViewport))
             compare(webViewport.child.loadProgress, 100);
+            while (!webViewport.child.painted) {
+                wait();
+            }
             mouseClick(webViewport, 10, 10)
             while (!appWindow.isState(1, 0, 3)) {
                 wait();

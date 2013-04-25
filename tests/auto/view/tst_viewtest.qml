@@ -22,7 +22,7 @@ ApplicationWindow {
             // Gecko does not switch to SW mode if gl context failed to init
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
-            mozContext.instance.setIsAccelerated(false);
+            mozContext.instance.setIsAccelerated(true);
         }
     }
 
@@ -54,18 +54,22 @@ ApplicationWindow {
             verify(MyScript.waitMozContext())
             verify(MyScript.waitMozView())
             webViewport.child.url = "about:blank";
-            verify(MyScript.waitLoadStarted(webViewport))
             verify(MyScript.waitLoadFinished(webViewport))
             compare(webViewport.child.loadProgress, 100)
+            while (!webViewport.child.painted) {
+                wait();
+            }
             mozContext.dumpTS("end")
         }
         function test_Test2LoadAboutMozillaCheckTitle()
         {
             mozContext.dumpTS("start")
             webViewport.child.url = "about:mozilla";
-            verify(MyScript.waitLoadStarted(webViewport))
             verify(MyScript.waitLoadFinished(webViewport))
             compare(webViewport.child.title, "The Book of Mozilla, 15:1")
+            while (!webViewport.child.painted) {
+                wait();
+            }
             mozContext.dumpTS("end")
         }
     }

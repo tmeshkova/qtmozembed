@@ -5,7 +5,7 @@ export `dbus-launch`
 export QML_IMPORT_PATH=/opt/tests/qtmozembed/imports
 #export NSPR_LOG_MODULES=all:5
 
-qmlmoztestrunner $@
+/usr/lib/qt4/bin/qmlmoztestrunner -opengl $@
 exit_code=$?
 
 kill $DBUS_SESSION_BUS_PID

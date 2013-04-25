@@ -114,10 +114,15 @@ int main(int argc, char **argv)
     gargc = argc;
     gargv = argv;
 
-    QApplication app(argc, argv);
-    QTestRunner runn;
-    QTimer::singleShot(0, &runn, SLOT(DropInStartup()));
-    QMozContext::GetInstance()->runEmbedding();
+    {
+        QApplication app(argc, argv);
+        {
+            QTestRunner runn;
+            QTimer::singleShot(0, &runn, SLOT(DropInStartup()));
+            QMozContext::GetInstance()->runEmbedding();
+        }
+        app.quit();
+    }
     return 0;
 }
 

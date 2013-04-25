@@ -86,6 +86,7 @@ public:
     QSize mScrollableSize;
     QPointF mScrollableOffset;
     float mContentResolution;
+    bool mIsPainted;
 };
 
 #endif /* qgraphicsmozview_p_h */

@@ -47,6 +47,7 @@ class QGraphicsMozView : public QGraphicsWidget
     Q_PROPERTY(QSize scrollableSize READ scrollableSize)
     Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset)
     Q_PROPERTY(float resolution READ resolution)
+    Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL)
 
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
@@ -64,6 +65,7 @@ public:
     QSize scrollableSize() const;
     QPointF scrollableOffset() const;
     float resolution() const;
+    bool isPainted() const;
 
 public Q_SLOTS:
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl());

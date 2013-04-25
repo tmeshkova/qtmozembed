@@ -2,10 +2,10 @@ var component;
 var sprite;
 
 function createSpriteObjects() {
-     component = Qt.createComponent("../ViewComponent.qml");
+     component = Qt.createComponent("/opt/tests/qtmozembed/auto/ViewComponent.qml");
      if (component.status == Component.Ready) {
          finishCreation();
-     } 
+     }
      else {
          component.statusChanged.connect(finishCreation);
     }
@@ -14,7 +14,7 @@ function createSpriteObjects() {
 function finishCreation() {
      if (component.status == Component.Ready) {
          appWindow.mozView = component.createObject(appWindow, {"x": 0, "y": 0});
-         if (sprite == null) {
+         if (appWindow.mozView == null) {
              // Error Handling
              console.log("Error creating object");
          }
@@ -47,21 +47,11 @@ function waitMozView() {
     return true;
 }
 
-function waitLoadStarted(view) {
-    if (view.child.loading) {
-        return true;
-    }
-    while (!view.child.loading) {
-        mozContext.waitLoop();
-    }
-    return true;
-}
-
 function waitLoadFinished(view) {
-    if (!view.child.loading) {
+    if (!view.child.loading && view.child.loadProgress !== 0) {
         return true;
     }
-    while (view.child.loading) {
+    while (view.child.loading || view.child.loadProgress === 0) {
         mozContext.waitLoop();
     }
     return true;

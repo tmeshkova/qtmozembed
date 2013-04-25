@@ -12,7 +12,6 @@ ApplicationWindow {
             : ""
 
     property bool mozViewInitialized : false
-    property bool viewRendered : false
     property int scrollX : 0
     property int scrollY : 0
     property int clickX : 0
@@ -27,7 +26,7 @@ ApplicationWindow {
             // Gecko does not switch to SW mode if gl context failed to init
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
-            mozContext.instance.setIsAccelerated(false);
+            mozContext.instance.setIsAccelerated(true);
             mozContext.instance.addComponentManifest("/opt/tests/qtmozembed/components/TestHelpers.manifest");
         }
     }
@@ -42,14 +41,12 @@ ApplicationWindow {
             onViewInitialized: {
                 appWindow.mozViewInitialized = true
             }
-            onFirstPaint: {
-                viewRendered = true;
-            }
             onHandleSingleTap: {
                 appWindow.clickX = point.x
                 appWindow.clickY = point.y
             }
             onViewAreaChanged: {
+                print("onViewAreaChanged: ", webViewport.child.scrollableOffset.x, webViewport.child.scrollableOffset.y);
                 var offset = webViewport.child.scrollableOffset
                 appWindow.scrollX = offset.x
                 appWindow.scrollY = offset.y
@@ -72,12 +69,13 @@ ApplicationWindow {
             verify(MyScript.waitMozContext())
             verify(MyScript.waitMozView())
             webViewport.child.url = "data:text/html,<body bgcolor=red leftmargin=0 topmargin=0 marginwidth=0 marginheight=0><input style='position:absolute; left:0px; top:1200px;'>";
-            verify(MyScript.waitLoadStarted(webViewport))
             verify(MyScript.waitLoadFinished(webViewport))
             compare(webViewport.child.loadProgress, 100);
-            while (!appWindow.viewRendered) {
+            while (!webViewport.child.painted) {
                 wait();
             }
+            wait(500)
+            MyScript.scrollBy(1, 401, 0, -400, 100, false);
             MyScript.scrollBy(1, 401, 0, -400, 100, false);
             while (appWindow.scrollY === 0) {
                 wait();

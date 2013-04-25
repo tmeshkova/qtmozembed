@@ -23,7 +23,7 @@ ApplicationWindow {
             // Gecko does not switch to SW mode if gl context failed to init
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
-            mozContext.instance.setIsAccelerated(false);
+            mozContext.instance.setIsAccelerated(true);
         }
     }
 
@@ -65,9 +65,11 @@ ApplicationWindow {
             mozContext.dumpTS("start")
             verify(mozView.child !== undefined)
             mozView.child.url = "about:mozilla";
-            verify(MyScript.waitLoadStarted(mozView))
             verify(MyScript.waitLoadFinished(mozView))
             compare(mozView.child.url, "about:mozilla")
+            while (!mozView.child.painted) {
+                wait();
+            }
             mozContext.dumpTS("end")
         }
     }

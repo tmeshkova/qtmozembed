@@ -11,6 +11,7 @@ isEmpty(OBJ_PATH) {
   BIN_DIR=$$replace(SDK_HOME, -devel-, -)
   message($$BIN_DIR - binary dir)
 } else {
+  CONFIG += link_pkgconfig
   message(OBJ_PATH defined $$OBJ_PATH)
   GECKO_LIB_DIR = $$OBJ_PATH/dist/lib
   GECKO_INCLUDE_DIR = $$OBJ_PATH/dist/include

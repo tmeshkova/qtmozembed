@@ -62,8 +62,8 @@ qmake
 %defattr(-,root,root,-)
 # >> files tests
 /opt/tests/qtmozembed/*
-/usr/bin/*
+%{_libdir}/qt4/bin/*
 # << files tests
 
 %changelog
-* Tue Mar 19 2013 Tatiana Meshkova <tanya.meshkova@gmail.com> - 1.0.1
+* Wed Mar 20 2013 Tatiana Meshkova <tanya.meshkova@gmail.com> - 1.0.3
