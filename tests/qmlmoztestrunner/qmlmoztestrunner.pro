@@ -4,7 +4,12 @@ CONFIG += warn_on link_pkgconfig
 SOURCES += main.cpp
 
 INCLUDEPATH+=../../src
-LIBS += -L../../ -lqtembedwidget
+isEmpty(OBJ_BUILD_PATH) {
+LIBS+= -L../../ -lqtembedwidget
+} else {
+LIBS+= -L../../$$OBJ_BUILD_PATH -lqtembedwidget
+}
+
 LIBS += -lQtQuickTest
 PKGCONFIG += QJson
 contains(QT_CONFIG, opengl)|contains(QT_CONFIG, opengles1)|contains(QT_CONFIG, opengles2) {
