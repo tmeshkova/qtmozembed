@@ -60,12 +60,12 @@ ApplicationWindow {
         when: windowShown
 
         function cleanup() {
-            mozContext.dumpTS("cleanup")
+            mozContext.dumpTS("tst_scrolltest cleanup")
         }
 
         function test_TestScrollPaintOperations()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_TestScrollPaintOperations start")
             verify(MyScript.waitMozContext())
             verify(MyScript.waitMozView())
             webViewport.child.url = "data:text/html,<body bgcolor=red leftmargin=0 topmargin=0 marginwidth=0 marginheight=0><input style='position:absolute; left:0px; top:1200px;'>";
@@ -93,7 +93,7 @@ ApplicationWindow {
             }
             verify(appWindow.clickX === 10)
             verify(appWindow.clickY === 20)
-            mozContext.dumpTS("end");
+            mozContext.dumpTS("test_TestScrollPaintOperations end");
         }
     }
 }

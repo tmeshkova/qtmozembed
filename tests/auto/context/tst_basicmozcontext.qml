@@ -37,37 +37,37 @@ ApplicationWindow {
         when: windowShown
 
         function cleanup() {
-            mozContext.dumpTS("cleanup")
+            mozContext.dumpTS("tst_basicmozcontext cleanup")
         }
 
         function test_context1Init()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_context1Init start")
             verify(mozContext.instance !== undefined)
             while (mozContext.instance.initialized() === false) {
                 wait(500)
             }
             verify(mozContext.instance.initialized())
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_context1Init end")
         }
         function test_context2AcceleratedAPI()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_context2AcceleratedAPI start")
             mozContext.instance.setIsAccelerated(true);
             verify(mozContext.instance.isAccelerated() === true)
             mozContext.instance.setIsAccelerated(false);
             verify(mozContext.instance.isAccelerated() === false)
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_context2AcceleratedAPI end")
         }
         function test_context3PrefAPI()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_context3PrefAPI start")
             mozContext.instance.setPref("test.embedlite.pref", "result");
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_context3PrefAPI end")
         }
         function test_context4ObserveAPI()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_context4ObserveAPI start")
             mozContext.instance.sendObserve("memory-pressure", null);
             mozContext.instance.addObserver("test-observe-message");
             mozContext.instance.sendObserve("test-observe-message", {msg: "testMessage", val: 1});
@@ -77,7 +77,7 @@ ApplicationWindow {
             compare(lastObserveMessage.msg, "test-observe-message");
             compare(lastObserveMessage.data.val, 1);
             compare(lastObserveMessage.data.msg, "testMessage");
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_context4ObserveAPI end")
         }
     }
 }

@@ -33,22 +33,22 @@ ApplicationWindow {
         when: windowShown
 
         function cleanup() {
-            mozContext.dumpTS("cleanup")
+            mozContext.dumpTS("tst_basicview cleanup")
         }
 
         function test_1contextPrepareViewContext()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_1contextPrepareViewContext start")
             verify(mozContext.instance !== undefined)
             while (mozContext.instance.initialized() === false) {
                 wait(500)
             }
             verify(mozContext.instance.initialized())
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_1contextPrepareViewContext end")
         }
         function test_2viewInit()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_2viewInit start")
             verify(mozContext.instance.initialized())
             MyScript.createSpriteObjects();
             while (mozView === null) {
@@ -58,11 +58,11 @@ ApplicationWindow {
                 wait(500)
             }
             verify(mozView.child !== undefined)
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_2viewInit end")
         }
         function test_3viewLoadURL()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_3viewLoadURL start")
             verify(mozView.child !== undefined)
             mozView.child.url = "about:mozilla";
             verify(MyScript.waitLoadFinished(mozView))
@@ -70,7 +70,7 @@ ApplicationWindow {
             while (!mozView.child.painted) {
                 wait();
             }
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_3viewLoadURL end")
         }
     }
 }

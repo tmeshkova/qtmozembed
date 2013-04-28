@@ -45,12 +45,12 @@ ApplicationWindow {
         when: windowShown
 
         function cleanup() {
-            mozContext.dumpTS("cleanup")
+            mozContext.dumpTS("tst_viewtest cleanup")
         }
 
         function test_Test1LoadSimpleBlank()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_Test1LoadSimpleBlank start")
             verify(MyScript.waitMozContext())
             verify(MyScript.waitMozView())
             webViewport.child.url = "about:blank";
@@ -59,18 +59,18 @@ ApplicationWindow {
             while (!webViewport.child.painted) {
                 wait();
             }
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_Test1LoadSimpleBlank end")
         }
         function test_Test2LoadAboutMozillaCheckTitle()
         {
-            mozContext.dumpTS("start")
+            mozContext.dumpTS("test_Test2LoadAboutMozillaCheckTitle start")
             webViewport.child.url = "about:mozilla";
             verify(MyScript.waitLoadFinished(webViewport))
             compare(webViewport.child.title, "The Book of Mozilla, 15:1")
             while (!webViewport.child.painted) {
                 wait();
             }
-            mozContext.dumpTS("end")
+            mozContext.dumpTS("test_Test2LoadAboutMozillaCheckTitle end")
         }
     }
 }
