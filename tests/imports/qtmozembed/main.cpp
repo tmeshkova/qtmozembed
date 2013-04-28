@@ -19,6 +19,8 @@ public:
         qmlRegisterType<QmlMozContext>("QtMozilla", 1, 0, "QmlMozContext");
         qmlRegisterType<QGraphicsMozView>("QtMozilla", 1, 0, "QGraphicsMozView");
         qmlRegisterType<QDeclarativeMozView>("QtMozilla", 1, 0, "QmlMozView");
+
+        setenv("EMBED_COMPONENTS_PATH", DEFAULT_COMPONENTS_PATH, 1);
     }
 };
 

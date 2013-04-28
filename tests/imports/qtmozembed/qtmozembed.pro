@@ -16,6 +16,12 @@ LIBS+= -L../../../ -lqtembedwidget
 LIBS+= -L../../../$$OBJ_BUILD_PATH -lqtembedwidget
 }
 
+isEmpty(DEFAULT_COMPONENT_PATH) {
+  DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"/usr/lib/mozembedlite/\\\"\"
+} else {
+  DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"$$DEFAULT_COMPONENT_PATH\\\"\"
+}
+
 INCLUDEPATH += $$QTMOZEMBED_SOURCE_PATH
 
 HEADERS += \

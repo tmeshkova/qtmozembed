@@ -1,27 +1,34 @@
 var component;
 var sprite;
 
+function loadEmbedComponents()
+{
+    mozContext.instance.addComponentManifest(mozContext.getenv("EMBED_COMPONENTS_PATH") + "/components/EmbedLiteBinComponents.manifest")
+    mozContext.instance.addComponentManifest(mozContext.getenv("EMBED_COMPONENTS_PATH") + "/chrome/EmbedLiteJSScripts.manifest")
+    mozContext.instance.addComponentManifest(mozContext.getenv("EMBED_COMPONENTS_PATH") + "/chrome/EmbedLiteOverrides.manifest")
+}
+
 function createSpriteObjects() {
-     component = Qt.createComponent(mozContext.getenv("QTTESTPATH") + "/auto/ViewComponent.qml");
-     if (component.status == Component.Ready) {
-         finishCreation();
-     }
-     else {
-         component.statusChanged.connect(finishCreation);
+    component = Qt.createComponent(mozContext.getenv("QTTESTPATH") + "/auto/ViewComponent.qml");
+    if (component.status == Component.Ready) {
+        finishCreation();
+    }
+    else {
+        component.statusChanged.connect(finishCreation);
     }
 }
 
 function finishCreation() {
-     if (component.status == Component.Ready) {
-         appWindow.mozView = component.createObject(appWindow, {"x": 0, "y": 0});
-         if (appWindow.mozView == null) {
-             // Error Handling
-             console.log("Error creating object");
-         }
-     } else if (component.status == Component.Error) {
-         // Error Handling
-         console.log("Error loading component:", component.errorString());
-     }
+    if (component.status == Component.Ready) {
+        appWindow.mozView = component.createObject(appWindow, {"x": 0, "y": 0});
+        if (appWindow.mozView == null) {
+            // Error Handling
+            console.log("Error creating object");
+        }
+    } else if (component.status == Component.Error) {
+        // Error Handling
+        console.log("Error loading component:", component.errorString());
+    }
 }
 
 function waitMozContext() {
@@ -78,8 +85,6 @@ function scrollBy(startX, startY, dx, dy, timeMs, isKinetic)
         testcaseid.mouseMove(webViewport, curRX, curRY, -1, 1);
     }
     testcaseid.mouseRelease(webViewport, curRX, curRY, 1);
-//    if (!isKinetic) {
-        testcaseid.mousePress(webViewport, curRX, curRY, 1);
-        testcaseid.mouseRelease(webViewport, curRX, curRY, 1);
-//    }
+    testcaseid.mousePress(webViewport, curRX, curRY, 1);
+    testcaseid.mouseRelease(webViewport, curRX, curRY, 1);
 }
