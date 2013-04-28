@@ -27,7 +27,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest("/opt/tests/qtmozembed/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
         }
     }
 

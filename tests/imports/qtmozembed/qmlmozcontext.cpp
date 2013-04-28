@@ -2,6 +2,7 @@
 #include <QEventLoop>
 #include <QAbstractEventDispatcher>
 #include <QThread>
+#include <QString>
 #include <QDateTime>
 #include <QCoreApplication>
 
@@ -33,4 +34,10 @@ void
 QmlMozContext::dumpTS(const QString& msg)
 {
     printf("TimeStamp: msg:\"%s\", Ts: %llu\n", msg.toUtf8().data(), QDateTime::currentMSecsSinceEpoch() / 1000);
+}
+
+QString
+QmlMozContext::getenv(const QString envVarName) const
+{
+    return QString(::getenv(envVarName.toUtf8().constData()));
 }

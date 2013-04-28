@@ -2,7 +2,7 @@ var component;
 var sprite;
 
 function createSpriteObjects() {
-     component = Qt.createComponent("/opt/tests/qtmozembed/auto/ViewComponent.qml");
+     component = Qt.createComponent(mozContext.getenv("QTTESTPATH") + "/auto/ViewComponent.qml");
      if (component.status == Component.Ready) {
          finishCreation();
      }
