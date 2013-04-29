@@ -14,6 +14,7 @@ ApplicationWindow {
     property bool mozViewInitialized : false
     property variant promptReceived : null
     property variant testResult : null
+    property variant testCaseNum : 0
 
     QmlMozContext {
         id: mozContext
@@ -47,12 +48,23 @@ ApplicationWindow {
                 if (message == "embed:prompt") {
                     testcaseid.compare(data.defaultValue, "Your name");
                     testcaseid.compare(data.text, "Please enter your name:");
-                    webViewport.child.sendAsyncMessage("promptresponse", {
-                                                         winid: data.winid,
-                                                         checkval: true,
-                                                         accepted: true,
-                                                         promptvalue: "expectedPromptResult"
-                                                     })
+                    var responsePrompt = null;
+                    switch(appWindow.testCaseNum) {
+                        case 0:
+                            responsePrompt="expectedPromptResult";
+                            break;
+                        case 1:
+                            responsePrompt="unexpectedPromptResult";
+                            break;
+                    }
+                    if (responsePrompt) {
+                        webViewport.child.sendAsyncMessage("promptresponse", {
+                                                            winid: data.winid,
+                                                            checkval: true,
+                                                            accepted: true,
+                                                            promptvalue: responsePrompt
+                                                          })
+                    }
                     appWindow.promptReceived = true;
                 } else if (message == "testembed:elementinnervalue") {
                     appWindow.testResult = data.value;
@@ -75,6 +87,9 @@ ApplicationWindow {
             mozContext.dumpTS("test_TestPromptPage start")
             verify(MyScript.waitMozContext())
             verify(MyScript.waitMozView())
+            appWindow.testCaseNum = 0
+            appWindow.promptReceived = null
+            appWindow.testResult = null
             webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/promptbasic/prompt.html";
             verify(MyScript.waitLoadFinished(webViewport))
             compare(webViewport.child.loadProgress, 100);
@@ -91,6 +106,58 @@ ApplicationWindow {
             }
             compare(appWindow.testResult, "ok");
             mozContext.dumpTS("test_TestPromptPage end");
+        }
+
+        function test_TestPromptWithBadResponse()
+        {
+            mozContext.dumpTS("test_TestPromptWithBadResponse start")
+            verify(MyScript.waitMozContext())
+            verify(MyScript.waitMozView())
+            appWindow.testCaseNum = 1
+            appWindow.promptReceived = null
+            appWindow.testResult = null
+            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/promptbasic/prompt.html";
+            verify(MyScript.waitLoadFinished(webViewport))
+            compare(webViewport.child.loadProgress, 100);
+            while (!webViewport.child.painted) {
+                wait();
+            }
+            while (!appWindow.promptReceived) {
+                wait();
+            }
+            webViewport.child.sendAsyncMessage("embedtest:getelementinner", {
+                                                name: "result" })
+            while (!appWindow.testResult) {
+                wait();
+            }
+            compare(appWindow.testResult, "failed");
+            mozContext.dumpTS("test_TestPromptWithBadResponse end");
+        }
+
+        function test_TestPromptWithoutResponse()
+        {
+            mozContext.dumpTS("test_TestPromptWithoutResponse start")
+            verify(MyScript.waitMozContext())
+            verify(MyScript.waitMozView())
+            appWindow.testCaseNum = 2
+            appWindow.promptReceived = null
+            appWindow.testResult = null
+            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/promptbasic/prompt.html";
+            verify(MyScript.waitLoadFinished(webViewport))
+            compare(webViewport.child.loadProgress, 100);
+            while (!webViewport.child.painted) {
+                wait();
+            }
+            while (!appWindow.promptReceived) {
+                wait();
+            }
+            webViewport.child.sendAsyncMessage("embedtest:getelementinner", {
+                                                name: "result" })
+            while (!appWindow.testResult) {
+                wait();
+            }
+            compare(appWindow.testResult, "unknown");
+            mozContext.dumpTS("test_TestPromptWithoutResponse end");
         }
     }
 }
