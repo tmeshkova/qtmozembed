@@ -1,13 +1,6 @@
 var component;
 var sprite;
 
-function loadEmbedComponents()
-{
-    mozContext.instance.addComponentManifest(mozContext.getenv("EMBED_COMPONENTS_PATH") + "/components/EmbedLiteBinComponents.manifest")
-    mozContext.instance.addComponentManifest(mozContext.getenv("EMBED_COMPONENTS_PATH") + "/chrome/EmbedLiteJSScripts.manifest")
-    mozContext.instance.addComponentManifest(mozContext.getenv("EMBED_COMPONENTS_PATH") + "/chrome/EmbedLiteOverrides.manifest")
-}
-
 function createSpriteObjects() {
     component = Qt.createComponent(mozContext.getenv("QTTESTPATH") + "/auto/ViewComponent.qml");
     if (component.status == Component.Ready) {

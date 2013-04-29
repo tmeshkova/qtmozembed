@@ -34,7 +34,6 @@ ApplicationWindow {
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
             mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
-            MyScript.loadEmbedComponents();
         }
     }
 

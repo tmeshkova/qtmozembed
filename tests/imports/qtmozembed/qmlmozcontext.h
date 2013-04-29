@@ -10,7 +10,6 @@
 class QmlMozContext : public QDeclarativeItem
 {
     Q_OBJECT
-
     Q_PROPERTY(QObject* instance READ instance CONSTANT)
 
 public:

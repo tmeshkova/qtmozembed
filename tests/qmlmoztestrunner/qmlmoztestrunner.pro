@@ -10,6 +10,12 @@ LIBS+= -L../../ -lqtembedwidget
 LIBS+= -L../../$$OBJ_BUILD_PATH -lqtembedwidget
 }
 
+isEmpty(DEFAULT_COMPONENT_PATH) {
+  DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"/usr/lib/mozembedlite/\\\"\"
+} else {
+  DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"$$DEFAULT_COMPONENT_PATH\\\"\"
+}
+
 LIBS += -lQtQuickTest
 PKGCONFIG += QJson
 contains(QT_CONFIG, opengl)|contains(QT_CONFIG, opengles1)|contains(QT_CONFIG, opengles2) {
