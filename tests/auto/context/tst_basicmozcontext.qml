@@ -55,8 +55,6 @@ ApplicationWindow {
             mozContext.dumpTS("test_context2AcceleratedAPI start")
             mozContext.instance.setIsAccelerated(true);
             verify(mozContext.instance.isAccelerated() === true)
-            mozContext.instance.setIsAccelerated(false);
-            verify(mozContext.instance.isAccelerated() === false)
             mozContext.dumpTS("test_context2AcceleratedAPI end")
         }
         function test_context3PrefAPI()
