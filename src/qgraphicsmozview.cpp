@@ -499,3 +499,64 @@ QGraphicsMozView::newWindow(const QString& url)
 {
     LOGT("New Window: %s", url.toUtf8().data());
 }
+
+void
+QGraphicsMozView::synthTouchBegin(const QVariant& touches)
+{
+    QList<QVariant> list = touches.toList();
+    d->mTouchTime.restart();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, d->mTouchTime.elapsed());
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        nsIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           nsIntPoint(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    d->mView->ReceiveInputEvent(meventStart);
+}
+
+void
+QGraphicsMozView::synthTouchMove(const QVariant& touches)
+{
+    QList<QVariant> list = touches.toList();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_MOVE, d->mTouchTime.elapsed());
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        nsIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           nsIntPoint(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    d->mView->ReceiveInputEvent(meventStart);
+}
+
+void
+QGraphicsMozView::synthTouchEnd(const QVariant& touches)
+{
+    QList<QVariant> list = touches.toList();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_END, d->mTouchTime.elapsed());
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        nsIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           nsIntPoint(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    d->mView->ReceiveInputEvent(meventStart);
+}

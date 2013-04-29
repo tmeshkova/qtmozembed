@@ -44,6 +44,7 @@ TestHelper.prototype = {
     // addEventListener("touchend", this, false);
     // Services.obs.addObserver(this, "before-first-paint", true);
     addMessageListener("embedtest:getelementprop", this);
+    addMessageListener("embedtest:getelementinner", this);
   },
 
   observe: function(aSubject, aTopic, data) {
@@ -56,6 +57,11 @@ TestHelper.prototype = {
       case "embedtest:getelementprop": {
         let element = content.document.getElementById(aMessage.json.name);
         sendAsyncMessage("testembed:elementpropvalue", {value: element.value});
+        break;
+      }
+      case "embedtest:getelementinner": {
+        let element = content.document.getElementById(aMessage.json.name);
+        sendAsyncMessage("testembed:elementinnervalue", {value: element.innerHTML});
         break;
       }
       default: {
