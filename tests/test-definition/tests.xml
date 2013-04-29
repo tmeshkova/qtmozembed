@@ -22,6 +22,9 @@
            <case manual="false" timeout="200" name="unittests-multitouch">
                <step>cd /opt/tests/qtmozembed/auto/multitouch &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
            </case>
+           <case manual="false" timeout="200" name="unittests-favicons">
+               <step>cd /opt/tests/qtmozembed/auto/favicons &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+           </case>
        </set>
    </suite>
 </testdefinition>
