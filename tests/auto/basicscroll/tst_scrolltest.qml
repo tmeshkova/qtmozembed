@@ -74,18 +74,16 @@ ApplicationWindow {
             while (!webViewport.child.painted) {
                 wait();
             }
-            wait(500)
-            MyScript.scrollBy(1, 401, 0, -400, 100, false);
-            MyScript.scrollBy(1, 401, 0, -400, 100, false);
             while (appWindow.scrollY === 0) {
-                wait();
+                MyScript.scrollBy(100, 301, 0, -200, 100, false);
+                wait(100);
             }
             verify(appWindow.scrollX === 0)
             while (appWindow.clickX === 0) {
                 wait();
             }
-            verify(appWindow.clickX === 1)
-            verify(appWindow.clickY === 1)
+            verify(appWindow.clickX === 100)
+            verify(appWindow.clickY === 101)
             appWindow.clickX = 0
             mouseClick(webViewport, 10, 20)
             while (appWindow.clickX === 0) {
