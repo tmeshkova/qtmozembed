@@ -82,6 +82,7 @@ ApplicationWindow {
             mozContext.dumpTS("TestCheckDefaultSearch start")
             verify(MyScript.waitMozContext())
             verify(MyScript.waitMozView())
+            mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri:"chrome://embedlite/content/google.xml", confirm: false})
             while (appWindow.testResult !== "loaded") {
                 wait();
             }
