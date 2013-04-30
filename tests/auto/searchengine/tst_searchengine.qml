@@ -23,9 +23,6 @@ ApplicationWindow {
             // Gecko does not switch to SW mode if gl context failed to init
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
-            mozContext.instance.addObserver("browser-search-engine-modified");
-            mozContext.instance.addObserver("embed:search");
-            mozContext.instance.setPref("keyword.enabled", true);
             mozContext.instance.setIsAccelerated(true);
             mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
         }
@@ -81,6 +78,9 @@ ApplicationWindow {
         {
             mozContext.dumpTS("TestCheckDefaultSearch start")
             verify(MyScript.waitMozContext())
+            mozContext.instance.addObserver("browser-search-engine-modified");
+            mozContext.instance.addObserver("embed:search");
+            mozContext.instance.setPref("keyword.enabled", true);
             verify(MyScript.waitMozView())
             mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri:"chrome://embedlite/content/google.xml", confirm: false})
             while (appWindow.testResult !== "loaded") {
