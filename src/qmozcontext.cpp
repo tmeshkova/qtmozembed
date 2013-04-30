@@ -98,27 +98,31 @@ public:
         LOGT("");
     }
     virtual void OnObserve(const char* aTopic, const PRUnichar* aData) {
-        LOGT("aTopic: %s, data: %s", aTopic, NS_ConvertUTF16toUTF8(aData).get());
-        NS_ConvertUTF16toUTF8 data(aData);
-        bool ok = false;
+        // LOGT("aTopic: %s, data: %s", aTopic, NS_ConvertUTF16toUTF8(aData).get());
+        QString data((QChar*)aData);
+        if (!data.startsWith('{') && !data.startsWith('[') && !data.startsWith('"')) {
+            QVariant vdata = QVariant::fromValue(data);
+            Q_EMIT q->recvObserve(aTopic, vdata);
+            return;
+        }
+        bool ok = true;
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
         QJson::Parser parser;
-        QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
+        QVariant vdata = parser.parse(data.toUtf8(), &ok);
 #else
         QJsonParseError error;
-        QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
+        QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &error);
         ok = error.error == QJsonParseError::NoError;
         QVariant vdata = doc.toVariant();
 #endif
-
         if (ok) {
-            LOGT("mesg:%s, data:%s", aTopic, data.get());
+            // LOGT("mesg:%s, data:%s", aTopic, data.toUtf8().data());
             Q_EMIT q->recvObserve(aTopic, vdata);
         } else {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-            LOGT("parse: err:%s, errLine:%i", parser.errorString().toUtf8().data(), parser.errorLine());
+            LOGT("parse: s:'%s', err:%s, errLine:%i", data.toUtf8().data(), parser.errorString().toUtf8().data(), parser.errorLine());
 #else
-            LOGT("parse: err:%s, errLine:%i", error.errorString().toUtf8().data(), error.offset);
+            LOGT("parse: s:'%s', err:%s, errLine:%i", data.toUtf8().data(), error.errorString().toUtf8().data(), error.offset);
 #endif
         }
     }
