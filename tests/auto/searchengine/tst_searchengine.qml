@@ -31,9 +31,6 @@ ApplicationWindow {
                 switch (data.msg) {
                     case "init": {
                         print("Received: search:" + message, ", msg: ", data.msg, data.defaultEngine);
-                        if (!data.defaultEngine) {
-                            mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri:"chrome://embedlite/content/google.xml", confirm: false})
-                        }
                     }
                     case "pluginslist": {
                         print("Received: search:" + message, ", msg: ", data.msg, data.list[0].name, data.list[0].isDefault, data.list[0].isCurrent);
@@ -78,16 +75,17 @@ ApplicationWindow {
         {
             mozContext.dumpTS("TestCheckDefaultSearch start")
             verify(MyScript.waitMozContext())
+            mozContext.instance.setPref("browser.search.log", true);
             mozContext.instance.addObserver("browser-search-engine-modified");
             mozContext.instance.addObserver("embed:search");
             mozContext.instance.setPref("keyword.enabled", true);
             verify(MyScript.waitMozView())
-            mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri:"chrome://embedlite/content/google.xml", confirm: false})
+            mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTPATH") + "/auto/searchengine/test.xml", confirm: false})
             while (appWindow.testResult !== "loaded") {
                 wait();
             }
             mozContext.instance.sendObserve("embedui:search", {msg:"getlist"})
-            while (appWindow.testResult !== "Google") {
+            while (appWindow.testResult !== "QMOZTest") {
                 wait();
             }
             webViewport.child.load("linux home");
@@ -96,7 +94,7 @@ ApplicationWindow {
             while (!webViewport.child.painted) {
                 wait();
             }
-            compare(webViewport.child.url.toString().substr(0, 32), "https://www.google.com/search?q=")
+            compare(webViewport.child.url.toString().substr(0, 34), "https://webhook/?search=linux+home")
             mozContext.dumpTS("TestCheckDefaultSearch end");
         }
     }
