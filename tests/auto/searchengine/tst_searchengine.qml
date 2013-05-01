@@ -25,6 +25,10 @@ ApplicationWindow {
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
             mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.setPref("browser.search.log", true);
+            mozContext.instance.addObserver("browser-search-engine-modified");
+            mozContext.instance.addObserver("embed:search");
+            mozContext.instance.setPref("keyword.enabled", true);
         }
         onRecvObserve: {
             if (message == "embed:search") {
