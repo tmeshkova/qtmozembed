@@ -1,6 +1,8 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS = src
-isEmpty(NO_TESTS) {
-  SUBDIRS += tests
+contains(QT_MAJOR_VERSION, 4) {
+  isEmpty(NO_TESTS) {
+    SUBDIRS += tests
+  }
 }

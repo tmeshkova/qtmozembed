@@ -5,14 +5,12 @@ TEMPLATE = lib
 
 SOURCES += qmozcontext.cpp \
            EmbedQtKeyUtils.cpp \
-           qdeclarativemozview.cpp \
            qgraphicsmozview.cpp \
            qgraphicsmozview_p.cpp \
            geckoworker.cpp
 
 HEADERS += qmozcontext.h \
            EmbedQtKeyUtils.h \
-           qdeclarativemozview.h \
            qgraphicsmozview.h \
            qgraphicsmozview_p.h \
            geckoworker.h
@@ -20,6 +18,9 @@ HEADERS += qmozcontext.h \
 !contains(QT_MAJOR_VERSION, 4) {
 SOURCES += quickmozview.cpp
 HEADERS += quickmozview.h
+} else {
+SOURCES += qdeclarativemozview.cpp
+HEADERS += qdeclarativemozview.h
 }
 
 CONFIG(opengl) {

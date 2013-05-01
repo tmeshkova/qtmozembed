@@ -216,8 +216,8 @@ char* QGraphicsMozViewPrivate::RecvSyncMessage(const PRUnichar* aMessage, const 
     QJson::Serializer serializer;
     QByteArray array = serializer.serialize(response.getMessage());
 #else
-    QJsonDocument doc = QJsonDocument::fromVariant(response.getMessage());
-    QByteArray array = doc.toJson();
+    QJsonDocument respdoc = QJsonDocument::fromVariant(response.getMessage());
+    QByteArray array = respdoc.toJson();
 #endif
     LOGT("msg:%s, response:%s", message.get(), array.constData());
     return strdup(array.constData());

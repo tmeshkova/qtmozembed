@@ -1,7 +1,6 @@
 #include <QDeclarativeExtensionPlugin>
 #include <qdeclarative.h>
 
-#include <QtDebug>
 #include <QStringList>
 #include <QVector>
 
