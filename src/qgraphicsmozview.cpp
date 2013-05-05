@@ -104,11 +104,6 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
             LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
             d->mContext->setIsAccelerated(false);
         }
-        QGraphicsView* view = d->GetViewWidget();
-        if (view) {
-            connect(view, SIGNAL(displayEntered()), this, SLOT(suspendView()));
-            connect(view, SIGNAL(displayExited()), this, SLOT(resumeView()));
-        }
     }
 
     QRect r = opt ? opt->exposedRect.toRect() : boundingRect().toRect();
