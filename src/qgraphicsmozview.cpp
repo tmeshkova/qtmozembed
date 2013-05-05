@@ -106,8 +106,8 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
         }
         QGraphicsView* view = d->GetViewWidget();
         if (view) {
-            connect(view, SIGNAL(displayEntered()), this, SLOT(onDisplayEntered()));
-            connect(view, SIGNAL(displayExited()), this, SLOT(onDisplayExited()));
+            connect(view, SIGNAL(displayEntered()), this, SLOT(suspendView()));
+            connect(view, SIGNAL(displayExited()), this, SLOT(resumeView()));
         }
     }
 
@@ -266,6 +266,11 @@ bool QGraphicsMozView::loading() const
     return d->mIsLoading;
 }
 
+QColor QGraphicsMozView::bgcolor() const
+{
+    return d->mBgColor;
+}
+
 void QGraphicsMozView::loadHtml(const QString& html, const QUrl& baseUrl)
 {
     LOGT();
@@ -328,7 +333,7 @@ bool QGraphicsMozView::event(QEvent* event)
     return QGraphicsWidget::event(event);
 }
 
-void QGraphicsMozView::onDisplayEntered()
+void QGraphicsMozView::suspendView()
 {
     if (!d->mView) {
         return;
@@ -337,7 +342,7 @@ void QGraphicsMozView::onDisplayEntered()
     d->mView->ResumeTimeouts();
 }
 
-void QGraphicsMozView::onDisplayExited()
+void QGraphicsMozView::resumeView()
 {
     if (!d->mView) {
         return;

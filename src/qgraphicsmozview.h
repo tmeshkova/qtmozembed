@@ -10,6 +10,7 @@
 #include <QGraphicsView>
 #include <QGraphicsWidget>
 #include <QUrl>
+#include <QColor>
 
 class QMozContext;
 class QSyncMessage;
@@ -48,6 +49,7 @@ class QGraphicsMozView : public QGraphicsWidget
     Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset)
     Q_PROPERTY(float resolution READ resolution)
     Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL)
+    Q_PROPERTY(QColor bgcolor READ bgcolor NOTIFY bgColorChanged FINAL)
 
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
@@ -66,6 +68,7 @@ public:
     QPointF scrollableOffset() const;
     float resolution() const;
     bool isPainted() const;
+    QColor bgcolor() const;
 
 public Q_SLOTS:
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl());
@@ -84,6 +87,8 @@ public Q_SLOTS:
     void synthTouchMove(const QVariant& touches);
     void synthTouchEnd(const QVariant& touches);
     void scrollTo(const QPointF& position);
+    void suspendView();
+    void resumeView();
 
 Q_SIGNALS:
     void viewInitialized();
@@ -104,6 +109,7 @@ Q_SIGNALS:
     void handleSingleTap(QPoint point);
     void handleDoubleTap(QPoint point);
     void imeNotification(int state, bool open, int cause, int focusChange, const QString& type);
+    void bgColorChanged();
 
 protected:
     virtual void setGeometry(const QRectF& rect);
@@ -122,8 +128,6 @@ protected:
 
 private Q_SLOTS:
     void onInitialized();
-    void onDisplayEntered();
-    void onDisplayExited();
 
 private:
     void forceActiveFocus();
