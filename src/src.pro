@@ -2,6 +2,7 @@ CONFIG += qt thread debug ordered create_pc create_prl no_install_prl
 
 TARGET = qtembedwidget
 TEMPLATE = lib
+VERSION = 1.0.1
 
 SOURCES += qmozcontext.cpp \
            EmbedQtKeyUtils.cpp \
