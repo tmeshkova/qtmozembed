@@ -26,6 +26,14 @@ ApplicationWindow {
             mozContext.instance.setIsAccelerated(true);
             mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
         }
+        onRecvObserve: {
+            if (message == "embed:download") {
+                // print("onRecvObserve: msg:" + message + ", dmsg:" + data.msg);
+                if (data.msg == "dl-done") {
+                    appWindow.promptReceived = true;
+                }
+            }
+        }
     }
 
     QmlMozView {
@@ -36,18 +44,17 @@ ApplicationWindow {
         Connections {
             target: webViewport.child
             onViewInitialized: {
-                webViewport.child.loadFrameScript("chrome://tests/content/testHelper.js");
+                webViewport.child.addMessageListener("embed:filepicker");
                 appWindow.mozViewInitialized = true
-                webViewport.child.addMessageListener("embed:login");
             }
             onRecvAsyncMessage: {
                 // print("onRecvAsyncMessage:" + message + ", data:" + data)
-                if (message == "embed:login") {
-                    webViewport.child.sendAsyncMessage("embedui:login", {
-                                                        buttonidx: 1,
-                                                        id: data.id
-                                                       })
-                    appWindow.promptReceived = true;
+                if (message == "embed:filepicker") {
+                    webViewport.child.sendAsyncMessage("filepickerresponse", {
+                                                     winid: data.winid,
+                                                     accepted: true,
+                                                     items: ["/tmp/tt.bin"]
+                                                 })
                 }
             }
         }
@@ -59,25 +66,34 @@ ApplicationWindow {
         when: windowShown
 
         function cleanup() {
-            mozContext.dumpTS("tst_passwordmgr cleanup")
+            mozContext.dumpTS("tst_downloadmgr cleanup")
         }
 
-        function test_TestLoginMgrPage()
+        function test_TestDownloadMgrPage()
         {
             mozContext.dumpTS("test_TestLoginMgrPage start")
             verify(MyScript.waitMozContext())
+            mozContext.instance.setPref("browser.download.folderList", 2); // 0 - Desktop, 1 - Downloads, 2 - Custom
+            mozContext.instance.setPref("browser.download.useDownloadDir", false); // Invoke filepicker instead of immediate download to ~/Downloads
+            mozContext.instance.setPref("browser.download.manager.retention", 2);
+            mozContext.instance.setPref("browser.helperApps.deleteTempFileOnExit", false);
+            mozContext.instance.setPref("browser.download.manager.quitBehavior", 1);
+            mozContext.instance.addObserver("embed:download");
             verify(MyScript.waitMozView())
             appWindow.promptReceived = null
-            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/passwordmgr/subtst_notifications_1.html";
+            webViewport.child.url = "about:mozilla";
             verify(MyScript.waitLoadFinished(webViewport))
             compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
                 wait();
             }
+            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/downloadmgr/tt.bin";
+            verify(MyScript.waitLoadFinished(webViewport))
+            compare(webViewport.child.loadProgress, 100);
             while (!appWindow.promptReceived) {
                 wait();
             }
-            mozContext.dumpTS("test_TestLoginMgrPage end");
+            mozContext.dumpTS("test_TestDownloadMgrPage end");
         }
     }
 }
