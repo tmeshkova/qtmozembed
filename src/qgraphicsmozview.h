@@ -110,6 +110,7 @@ Q_SIGNALS:
     void handleDoubleTap(QPoint point);
     void imeNotification(int state, bool open, int cause, int focusChange, const QString& type);
     void bgColorChanged();
+    void requestGLContext(bool& hasContext, QSize& viewPortSize);
 
 protected:
     virtual void setGeometry(const QRectF& rect);

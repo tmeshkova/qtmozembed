@@ -313,7 +313,7 @@ bool QGraphicsMozView::event(QEvent* event)
         return true;
     }
     case QEvent::Show: {
-        LOGT("Event Show: curCtx:%p", QGLContext::currentContext());
+        LOGT("Event Show: curCtx:%p", (void*)QGLContext::currentContext());
         break;
     }
     case QEvent::Hide: {

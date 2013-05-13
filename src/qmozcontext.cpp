@@ -53,7 +53,7 @@ public:
 
     virtual bool ExecuteChildThread() {
         if (!getenv("GECKO_THREAD")) {
-            LOGT("Execute in child Native thread: %p", mThread);
+            LOGT("Execute in child Native thread: %p", (void*)mThread);
             GeckoWorker *worker = new GeckoWorker(mApp);
 
             QObject::connect(mThread, SIGNAL(started()), worker, SLOT(doWork()));
@@ -68,7 +68,7 @@ public:
     // Native thread must be stopped here
     virtual bool StopChildThread() {
         if (mThread) {
-            LOGT("Stop Native thread: %p", mThread);
+            LOGT("Stop Native thread: %p", (void*)mThread);
             mThread->exit(0);
             mThread->wait();
             return true;
@@ -150,7 +150,7 @@ public:
 
     virtual uint32_t CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView)
     {
-        LOGT("QtMozEmbedContext new Window requested: parent:%p", aParentView);
+        LOGT("QtMozEmbedContext new Window requested: parent:%p", (void*)aParentView);
         uint32_t retval = QMozContext::GetInstance()->newWindow(QString(), aParentView ? aParentView->GetUniqueID() : 0);
         return retval;
     }
@@ -272,7 +272,7 @@ void QMozContext::stopEmbedding()
 quint32
 QMozContext::newWindow(const QString& url, const quint32& parentId)
 {
-    quint32 retval = Q_EMIT(this, newWindowRequested(url, parentId));
+    quint32 retval = Q_EMIT newWindowRequested(url, parentId);
     return retval;
 }
 

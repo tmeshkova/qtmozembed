@@ -7,6 +7,8 @@
 #define LOG_COMPONENT "QDeclarativeMozView"
 
 #include <QSharedPointer>
+#include <QGLContext>
+#include <QtDeclarative/QDeclarativeView>
 
 #include "mozilla-config.h"
 #include "qdeclarativemozview.h"
@@ -67,11 +69,45 @@ QDeclarativeMozView::init()
     setClip(true);
 
     d->view = QSharedPointer<GraphicsMozView>(new GraphicsMozView(this));
+    connect(d->view.data(), SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
     d->view->setFocus();
     if (!preferredWidth())
         setPreferredWidth(d->view->preferredWidth());
     if (!preferredHeight())
         setPreferredHeight(d->view->preferredHeight());
+}
+
+static bool viewHasGLContext(QGraphicsView* view)
+{
+    QGLWidget* qglwidget = qobject_cast<QGLWidget*>(view->viewport());
+    if (qglwidget) {
+        qglwidget->makeCurrent();
+        QGLContext* context = const_cast<QGLContext*>(QGLContext::currentContext());
+        if (context) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void
+QDeclarativeMozView::onRequestGLContext(bool& hasContext, QSize& viewPortSize)
+{
+    hasContext = false;
+    QList<QGraphicsView *> views = scene()->views();
+    for (int i = 0; i < views.length(); ++i) {
+        QDeclarativeView *view = qobject_cast<QDeclarativeView *>(views[i]);
+        if (view && viewHasGLContext(view)) {
+            const QGLContext* ctx = QGLContext::currentContext();
+            if (ctx && ctx->device()) {
+                QRectF r(0, 0, ctx->device()->width(), ctx->device()->height());
+                r = mapRectToScene(r);
+                viewPortSize = r.size().toSize();
+            }
+            hasContext = true;
+            break;
+        }
+    }
 }
 
 /*!

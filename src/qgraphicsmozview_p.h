@@ -26,10 +26,10 @@ public:
     QGraphicsMozViewPrivate(QGraphicsMozView* view);
     virtual ~QGraphicsMozViewPrivate();
 
-    QGraphicsView* GetViewWidget();
     void ReceiveInputEvent(const mozilla::InputData& event);
     void touchEvent(QTouchEvent* event);
     void UpdateViewSize();
+    bool RequestCurrentGLContext(QSize&);
     virtual bool RequestCurrentGLContext();
     virtual void ViewInitialized();
     virtual void SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a);

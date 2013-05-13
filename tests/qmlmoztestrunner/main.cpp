@@ -75,7 +75,7 @@ public:
 public Q_SLOTS:
     void DropInStartup()
     {
-        int ret = RunMainTest();
+        RunMainTest();
         QMozContext::GetInstance()->stopEmbedding();
     }
 private:

@@ -7,7 +7,6 @@
 #define LOG_COMPONENT "QGraphicsMozViewPrivate"
 
 #include <QTouchEvent>
-#include <QGLContext>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QInputContext>
 #include <qjson/serializer.h>
@@ -53,49 +52,30 @@ QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
 {
 }
 
-QGraphicsView* QGraphicsMozViewPrivate::GetViewWidget()
-{
-    if (!q->scene()) {
-        return nullptr;
-    }
-
-    NS_ASSERTION(q->scene()->views().size() == 1, "Not exactly one view for our scene!");
-    return q->scene()->views()[0];
-}
-
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
     if (!mViewInitialized) {
         return;
     }
 
-    if (mContext->GetApp()->IsAccelerated() && RequestCurrentGLContext()) {
-        const QGLContext* ctx = QGLContext::currentContext();
-        if (ctx && ctx->device()) {
-            QRectF r(0, 0, ctx->device()->width(), ctx->device()->height());
-            r = q->mapRectToScene(r);
-            mView->SetGLViewPortSize(r.width(), r.height());
-        }
+    QSize viewPortSize;
+    if (mContext->GetApp()->IsAccelerated() && RequestCurrentGLContext(viewPortSize)) {
+        mView->SetGLViewPortSize(viewPortSize.width(), viewPortSize.height());
     }
     mView->SetViewSize(mSize.width(), mSize.height());
 }
 
 bool QGraphicsMozViewPrivate::RequestCurrentGLContext()
 {
-    QGraphicsView* view = GetViewWidget();
-    if (!view) {
-        return false;
-    }
+    QSize unused;
+    return RequestCurrentGLContext(unused);
+}
 
-    QGLWidget* qglwidget = qobject_cast<QGLWidget*>(view->viewport());
-    if (qglwidget) {
-        qglwidget->makeCurrent();
-        QGLContext* context = const_cast<QGLContext*>(QGLContext::currentContext());
-        if (context) {
-            return true;
-        }
-    }
-    return false;
+bool QGraphicsMozViewPrivate::RequestCurrentGLContext(QSize& aViewPortSize)
+{
+    bool hasContext = false;
+    Q_EMIT q->requestGLContext(hasContext, aViewPortSize);
+    return hasContext;
 }
 
 void QGraphicsMozViewPrivate::ViewInitialized()

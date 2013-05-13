@@ -36,6 +36,7 @@ private:
 
 public Q_SLOTS:
     quint32 uniqueID() const;
+    void onRequestGLContext(bool& hasContext, QSize& viewPortSize);
 
 Q_SIGNALS:
     void preferredWidthChanged();
