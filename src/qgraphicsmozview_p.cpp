@@ -69,7 +69,7 @@ void QGraphicsMozViewPrivate::UpdateViewSize()
         return;
     }
 
-    if (mContext->GetApp()->IsAccelerated()) {
+    if (mContext->GetApp()->IsAccelerated() && RequestCurrentGLContext()) {
         const QGLContext* ctx = QGLContext::currentContext();
         if (ctx && ctx->device()) {
             QRectF r(0, 0, ctx->device()->width(), ctx->device()->height());
