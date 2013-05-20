@@ -84,6 +84,7 @@ ApplicationWindow {
             mozContext.instance.addObserver("embed:search");
             mozContext.instance.setPref("keyword.enabled", true);
             verify(MyScript.waitMozView())
+            mozContext.instance.sendObserve("embedui:search", {msg:"remove", name: "QMOZTest"})
             mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTPATH") + "/auto/searchengine/test.xml", confirm: false})
             while (appWindow.testResult !== "loaded") {
                 wait();
