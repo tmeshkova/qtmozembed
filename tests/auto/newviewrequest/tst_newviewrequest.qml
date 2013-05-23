@@ -36,7 +36,7 @@ ApplicationWindow {
             while (appWindow.mozView === null) {
                 testcaseid.wait()
             }
-            verify(mozView.uniqueID() > 0)
+            testcaseid.verify(mozView.uniqueID() > 0)
             newWinResponse.windowID = mozView.uniqueID();
         }
     }
@@ -93,6 +93,10 @@ ApplicationWindow {
                 wait()
             }
             verify(mozView.child !== undefined)
+            verify(MyScript.waitLoadFinished(mozView))
+            while (!mozView.child.painted) {
+                wait();
+            }
             compare(mozView.child.url, "about:mozilla")
             mozContext.dumpTS("test_viewTestNewWindowAPI end")
         }
