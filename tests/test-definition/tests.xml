@@ -37,6 +37,9 @@
            <case manual="false" timeout="200" name="unittests-downloadmgr">
                <step>cd /opt/tests/qtmozembed/auto/downloadmgr &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
            </case>
+           <case manual="false" timeout="200" name="unittests-newviewrequest">
+               <step>cd /opt/tests/qtmozembed/auto/newviewrequest &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+           </case>
        </set>
    </suite>
 </testdefinition>

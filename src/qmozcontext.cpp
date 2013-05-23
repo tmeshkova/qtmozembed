@@ -18,6 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 #endif
+#include <QtDeclarative/qdeclarative.h>
 
 #include "qmozcontext.h"
 #include "geckoworker.h"
@@ -40,6 +41,7 @@ public:
     , mThread(new QThread())
     , mEmbedStarted(false)
     {
+        qmlRegisterType<QNewWindowResponse>("QtMozilla", 1, 0, "QNewWindowResponse");
     }
 
     virtual ~QMozContextPrivate() {
@@ -272,8 +274,9 @@ void QMozContext::stopEmbedding()
 quint32
 QMozContext::newWindow(const QString& url, const quint32& parentId)
 {
-    quint32 retval = Q_EMIT newWindowRequested(url, parentId);
-    return retval;
+    QNewWindowResponse response;
+    Q_EMIT newWindowRequested(url, parentId, &response);
+    return response.getNewWindowID();
 }
 
 void

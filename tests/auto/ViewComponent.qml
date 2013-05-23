@@ -3,6 +3,7 @@ import QtMozilla 1.0
 
 QmlMozView {
     id: webViewport
+    parentid: appWindow.createParentID
     visible: true
     focus: true
     anchors.fill: parent

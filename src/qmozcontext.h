@@ -17,6 +17,24 @@ namespace embedlite {
 class EmbedLiteApp;
 }}
 
+class QNewWindowResponse : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(quint32 windowID READ getNewWindowID WRITE setNewWindowID FINAL)
+
+public:
+    QNewWindowResponse(QObject* parent = 0) : QObject(parent) {}
+    QNewWindowResponse(const QNewWindowResponse& aMsg) : QObject(NULL) { mNewWindowID = aMsg.mNewWindowID; }
+    virtual ~QNewWindowResponse() {}
+
+    quint32 getNewWindowID() const { return mNewWindowID; }
+    void setNewWindowID(const quint32& newWindowID) { mNewWindowID = newWindowID; }
+
+private:
+    quint32 mNewWindowID;
+};
+
+Q_DECLARE_METATYPE(QNewWindowResponse)
+
 class QMozContext : public QObject
 {
     Q_OBJECT
@@ -29,7 +47,7 @@ public:
 
 Q_SIGNALS:
     void onInitialized();
-    unsigned newWindowRequested(const QString& url, const unsigned& parentId);
+    void newWindowRequested(const QString& url, const unsigned& parentId, QNewWindowResponse* newWinResponse);
     void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
