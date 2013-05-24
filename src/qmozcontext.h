@@ -65,6 +65,7 @@ public Q_SLOTS:
     void stopEmbedding();
     void setPref(const QString& aName, const QVariant& aPref);
     void notifyFirstUIInitialized();
+    void setProfile(const QString);
 
 private:
     QMozContext(QObject* parent = 0);

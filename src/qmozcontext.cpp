@@ -180,6 +180,11 @@ QMozContext::QMozContext(QObject* parent)
     d->mApp->SetListener(d);
 }
 
+void QMozContext::setProfile(const QString profilePath)
+{
+    d->mApp->SetProfilePath(!profilePath.isEmpty() ? profilePath.toUtf8().data() : NULL);
+}
+
 QMozContext::~QMozContext()
 {
     protectSingleton = nullptr;
