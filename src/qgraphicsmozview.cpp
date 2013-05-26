@@ -346,63 +346,48 @@ void QGraphicsMozView::resumeView()
     d->mView->SuspendTimeouts();
 }
 
-void QGraphicsMozView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+void QGraphicsMozView::recvMouseMove(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        const bool accepted = e->isAccepted();
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(e->pos().x(), e->pos().y()),
+                                     nsIntPoint(posX, posY),
                                      nsIntPoint(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
-        e->setAccepted(accepted);
     }
-
-    if (!e->isAccepted())
-        QGraphicsItem::mouseMoveEvent(e);
 }
 
-void QGraphicsMozView::mousePressEvent(QGraphicsSceneMouseEvent* e)
+void QGraphicsMozView::recvMousePress(int posX, int posY)
 {
     d->mPanningTime.restart();
     forceActiveFocus();
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        const bool accepted = e->isAccepted();
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(e->pos().x(), e->pos().y()),
+                                     nsIntPoint(posX, posY),
                                      nsIntPoint(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
-        e->setAccepted(accepted);
     }
-
-    if (!e->isAccepted())
-        QGraphicsItem::mouseMoveEvent(e);
 }
 
-void QGraphicsMozView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+void QGraphicsMozView::recvMouseRelease(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        const bool accepted = e->isAccepted();
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_END, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(e->pos().x(), e->pos().y()),
+                                     nsIntPoint(posX, posY),
                                      nsIntPoint(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
-        e->setAccepted(accepted);
     }
     if (d->mPendingTouchEvent) {
         d->mPendingTouchEvent = false;
     }
-
-    if (!e->isAccepted())
-        QGraphicsItem::mouseMoveEvent(e);
 }
 
 void QGraphicsMozView::forceActiveFocus()

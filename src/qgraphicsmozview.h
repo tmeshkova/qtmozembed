@@ -89,6 +89,9 @@ public Q_SLOTS:
     void scrollTo(const QPointF& position);
     void suspendView();
     void resumeView();
+    void recvMouseMove(int posX, int posY);
+    void recvMousePress(int posX, int posY);
+    void recvMouseRelease(int posX, int posY);
 
 Q_SIGNALS:
     void viewInitialized();
@@ -119,9 +122,6 @@ protected:
 protected:
     virtual void paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget* widget = 0);
     virtual bool event(QEvent*);
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent*);
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
-    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent*);
     virtual void keyPressEvent(QKeyEvent*);
     virtual void keyReleaseEvent(QKeyEvent*);
     virtual void inputMethodEvent(QInputMethodEvent*);
