@@ -35,6 +35,7 @@ QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     : QGraphicsWidget(parent)
     , d(new QGraphicsMozViewPrivate(this))
     , mParentID(0)
+    , mUseQmlMouse(false)
 {
     setFlag(QGraphicsItem::ItemUsesExtendedStyleOption, true);
     setAcceptDrops(true);
@@ -346,6 +347,16 @@ void QGraphicsMozView::resumeView()
     d->mView->SuspendTimeouts();
 }
 
+bool QGraphicsMozView::getUseQmlMouse()
+{
+    return mUseQmlMouse;
+}
+
+void QGraphicsMozView::setUseQmlMouse(bool value)
+{
+    mUseQmlMouse = value;
+}
+
 void QGraphicsMozView::recvMouseMove(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
@@ -402,6 +413,42 @@ void QGraphicsMozView::forceActiveFocus()
     setFocus(Qt::OtherFocusReason);
     if (d->mViewInitialized) {
         d->mView->SetIsActive(true);
+    }
+}
+
+void QGraphicsMozView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMouseMove(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QGraphicsWidget::mouseMoveEvent(e);
+    }
+}
+
+void QGraphicsMozView::mousePressEvent(QGraphicsSceneMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMousePress(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QGraphicsWidget::mousePressEvent(e);
+    }
+}
+
+void QGraphicsMozView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMouseRelease(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QGraphicsWidget::mouseReleaseEvent(e);
     }
 }
 

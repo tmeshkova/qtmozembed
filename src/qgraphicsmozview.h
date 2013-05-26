@@ -50,6 +50,7 @@ class QGraphicsMozView : public QGraphicsWidget
     Q_PROPERTY(float resolution READ resolution)
     Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL)
     Q_PROPERTY(QColor bgcolor READ bgcolor NOTIFY bgColorChanged FINAL)
+    Q_PROPERTY(bool useQmlMouse READ getUseQmlMouse WRITE setUseQmlMouse)
 
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
@@ -69,6 +70,8 @@ public:
     float resolution() const;
     bool isPainted() const;
     QColor bgcolor() const;
+    bool getUseQmlMouse();
+    void setUseQmlMouse(bool value);
 
 public Q_SLOTS:
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl());
@@ -114,6 +117,7 @@ Q_SIGNALS:
     void imeNotification(int state, bool open, int cause, int focusChange, const QString& type);
     void bgColorChanged();
     void requestGLContext(bool& hasContext, QSize& viewPortSize);
+    void useQmlMouse(bool value);
 
 protected:
     virtual void setGeometry(const QRectF& rect);
@@ -122,6 +126,9 @@ protected:
 protected:
     virtual void paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget* widget = 0);
     virtual bool event(QEvent*);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent*);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent*);
     virtual void keyPressEvent(QKeyEvent*);
     virtual void keyReleaseEvent(QKeyEvent*);
     virtual void inputMethodEvent(QInputMethodEvent*);
@@ -136,6 +143,8 @@ private:
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
+
+    bool mUseQmlMouse;
 };
 
 #endif /* qgraphicsmozview_h */
