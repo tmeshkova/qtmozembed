@@ -35,6 +35,7 @@ QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     : QGraphicsWidget(parent)
     , d(new QGraphicsMozViewPrivate(this))
     , mParentID(0)
+    , mUseQmlMouse(false)
 {
     setFlag(QGraphicsItem::ItemUsesExtendedStyleOption, true);
     setAcceptDrops(true);
@@ -346,63 +347,58 @@ void QGraphicsMozView::resumeView()
     d->mView->SuspendTimeouts();
 }
 
-void QGraphicsMozView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+bool QGraphicsMozView::getUseQmlMouse()
+{
+    return mUseQmlMouse;
+}
+
+void QGraphicsMozView::setUseQmlMouse(bool value)
+{
+    mUseQmlMouse = value;
+}
+
+void QGraphicsMozView::recvMouseMove(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        const bool accepted = e->isAccepted();
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(e->pos().x(), e->pos().y()),
+                                     nsIntPoint(posX, posY),
                                      nsIntPoint(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
-        e->setAccepted(accepted);
     }
-
-    if (!e->isAccepted())
-        QGraphicsItem::mouseMoveEvent(e);
 }
 
-void QGraphicsMozView::mousePressEvent(QGraphicsSceneMouseEvent* e)
+void QGraphicsMozView::recvMousePress(int posX, int posY)
 {
     d->mPanningTime.restart();
     forceActiveFocus();
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        const bool accepted = e->isAccepted();
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(e->pos().x(), e->pos().y()),
+                                     nsIntPoint(posX, posY),
                                      nsIntPoint(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
-        e->setAccepted(accepted);
     }
-
-    if (!e->isAccepted())
-        QGraphicsItem::mouseMoveEvent(e);
 }
 
-void QGraphicsMozView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+void QGraphicsMozView::recvMouseRelease(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        const bool accepted = e->isAccepted();
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_END, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(e->pos().x(), e->pos().y()),
+                                     nsIntPoint(posX, posY),
                                      nsIntPoint(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
-        e->setAccepted(accepted);
     }
     if (d->mPendingTouchEvent) {
         d->mPendingTouchEvent = false;
     }
-
-    if (!e->isAccepted())
-        QGraphicsItem::mouseMoveEvent(e);
 }
 
 void QGraphicsMozView::forceActiveFocus()
@@ -417,6 +413,42 @@ void QGraphicsMozView::forceActiveFocus()
     setFocus(Qt::OtherFocusReason);
     if (d->mViewInitialized) {
         d->mView->SetIsActive(true);
+    }
+}
+
+void QGraphicsMozView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMouseMove(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QGraphicsWidget::mouseMoveEvent(e);
+    }
+}
+
+void QGraphicsMozView::mousePressEvent(QGraphicsSceneMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMousePress(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QGraphicsWidget::mousePressEvent(e);
+    }
+}
+
+void QGraphicsMozView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMouseRelease(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QGraphicsWidget::mouseReleaseEvent(e);
     }
 }
 
