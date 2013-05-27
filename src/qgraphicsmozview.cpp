@@ -310,7 +310,10 @@ bool QGraphicsMozView::event(QEvent* event)
     case QEvent::TouchBegin:
     case QEvent::TouchUpdate:
     case QEvent::TouchEnd: {
-        d->touchEvent(static_cast<QTouchEvent*>(event));
+        QTouchEvent* touch = static_cast<QTouchEvent*>(event);
+        if (!mUseQmlMouse || touch->touchPoints().size() > 1) {
+            d->touchEvent(touch);
+        }
         return true;
     }
     case QEvent::Show: {
