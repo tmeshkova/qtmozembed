@@ -239,6 +239,18 @@ QMozContext::addObserver(const QString& aTopic)
     d->mApp->AddObserver(aTopic.toUtf8().data());
 }
 
+void QMozContext::addObservers(const QStringList& aObserversList)
+{
+    if (!d->mApp)
+        return;
+
+    nsTArray<nsCString> observersList;
+    for (int i = 0; i < aObserversList.size(); i++) {
+        observersList.AppendElement(aObserversList.at(i).toUtf8().data());
+    }
+    d->mApp->AddObservers(observersList);
+}
+
 QMozContext*
 QMozContext::GetInstance()
 {

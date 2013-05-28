@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QStringList>
 
 class QMozContextPrivate;
 
@@ -66,6 +67,7 @@ public Q_SLOTS:
     void setPref(const QString& aName, const QVariant& aPref);
     void notifyFirstUIInitialized();
     void setProfile(const QString);
+    void addObservers(const QStringList& aObserversList);
 
 private:
     QMozContext(QObject* parent = 0);

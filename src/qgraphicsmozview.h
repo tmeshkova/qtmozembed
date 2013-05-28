@@ -82,6 +82,7 @@ public Q_SLOTS:
     void load(const QString&);
     void sendAsyncMessage(const QString& name, const QVariant& variant);
     void addMessageListener(const QString& name);
+    void addMessageListeners(const QStringList& messageNamesList);
     void loadFrameScript(const QString& name);
     void newWindow(const QString& url = "about:blank");
     quint32 uniqueID() const;

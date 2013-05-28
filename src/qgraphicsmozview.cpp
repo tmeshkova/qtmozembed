@@ -192,8 +192,23 @@ void QGraphicsMozView::loadFrameScript(const QString& name)
 
 void QGraphicsMozView::addMessageListener(const QString& name)
 {
+    if (!d->mViewInitialized)
+        return;
+
     LOGT("name:%s", name.toUtf8().data());
     d->mView->AddMessageListener(name.toUtf8().data());
+}
+
+void QGraphicsMozView::addMessageListeners(const QStringList& messageNamesList)
+{
+    if (!d->mViewInitialized)
+        return;
+
+    nsTArray<nsString> messages;
+    for (int i = 0; i < messageNamesList.size(); i++) {
+        messages.AppendElement((PRUnichar*)messageNamesList.at(i).data());
+    }
+    d->mView->AddMessageListeners(messages);
 }
 
 void QGraphicsMozView::sendAsyncMessage(const QString& name, const QVariant& variant)
