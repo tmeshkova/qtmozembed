@@ -20,8 +20,8 @@
 #include "qgraphicsmozview.h"
 #include "qmozcontext.h"
 #include "InputData.h"
-#include "mozilla/embedlite/EmbedLog.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
+#include "qmozembedlog.h"
 
 using namespace mozilla;
 using namespace mozilla::embedlite;

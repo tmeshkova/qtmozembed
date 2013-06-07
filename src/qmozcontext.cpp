@@ -5,7 +5,6 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #define LOG_COMPONENT "QMozContext"
-#include "mozilla/embedlite/EmbedLog.h"
 
 #include <QTimer>
 #include <QApplication>
@@ -20,6 +19,7 @@
 #endif
 #include <QtDeclarative/qdeclarative.h>
 
+#include "qmozembedlog.h"
 #include "qmozcontext.h"
 #include "geckoworker.h"
 

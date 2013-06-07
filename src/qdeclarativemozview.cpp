@@ -13,7 +13,7 @@
 #include "mozilla-config.h"
 #include "qdeclarativemozview.h"
 #include "qgraphicsmozview.h"
-#include "mozilla/embedlite/EmbedLog.h"
+#include "qmozembedlog.h"
 
 class QDeclarativeMozViewPrivate {
 public:
