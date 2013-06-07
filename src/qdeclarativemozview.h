@@ -55,7 +55,6 @@ private:
 private:
     QDeclarativeMozViewPrivate* d;
     friend class QDeclarativeMozViewPrivate;
-    friend class MozWindowCreator;
 };
 
 class GraphicsMozView : public QGraphicsMozView {

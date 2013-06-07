@@ -37,6 +37,7 @@ QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     , mParentID(0)
     , mUseQmlMouse(false)
 {
+    setObjectName("QGraphicsMozView");
     setFlag(QGraphicsItem::ItemUsesExtendedStyleOption, true);
     setAcceptDrops(true);
     setAcceptTouchEvents(true);
