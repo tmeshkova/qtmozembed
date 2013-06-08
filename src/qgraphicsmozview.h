@@ -16,14 +16,15 @@ class QMozContext;
 class QSyncMessage;
 class QGraphicsMozViewPrivate;
 
-class QSyncMessageResponse : public QObject {
+class QMozReturnValue : public QObject
+{
     Q_OBJECT
     Q_PROPERTY(QVariant message READ getMessage WRITE setMessage FINAL)
 
 public:
-    QSyncMessageResponse(QObject* parent = 0) : QObject(parent) {}
-    QSyncMessageResponse(const QSyncMessageResponse& aMsg) : QObject(NULL) { mMessage = aMsg.mMessage; }
-    virtual ~QSyncMessageResponse() {}
+    QMozReturnValue(QObject* parent = 0) : QObject(parent) {}
+    QMozReturnValue(const QMozReturnValue& aMsg) : QObject(NULL) { mMessage = aMsg.mMessage; }
+    virtual ~QMozReturnValue() {}
 
     QVariant getMessage() const { return mMessage; }
     void setMessage(const QVariant& msg) { mMessage = msg; }
@@ -32,7 +33,7 @@ private:
     QVariant mMessage;
 };
 
-Q_DECLARE_METATYPE(QSyncMessageResponse)
+Q_DECLARE_METATYPE(QMozReturnValue)
 
 class QGraphicsMozView : public QGraphicsWidget
 {
@@ -106,15 +107,15 @@ Q_SIGNALS:
     void loadingChanged();
     void viewDestroyed();
     void recvAsyncMessage(const QString message, const QVariant data);
-    bool recvSyncMessage(const QString message, const QVariant data, QSyncMessageResponse* response);
+    bool recvSyncMessage(const QString message, const QVariant data, QMozReturnValue* response);
     void loadRedirect();
     void securityChanged(QString status, uint state);
     void firstPaint(int offx, int offy);
     void contentLoaded(QString docuri);
     void viewAreaChanged();
-    void handleLongTap(QPoint point);
-    void handleSingleTap(QPoint point);
-    void handleDoubleTap(QPoint point);
+    void handleLongTap(QPoint point, QMozReturnValue* retval);
+    void handleSingleTap(QPoint point, QMozReturnValue* retval);
+    void handleDoubleTap(QPoint point, QMozReturnValue* retval);
     void imeNotification(int state, bool open, int cause, int focusChange, const QString& type);
     void bgColorChanged();
     void requestGLContext(bool& hasContext, QSize& viewPortSize);

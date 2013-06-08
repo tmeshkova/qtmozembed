@@ -177,7 +177,7 @@ void QGraphicsMozViewPrivate::RecvAsyncMessage(const PRUnichar* aMessage, const 
 
 char* QGraphicsMozViewPrivate::RecvSyncMessage(const PRUnichar* aMessage, const PRUnichar*  aData)
 {
-    QSyncMessageResponse response;
+    QMozReturnValue response;
     NS_ConvertUTF16toUTF8 message(aMessage);
     NS_ConvertUTF16toUTF8 data(aData);
 
@@ -320,20 +320,26 @@ bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const floa
 
 bool QGraphicsMozViewPrivate::HandleLongTap(const nsIntPoint& aPoint)
 {
-    Q_EMIT q->handleLongTap(QPoint(aPoint.x, aPoint.y));
-    return false;
+    QMozReturnValue retval;
+    retval.setMessage(false);
+    Q_EMIT q->handleLongTap(QPoint(aPoint.x, aPoint.y), &retval);
+    return retval.getMessage().toBool();
 }
 
 bool QGraphicsMozViewPrivate::HandleSingleTap(const nsIntPoint& aPoint)
 {
-    Q_EMIT q->handleSingleTap(QPoint(aPoint.x, aPoint.y));
-    return false;
+    QMozReturnValue retval;
+    retval.setMessage(false);
+    Q_EMIT q->handleSingleTap(QPoint(aPoint.x, aPoint.y), &retval);
+    return retval.getMessage().toBool();
 }
 
 bool QGraphicsMozViewPrivate::HandleDoubleTap(const nsIntPoint& aPoint)
 {
-    Q_EMIT q->handleDoubleTap(QPoint(aPoint.x, aPoint.y));
-    return false;
+    QMozReturnValue retval;
+    retval.setMessage(false);
+    Q_EMIT q->handleDoubleTap(QPoint(aPoint.x, aPoint.y), &retval);
+    return retval.getMessage().toBool();
 }
 
 void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)

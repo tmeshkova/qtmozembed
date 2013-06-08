@@ -36,7 +36,7 @@ QDeclarativeMozView::QDeclarativeMozView(QDeclarativeItem* parent)
     init();
     static bool Initialized = false;
     if (!Initialized) {
-        qmlRegisterType<QSyncMessageResponse>("QtMozilla", 1, 0, "QSyncMessageResponse");
+        qmlRegisterType<QMozReturnValue>("QtMozilla", 1, 0, "QMozReturnValue");
         Initialized = true;
     }
 }
