@@ -72,8 +72,8 @@ QGraphicsMozView::setParentID(unsigned aParentID)
 QGraphicsMozView::~QGraphicsMozView()
 {
     if (d->mView) {
-        d->mContext->GetApp()->DestroyView(d->mView);
         d->mView->SetListener(NULL);
+        d->mContext->GetApp()->DestroyView(d->mView);
     }
     delete d;
 }
