@@ -73,6 +73,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 {
 //    setFlag(ItemHasContents, true);
     d->mContext = QMozContext::GetInstance();
+    QTimer::singleShot(0, QMozContext::GetInstance(), SLOT(runEmbedding()));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
