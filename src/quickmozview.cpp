@@ -30,6 +30,12 @@ public:
     }
     virtual ~QuickMozViewPrivate() {}
 
+    virtual bool RequestCurrentGLContext()
+    {
+      // Need really check what is what and switch to common implementation
+      return true;
+    }
+
     void UpdateViewSize(bool updateSize = true)
     {
         if (mViewInitialized) {
