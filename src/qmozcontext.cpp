@@ -13,11 +13,12 @@
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
+#include <QtDeclarative/qdeclarative.h>
 #else
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QtQml/QtQml>
 #endif
-#include <QtDeclarative/qdeclarative.h>
 
 #include "qmozembedlog.h"
 #include "qmozcontext.h"
