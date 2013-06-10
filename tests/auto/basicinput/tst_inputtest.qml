@@ -17,6 +17,7 @@ ApplicationWindow {
     property bool changed : false
     property int focusChange : -1
     property int cause : -1
+    property string inputType : ""
 
     function isState(state, focus, cause)
     {
@@ -65,11 +66,12 @@ ApplicationWindow {
                 }
             }
             onImeNotification: {
-                // print("onImeNotification: state:" + state + ", open:" + open + ", cause:" + cause + ", focChange:" + focusChange + ", type:" + type)
+                print("onImeNotification: state:" + state + ", open:" + open + ", cause:" + cause + ", focChange:" + focusChange + ", type:" + type)
                 appWindow.changed = true
                 appWindow.inputState = state
                 appWindow.cause = cause
                 appWindow.focusChange = focusChange
+                appWindow.inputType = type
             }
         }
     }
@@ -111,6 +113,42 @@ ApplicationWindow {
                 wait();
             }
             compare(appWindow.inputContent, "korp");
+            mozContext.dumpTS("test_Test1LoadInputPage end");
+        }
+
+        function test_Test1LoadInputURLPage()
+        {
+            mozContext.dumpTS("test_Test1LoadInputPage start")
+            verify(MyScript.waitMozContext())
+            verify(MyScript.waitMozView())
+            appWindow.inputContent = ""
+            appWindow.inputType = ""
+            webViewport.child.url = "data:text/html,<input type=number id=myelem value=''>";
+            verify(MyScript.waitLoadFinished(webViewport))
+            compare(webViewport.child.loadProgress, 100);
+            while (!webViewport.child.painted) {
+                wait();
+            }
+            mouseClick(webViewport, 10, 10)
+            while (!appWindow.isState(1, 0, 3)) {
+                wait();
+            }
+            appWindow.inputState = false;
+            keyClick(Qt.Key_1);
+            keyClick(Qt.Key_2);
+            keyClick(Qt.Key_3);
+            keyClick(Qt.Key_4);
+            webViewport.child.sendAsyncMessage("embedtest:getelementprop", {
+                                                name: "myelem",
+                                                property: "value"
+                                               })
+            while (appWindow.inputContent == "") {
+                wait();
+            }
+            while (appWindow.inputType == "") {
+                wait();
+            }
+            compare(appWindow.inputContent, "1234");
             mozContext.dumpTS("test_Test1LoadInputPage end");
         }
     }
