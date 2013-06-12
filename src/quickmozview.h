@@ -21,6 +21,7 @@ protected:
 
 public Q_SLOTS:
     void paint();
+    void sceneGraphInitialized();
     void cleanup();
 
 private Q_SLOTS:

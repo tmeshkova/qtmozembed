@@ -14,6 +14,7 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLContext>
 #include <QSGSimpleRectNode>
+#include <QSGSimpleTextureNode>
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -26,14 +27,16 @@ public:
       , mView(NULL)
       , mViewInitialized(false)
       , mViewGLSized(false)
+      , mTempTexture(NULL)
     {
     }
     virtual ~QuickMozViewPrivate() {}
 
     virtual bool RequestCurrentGLContext()
     {
-      // Need really check what is what and switch to common implementation
-      return true;
+        // Need really check what is what and switch to common implementation
+        const QOpenGLContext* ctx = QOpenGLContext::currentContext();
+        return ctx && ctx->surface();
     }
 
     void UpdateViewSize(bool updateSize = true)
@@ -65,13 +68,15 @@ public:
     EmbedLiteView* mView;
     bool mViewInitialized;
     bool mViewGLSized;
+    QImage mTempBufferImage;
+    QSGTexture* mTempTexture;
 };
 
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QuickMozViewPrivate(this))
 {
-//    setFlag(ItemHasContents, true);
+    setFlag(ItemHasContents, true);
     d->mContext = QMozContext::GetInstance();
     QTimer::singleShot(0, QMozContext::GetInstance(), SLOT(runEmbedding()));
     if (!d->mContext->initialized()) {
@@ -90,7 +95,8 @@ void
 QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
-    d->mContext->GetApp()->SetIsAccelerated(true);
+    const QOpenGLContext* ctx = QOpenGLContext::currentContext();
+    d->mContext->GetApp()->SetIsAccelerated(ctx && ctx->surface() && !getenv("SWRENDER"));
     d->mView = d->mContext->GetApp()->CreateView();
     d->mView->SetListener(d);
 }
@@ -102,28 +108,8 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
         if (!win)
             return;
         connect(win, SIGNAL(beforeRendering()), this, SLOT(paint()), Qt::DirectConnection);
+        connect(win, SIGNAL(sceneGraphInitialized()), this, SLOT(sceneGraphInitialized()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
-    }
-}
-
-
-void QuickMozView::paint()
-{
-    if (d->mViewInitialized) {
-        if (d->mContext->GetApp()->IsAccelerated()) {
-            if (!d->mViewGLSized) {
-                d->UpdateViewSize(false);
-                d->mViewGLSized = true;
-            }
-            QMatrix qmatr;
-            qmatr.translate(x(), y());
-            qmatr.rotate(rotation());
-            qmatr.scale(scale(), scale());
-            gfxMatrix matr(qmatr.m11(), qmatr.m12(), qmatr.m21(), qmatr.m22(), qmatr.dx(), qmatr.dy());
-            d->mView->SetGLViewTransform(matr);
-            d->mView->SetViewClipping(0, 0, boundingRect().width(), boundingRect().height());
-            d->mView->RenderGL();
-        }
     }
 }
 
@@ -132,16 +118,52 @@ void QuickMozView::geometryChanged(const QRectF & newGeometry, const QRectF&)
     d->UpdateViewSize();
 }
 
+void QuickMozView::sceneGraphInitialized()
+{
+}
+
+void QuickMozView::paint()
+{
+    if (d->mViewInitialized && d->mContext->GetApp()->IsAccelerated()) {
+        if (!d->mViewGLSized) {
+            d->UpdateViewSize(false);
+            d->mViewGLSized = true;
+        }
+        QMatrix qmatr;
+        qmatr.translate(x(), y());
+        qmatr.rotate(rotation());
+        qmatr.scale(scale(), scale());
+        gfxMatrix matr(qmatr.m11(), qmatr.m12(), qmatr.m21(), qmatr.m22(), qmatr.dx(), qmatr.dy());
+        d->mView->SetGLViewTransform(matr);
+        d->mView->SetViewClipping(0, 0, boundingRect().width(), boundingRect().height());
+        d->mView->RenderGL();
+    }
+}
+
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
-    QSGSimpleRectNode *n = static_cast<QSGSimpleRectNode *>(oldNode);
-    if (!n) {
-        n = new QSGSimpleRectNode();
-        n->setColor(Qt::green);
+    if (d->mViewInitialized && !d->mContext->GetApp()->IsAccelerated()) {
+        QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode*>(oldNode);
+        if (!n) {
+            n = new QSGSimpleTextureNode();
+        }
+        QRect r(boundingRect().toRect());
+        if (d->mTempBufferImage.isNull() || d->mTempBufferImage.width() != r.width() || d->mTempBufferImage.height() != r.height()) {
+            d->mTempBufferImage = QImage(r.size(), QImage::Format_RGB32);
+        }
+        d->mView->RenderToImage(d->mTempBufferImage.bits(), d->mTempBufferImage.width(),
+                                d->mTempBufferImage.height(), d->mTempBufferImage.bytesPerLine(),
+                                d->mTempBufferImage.depth());
+
+        if (d->mTempTexture)
+            delete d->mTempTexture;
+        d->mTempTexture = window()->createTextureFromImage(d->mTempBufferImage);
+        n->setTexture(d->mTempTexture);
+        n->setRect(boundingRect());
+        return n;
     }
-    n->setRect(boundingRect());
-    return n;
+    return nullptr;
 }
 
 void QuickMozView::cleanup()
