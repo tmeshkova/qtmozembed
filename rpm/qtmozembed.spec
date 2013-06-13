@@ -10,7 +10,7 @@ BuildRequires:  pkgconfig(QtCore) >= 4.6.0
 BuildRequires:  pkgconfig(QtOpenGL)
 BuildRequires:  pkgconfig(QtGui)
 BuildRequires:  pkgconfig(QJson)
-BuildRequires:  pkgconfig(libxul-embedding)
+BuildRequires:  xulrunner-devel
 BuildRequires:  pkgconfig(nspr)
 BuildRequires:  pkgconfig(QtTest)
 BuildRequires:  qtest-qml-devel
