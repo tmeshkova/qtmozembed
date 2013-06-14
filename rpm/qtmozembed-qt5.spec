@@ -1,4 +1,4 @@
-Name:       qtmozembed
+Name:       qtmozembed-qt5
 Summary:    Qt embeddings for Gecko
 Version:    1.2.3
 Release:    1
