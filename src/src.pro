@@ -19,10 +19,10 @@ HEADERS += qmozcontext.h \
 !contains(QT_MAJOR_VERSION, 4) {
 SOURCES += quickmozview.cpp
 HEADERS += quickmozview.h
-} else {
+}
 SOURCES += qdeclarativemozview.cpp
 HEADERS += qdeclarativemozview.h
-}
+
 
 CONFIG(opengl) {
      message(Building with OpenGL support.)
