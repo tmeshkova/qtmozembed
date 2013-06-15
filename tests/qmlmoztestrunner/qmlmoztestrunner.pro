@@ -1,7 +1,8 @@
 TEMPLATE = app
 TARGET = qmlmoztestrunner
 CONFIG += warn_on link_pkgconfig
-SOURCES += main.cpp
+SOURCES += main.cpp qtestrunner.cpp
+HEADERS += qtestrunner.h
 
 INCLUDEPATH+=../../src
 isEmpty(OBJ_BUILD_PATH) {
@@ -16,8 +17,12 @@ isEmpty(DEFAULT_COMPONENT_PATH) {
   DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"$$DEFAULT_COMPONENT_PATH\\\"\"
 }
 
-LIBS += -lQtQuickTest
-PKGCONFIG += QJson
+contains(QT_MAJOR_VERSION, 4) {
+  LIBS += -lQtQuickTest
+  PKGCONFIG += QJson
+} else {
+  PKGCONFIG += Qt5QuickTest
+}
 contains(QT_CONFIG, opengl)|contains(QT_CONFIG, opengles1)|contains(QT_CONFIG, opengles2) {
     QT += opengl
 }

@@ -10,6 +10,9 @@
 
 class QtMozEmbedPlugin : public QDeclarativeExtensionPlugin
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    Q_PLUGIN_METADATA(IID "org.qt-project.foo" FILE "myplugindescription.json")
+#endif
 public:
     virtual void registerTypes(const char *uri)
     {
@@ -23,4 +26,6 @@ public:
     }
 };
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 Q_EXPORT_PLUGIN2(qtmozembedplugin, QtMozEmbedPlugin);
+#endif

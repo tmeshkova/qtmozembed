@@ -35,47 +35,53 @@
 #include "qmozcontext.h"
 #include "qtestrunner.h"
 #include <QApplication>
+#include <QtQuickTest/quicktest.h>
 #include <QtCore/qstring.h>
+#ifdef QT_OPENGL_LIB
+#include <QtOpenGL/qgl.h>
+#endif
 #include <QTimer>
 #include <stdio.h>
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QtQuickTest/quicktest.h>
-#endif
 #if defined(Q_WS_X11)
 #include <X11/Xlib.h>
 #endif
 
-int main(int argc, char **argv)
+#ifdef QT_OPENGL_LIB
+static QWidget *qmltestrunner_create_gl_viewport()
 {
-#if defined(Q_WS_X11)
-#if QT_VERSION >= 0x040800
-    QApplication::setAttribute(Qt::AA_X11InitThreads, true);
-#else
-    XInitThreads();
-    QApplication::setAttribute(static_cast<Qt::ApplicationAttribute>(10), true);
+    return new QGLWidget();
+}
 #endif
+
+static int gargc;
+static char **gargv;
+
+QTestRunner::QTestRunner(bool isOpenGL, int agargc, char **agargv)
+ : QObject(0), mIsOpenGL(isOpenGL)
+{
+    gargv = agargv;
+    gargc = agargc;
+}
+
+void QTestRunner::DropInStartup()
+{
+    RunMainTest();
+    QMozContext::GetInstance()->stopEmbedding();
+}
+
+int QTestRunner::RunMainTest()
+{
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#ifdef QT_OPENGL_LIB
+    if (mIsOpenGL) {
+        return quick_test_main(gargc, gargv, "qmlmoztestrunner",
+                               qmltestrunner_create_gl_viewport, ".");
+    } else
 #endif
     {
-        QApplication app(argc, argv);
-        {
-            bool isOpenGL = false;
-            for (int index = 1; index < argc; ++index) {
-                if (strcmp(argv[index], "-opengl") == 0) {
-                    isOpenGL = true;
-                    break;
-                }
-            }
-            QTestRunner runn(isOpenGL, argc, argv);
-            QTimer::singleShot(0, &runn, SLOT(DropInStartup()));
-            // These components must be loaded before app start
-            QString componentPath(DEFAULT_COMPONENTS_PATH);
-            QMozContext::GetInstance()->addComponentManifest(componentPath + QString("/components") + QString("/EmbedLiteBinComponents.manifest"));
-            QMozContext::GetInstance()->addComponentManifest(componentPath + QString("/chrome") + QString("/EmbedLiteJSScripts.manifest"));
-            QMozContext::GetInstance()->addComponentManifest(componentPath + QString("/chrome") + QString("/EmbedLiteOverrides.manifest"));
-            QMozContext::GetInstance()->addComponentManifest(componentPath + QString("/components") + QString("/EmbedLiteJSComponents.manifest"));
-            QMozContext::GetInstance()->runEmbedding();
-        }
-        app.quit();
+        return quick_test_main(gargc, gargv, "qmlmoztestrunner", 0, ".");
     }
-    return 0;
-}
+#else
+    return quick_test_main(gargc, gargv, "qmlmoztestrunner", 0);
+#endif
+};

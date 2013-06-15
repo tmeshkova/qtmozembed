@@ -1,6 +1,9 @@
 MODULENAME = QtMozilla
 TARGET = qtmozembedplugin
 
+TEMPLATE = lib
+CONFIG += qt plugin
+
 include (../imports.pri)
 
 QTMOZEMBED_SOURCE_PATH = $$PWD/../../../src
