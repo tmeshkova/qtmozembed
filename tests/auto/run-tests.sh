@@ -8,6 +8,7 @@ if [ "$QTTESTPATH" != "" ]; then
 fi
 export QTTESTPATH=${QTTESTPATH:-"/opt/tests/qtmozembed"}
 export QML_IMPORT_PATH=$QTTESTPATH/imports
+export QML2_IMPORT_PATH=$QTTESTPATH/imports
 
 #export NSPR_LOG_MODULES=EmbedLiteTrace:5,EmbedNonImpl:5,EmbedLiteApp:5,EmbedLiteView:5,EmbedLiteViewThreadParent:5
 
