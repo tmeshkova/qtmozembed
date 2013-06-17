@@ -381,8 +381,8 @@ void QGraphicsMozView::recvMouseMove(int posX, int posY)
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(posX, posY),
-                                     nsIntPoint(1, 1),
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
@@ -396,8 +396,8 @@ void QGraphicsMozView::recvMousePress(int posX, int posY)
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(posX, posY),
-                                     nsIntPoint(1, 1),
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
@@ -409,8 +409,8 @@ void QGraphicsMozView::recvMouseRelease(int posX, int posY)
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_END, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
-                                     nsIntPoint(posX, posY),
-                                     nsIntPoint(1, 1),
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
                                      180.0f,
                                      1.0f));
         d->ReceiveInputEvent(event);
@@ -537,11 +537,11 @@ QGraphicsMozView::synthTouchBegin(const QVariant& touches)
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
         const QPointF pt = (*it).toPointF();
-        nsIntPoint nspt(pt.x(), pt.y());
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
         ptId++;
         meventStart.mTouches.AppendElement(SingleTouchData(ptId,
                                                            nspt,
-                                                           nsIntPoint(1, 1),
+                                                           mozilla::ScreenSize(1, 1),
                                                            180.0f,
                                                            1.0f));
     }
@@ -557,11 +557,11 @@ QGraphicsMozView::synthTouchMove(const QVariant& touches)
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
         const QPointF pt = (*it).toPointF();
-        nsIntPoint nspt(pt.x(), pt.y());
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
         ptId++;
         meventStart.mTouches.AppendElement(SingleTouchData(ptId,
                                                            nspt,
-                                                           nsIntPoint(1, 1),
+                                                           mozilla::ScreenSize(1, 1),
                                                            180.0f,
                                                            1.0f));
     }
@@ -577,11 +577,11 @@ QGraphicsMozView::synthTouchEnd(const QVariant& touches)
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
         const QPointF pt = (*it).toPointF();
-        nsIntPoint nspt(pt.x(), pt.y());
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
         ptId++;
         meventStart.mTouches.AppendElement(SingleTouchData(ptId,
                                                            nspt,
-                                                           nsIntPoint(1, 1),
+                                                           mozilla::ScreenSize(1, 1),
                                                            180.0f,
                                                            1.0f));
     }

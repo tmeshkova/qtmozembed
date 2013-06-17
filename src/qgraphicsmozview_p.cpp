@@ -357,12 +357,12 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_END, mTouchTime.elapsed());
     for (int i = 0; i < event->touchPoints().size(); ++i) {
         const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
-        nsIntPoint nspt(pt.pos().x(), pt.pos().y());
+        mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
         switch (pt.state()) {
             case Qt::TouchPointPressed: {
                 meventStart.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                    nspt,
-                                                                   nsIntPoint(1, 1),
+                                                                   mozilla::ScreenSize(1, 1),
                                                                    180.0f,
                                                                    1.0f));
                 break;
@@ -370,7 +370,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             case Qt::TouchPointReleased: {
                 meventEnd.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                  nspt,
-                                                                 nsIntPoint(1, 1),
+                                                                 mozilla::ScreenSize(1, 1),
                                                                  180.0f,
                                                                  1.0f));
                 break;
@@ -378,7 +378,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             case Qt::TouchPointMoved: {
                 meventMove.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                   nspt,
-                                                                  nsIntPoint(1, 1),
+                                                                  mozilla::ScreenSize(1, 1),
                                                                   180.0f,
                                                                   1.0f));
                 break;
