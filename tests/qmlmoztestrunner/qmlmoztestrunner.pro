@@ -22,7 +22,7 @@ contains(QT_MAJOR_VERSION, 4) {
   PKGCONFIG += QJson
 } else {
   PKGCONFIG += Qt5QuickTest
-  QT += declarative
+  QT += declarative qml quick
 }
 contains(QT_CONFIG, opengl)|contains(QT_CONFIG, opengles1)|contains(QT_CONFIG, opengles2) {
     QT += opengl

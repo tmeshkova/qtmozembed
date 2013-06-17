@@ -17,8 +17,8 @@ HEADERS += qmozcontext.h \
            geckoworker.h
 
 !contains(QT_MAJOR_VERSION, 4) {
-SOURCES += quickmozview.cpp
-HEADERS += quickmozview.h
+  SOURCES += quickmozview.cpp
+  HEADERS += quickmozview.h
 }
 SOURCES += qdeclarativemozview.cpp
 HEADERS += qdeclarativemozview.h

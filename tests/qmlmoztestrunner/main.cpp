@@ -40,6 +40,8 @@
 #include <stdio.h>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QtQuickTest/quicktest.h>
+#else
+#include <QQuickView>
 #endif
 #if defined(Q_WS_X11)
 #include <X11/Xlib.h>
@@ -47,6 +49,9 @@
 
 int main(int argc, char **argv)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    setenv("QML_BAD_GUI_RENDER_LOOP", "1", 1);
+#endif
 #if defined(Q_WS_X11)
 #if QT_VERSION >= 0x040800
     QApplication::setAttribute(Qt::AA_X11InitThreads, true);
@@ -65,6 +70,7 @@ int main(int argc, char **argv)
                     break;
                 }
             }
+
             QTestRunner runn(isOpenGL, argc, argv);
             QTimer::singleShot(0, &runn, SLOT(DropInStartup()));
             // These components must be loaded before app start

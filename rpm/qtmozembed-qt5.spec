@@ -13,10 +13,10 @@ BuildRequires:  pkgconfig(Qt5OpenGL)
 BuildRequires:  pkgconfig(Qt5Widgets)
 BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(Qt5Declarative)
+BuildRequires:  pkgconfig(Qt5QuickTest)
 BuildRequires:  xulrunner-qt5-devel
 BuildRequires:  pkgconfig(nspr)
 BuildRequires:  qt5-default
-BuildRequires:  qt5-qtdeclarative-qtquick-devel
 
 %description
 Qt embeddings for Gecko browser engine
@@ -33,7 +33,7 @@ Development files for qtmozembed.
 Summary:    Unit tests for QtMozEmbed tests
 Group:      Applications/Internet
 Requires:   %{name} = %{version}-%{release}
-Requires:   embedlite-components >= 1.0.10
+Requires:   embedlite-components-qt5 >= 1.0.10
 
 %description tests
 This package contains QML unit tests for QtMozEmbed library
@@ -53,6 +53,8 @@ qmake
 %files
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
+%{_libdir}/qt4/imports/*
+%{_libdir}/qt5/imports/*
 
 %files devel
 %defattr(-,root,root,-)
@@ -63,6 +65,6 @@ qmake
 %files tests
 %defattr(-,root,root,-)
 # >> files tests
-#/opt/tests/qtmozembed/*
-#%{_libdir}/qt5/bin/*
+/opt/tests/qtmozembed/*
+%{_libdir}/qt5/bin/*
 # << files tests

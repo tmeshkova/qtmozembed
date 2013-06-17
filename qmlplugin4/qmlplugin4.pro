@@ -1,22 +1,20 @@
 MODULENAME = QtMozilla
-TARGET = qtmozembedplugin
+TARGET = qtmozembedpluginqt4
 
 TEMPLATE = lib
 CONFIG += qt plugin
 
-include (../imports.pri)
+QTMOZEMBED_SOURCE_PATH = $$PWD/../src
 
-QTMOZEMBED_SOURCE_PATH = $$PWD/../../../src
-
-QT += dbus declarative script
+QT += declarative script
 CONFIG += mobility link_pkgconfig
 MOBILITY += qtmozembed
 
 LIBS+=-lX11
 isEmpty(OBJ_BUILD_PATH) {
-LIBS+= -L../../../ -lqtembedwidget
+  LIBS+= -L../ -lqtembedwidget
 } else {
-LIBS+= -L../../../$$OBJ_BUILD_PATH -lqtembedwidget
+  LIBS+= -L../$$OBJ_BUILD_PATH -lqtembedwidget
 }
 
 isEmpty(DEFAULT_COMPONENT_PATH) {
@@ -27,13 +25,18 @@ isEmpty(DEFAULT_COMPONENT_PATH) {
 
 INCLUDEPATH += $$QTMOZEMBED_SOURCE_PATH
 
-HEADERS += \
-        qmlmozcontext.h
+HEADERS += qmlmozcontext.h
 
 SOURCES += \
-        main.cpp \
-        qmlmozcontext.cpp
+    main.cpp \
+    qmlmozcontext.cpp
 
 import.files = qmldir
 import.path = $$TARGETPATH
 INSTALLS += import
+
+TARGET = $$qtLibraryTarget($$TARGET)
+TARGETPATH = /opt/tests/qtmozembed/imports/$$MODULENAME
+
+target.path = $$TARGETPATH
+INSTALLS += target

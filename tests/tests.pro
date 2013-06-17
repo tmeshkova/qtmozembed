@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS = imports qmlmoztestrunner
+SUBDIRS = qmlmoztestrunner
 
 OTHER_FILES += auto/* auto/scripts/*
 
