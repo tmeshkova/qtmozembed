@@ -33,7 +33,7 @@ Development files for qtmozembed.
 Summary:    Unit tests for QtMozEmbed tests
 Group:      Applications/Internet
 Requires:   %{name} = %{version}-%{release}
-Requires:   embedlite-components-qt5 >= 1.0.10
+Requires:   embedlite-components-qt5 >= 1.0.0
 
 %description tests
 This package contains QML unit tests for QtMozEmbed library
