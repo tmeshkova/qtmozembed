@@ -53,8 +53,7 @@ qmake
 %files
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
-%{_libdir}/qt4/imports/*
-%{_libdir}/qt5/imports/*
+%{_libdir}/qt5/qml/Qt5Mozilla/*
 
 %files devel
 %defattr(-,root,root,-)
