@@ -4,12 +4,12 @@ CONFIG += warn_on link_pkgconfig
 SOURCES += main.cpp qtestrunner.cpp
 HEADERS += qtestrunner.h
 
-INCLUDEPATH+=../../src
-isEmpty(OBJ_BUILD_PATH) {
-LIBS+= -L../../ -lqtembedwidget
-} else {
-LIBS+= -L../../$$OBJ_BUILD_PATH -lqtembedwidget
-}
+RELATIVE_PATH=../..
+VDEPTH_PATH=tests/qmlmoztestrunner
+include($$RELATIVE_PATH/relative-objdir.pri)
+
+INCLUDEPATH+=$$RELATIVE_PATH/src
+LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqtembedwidget
 
 isEmpty(DEFAULT_COMPONENT_PATH) {
   DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"/usr/lib/mozembedlite/\\\"\"

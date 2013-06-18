@@ -16,10 +16,10 @@ PREFIX=$TARGET_DIR/lib
 mkdir -p $PREFIX
 
 FILES_LIST="
-$OBJPREFIX/libqtembedwidget.so
-$OBJPREFIX/libqtembedwidget.so.1
-$OBJPREFIX/libqtembedwidget.so.1.0
-$OBJPREFIX/libqtembedwidget.so.1.0.0
+$OBJPREFIX/src/libqtembedwidget.so
+$OBJPREFIX/src/libqtembedwidget.so.1
+$OBJPREFIX/src/libqtembedwidget.so.1.0
+$OBJPREFIX/src/libqtembedwidget.so.1.0.0
 "
 
 for str in $FILES_LIST; do

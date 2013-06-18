@@ -8,12 +8,12 @@ QT += qml declarative widgets quick
 SOURCES += main.cpp qmlmozcontext.cpp
 HEADERS += qmlmozcontext.h
 
-isEmpty(OBJ_BUILD_PATH) {
-  LIBS+= -L../ -lqtembedwidget
-} else {
-  LIBS+= -L../$$OBJ_BUILD_PATH -lqtembedwidget
-}
-QTMOZEMBED_SOURCE_PATH = $$PWD/../src
+RELATIVE_PATH=..
+VDEPTH_PATH=qmlplugin5
+include($$RELATIVE_PATH/relative-objdir.pri)
+
+LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqtembedwidget
+QTMOZEMBED_SOURCE_PATH = $$PWD/$$RELATIVE_PATH/src
 INCLUDEPATH += $$QTMOZEMBED_SOURCE_PATH
 
 isEmpty(DEFAULT_COMPONENT_PATH) {

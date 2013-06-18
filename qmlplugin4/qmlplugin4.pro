@@ -4,18 +4,17 @@ TARGET = qtmozembedpluginqt4
 TEMPLATE = lib
 CONFIG += qt plugin
 
-QTMOZEMBED_SOURCE_PATH = $$PWD/../src
-
 QT += declarative script
 CONFIG += mobility link_pkgconfig
 MOBILITY += qtmozembed
 
+RELATIVE_PATH=..
+VDEPTH_PATH=qmlplugin4
+include($$RELATIVE_PATH/relative-objdir.pri)
+QTMOZEMBED_SOURCE_PATH = $$PWD/$$RELATIVE_PATH/src
+
 LIBS+=-lX11
-isEmpty(OBJ_BUILD_PATH) {
-  LIBS+= -L../ -lqtembedwidget
-} else {
-  LIBS+= -L../$$OBJ_BUILD_PATH -lqtembedwidget
-}
+LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqtembedwidget
 
 isEmpty(DEFAULT_COMPONENT_PATH) {
   DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"/usr/lib/mozembedlite/\\\"\"
