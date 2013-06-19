@@ -42,7 +42,7 @@ contains(QT_MAJOR_VERSION, 4) {
   QT += opengl
   PKGCONFIG += QJson
 } else {
-  QT += quick opengl
+  QT += quick opengl declarative
 }
 
 target.path = $$PREFIX/lib
