@@ -353,8 +353,8 @@ void QGraphicsMozView::suspendView()
     if (!d->mView) {
         return;
     }
-    d->mView->SetIsActive(true);
-    d->mView->ResumeTimeouts();
+    d->mView->SetIsActive(false);
+    d->mView->SuspendTimeouts();
 }
 
 void QGraphicsMozView::resumeView()
@@ -362,8 +362,8 @@ void QGraphicsMozView::resumeView()
     if (!d->mView) {
         return;
     }
-    d->mView->SetIsActive(false);
-    d->mView->SuspendTimeouts();
+    d->mView->SetIsActive(true);
+    d->mView->ResumeTimeouts();
 }
 
 bool QGraphicsMozView::getUseQmlMouse()
