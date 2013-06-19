@@ -169,3 +169,14 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 void QuickMozView::cleanup()
 {
 }
+
+void QuickMozView::setParentID(unsigned aParentID)
+{
+    printf("QuickMozView::%s FIXME Not implemented: id:%i\n", __FUNCTION__, aParentID);
+}
+
+quint32 QuickMozView::uniqueID() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return 0;
+}

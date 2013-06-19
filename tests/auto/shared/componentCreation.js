@@ -11,6 +11,16 @@ function createSpriteObjects() {
     }
 }
 
+function createSpriteObjectsQt5() {
+    component = Qt.createComponent(mozContext.getenv("QTTESTSROOT") + "/auto/shared/ViewComponentQt5.qml");
+    if (component.status == Component.Ready) {
+        finishCreation();
+    }
+    else {
+        component.statusChanged.connect(finishCreation);
+    }
+}
+
 function finishCreation() {
     if (component.status == Component.Ready) {
         appWindow.mozView = component.createObject(appWindow, {"x": 0, "y": 0});
