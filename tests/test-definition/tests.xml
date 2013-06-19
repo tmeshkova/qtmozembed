@@ -5,43 +5,43 @@
        <set name="unit-tests" feature="QtMozEmbed">
            <description>QML component unit tests</description>
            <case manual="false" timeout="200" name="unittests-context">
-               <step>cd /opt/tests/qtmozembed/auto/context &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/context &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-basicview">
-               <step>cd /opt/tests/qtmozembed/auto/basicview &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/basicview &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-view">
-               <step>cd /opt/tests/qtmozembed/auto/view &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/view &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-basicinput">
-               <step>cd /opt/tests/qtmozembed/auto/basicinput &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/basicinput &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-basicscroll">
-               <step>cd /opt/tests/qtmozembed/auto/basicscroll &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/basicscroll &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-multitouch">
-               <step>cd /opt/tests/qtmozembed/auto/multitouch &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/multitouch &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-favicons">
-               <step>cd /opt/tests/qtmozembed/auto/favicons &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/favicons &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-promptbasic">
-               <step>cd /opt/tests/qtmozembed/auto/promptbasic &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/promptbasic &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-searchengine">
-               <step>cd /opt/tests/qtmozembed/auto/searchengine &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/searchengine &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-passwordmgr">
-               <step>cd /opt/tests/qtmozembed/auto/passwordmgr &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/passwordmgr &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-downloadmgr">
-               <step>cd /opt/tests/qtmozembed/auto/downloadmgr &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/downloadmgr &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-newviewrequest">
-               <step>cd /opt/tests/qtmozembed/auto/newviewrequest &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/newviewrequest &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-selection">
-               <step>cd /opt/tests/qtmozembed/auto/selection &amp;&amp;DISPLAY=:0 ../run-tests.sh</step>
+               <step>cd /opt/tests/qtmozembed/auto/mer-qt4/selection &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
            </case>
        </set>
    </suite>

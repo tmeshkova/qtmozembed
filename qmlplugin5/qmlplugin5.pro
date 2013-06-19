@@ -31,3 +31,10 @@ INSTALLS += target
 import.files = qmldir
 import.path = $$TARGETPATH
 INSTALLS += import
+
+!isEmpty(OBJ_BUILD_PATH) {
+  QMAKE_POST_LINK = rm -f $$OBJECTS_DIR/qmldir
+  QMAKE_POST_LINK += && rm -f $$OBJECTS_DIR/Qt5Mozilla
+  QMAKE_POST_LINK += && ln -s $$RELATIVE_PATH/$$RELATIVE_PATH/qmlplugin5/qmldir $$OBJECTS_DIR/qmldir
+  QMAKE_POST_LINK += && ln -s . $$OBJECTS_DIR/Qt5Mozilla
+}

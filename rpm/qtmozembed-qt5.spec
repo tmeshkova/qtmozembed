@@ -17,6 +17,7 @@ BuildRequires:  pkgconfig(Qt5QuickTest)
 BuildRequires:  xulrunner-qt5-devel
 BuildRequires:  pkgconfig(nspr)
 BuildRequires:  qt5-default
+BuildRequires:  qt5-qttools
 
 %description
 Qt embeddings for Gecko browser engine
@@ -42,11 +43,11 @@ This package contains QML unit tests for QtMozEmbed library
 %setup -q -n %{name}-%{version}
 
 %build
-qmake
+%qmake5
 %{__make} %{?jobs:MOZ_MAKE_FLAGS="-j%jobs"}
 
 %install
-%{__make} install INSTALL_ROOT=%{buildroot}
+%qmake5_install
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
