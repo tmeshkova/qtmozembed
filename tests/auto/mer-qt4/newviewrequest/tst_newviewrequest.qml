@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property variant mozView : null
@@ -53,51 +50,51 @@ ApplicationWindow {
         function test_1contextPrepareViewContext()
         {
             mozContext.dumpTS("test_1contextPrepareViewContext start")
-            verify(mozContext.instance !== undefined)
+            testcaseid.verify(mozContext.instance !== undefined)
             while (mozContext.instance.initialized() === false) {
-                wait(500)
+                testcaseid.wait(500)
             }
-            verify(mozContext.instance.initialized())
+            testcaseid.verify(mozContext.instance.initialized())
             mozContext.dumpTS("test_1contextPrepareViewContext end")
         }
         function test_2viewInit()
         {
             mozContext.dumpTS("test_2viewInit start")
-            verify(mozContext.instance.initialized())
+            testcaseid.verify(mozContext.instance.initialized())
             MyScript.createSpriteObjects();
             while (mozView === null) {
-                wait(500)
+                testcaseid.wait(500)
             }
             while (mozViewInitialized !== true) {
-                wait(500)
+                testcaseid.wait(500)
             }
-            verify(mozView.child !== undefined)
+            testcaseid.verify(mozView.child !== undefined)
             mozContext.dumpTS("test_2viewInit end")
         }
         function test_viewTestNewWindowAPI()
         {
             mozContext.dumpTS("test_viewTestNewWindowAPI start")
-            verify(mozView.child !== undefined)
-            mozView.child.url = mozContext.getenv("QTTESTPATH") + "/auto/newviewrequest/newwin.html";
-            verify(MyScript.waitLoadFinished(mozView))
-            compare(mozView.child.title, "NewWinExample")
+            testcaseid.verify(mozView.child !== undefined)
+            mozView.child.url = mozContext.getenv("QTTESTSLOCATION") + "/newviewrequest/newwin.html";
+            testcaseid.verify(MyScript.waitLoadFinished(mozView))
+            testcaseid.compare(mozView.child.title, "NewWinExample")
             while (!mozView.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             mozViewInitialized = false;
             mouseClick(mozView, 10, 10)
             while (!mozView || !oldMozView) {
-                wait()
+                testcaseid.wait()
             }
             while (mozViewInitialized !== true) {
-                wait()
+                testcaseid.wait()
             }
-            verify(mozView.child !== undefined)
-            verify(MyScript.waitLoadFinished(mozView))
+            testcaseid.verify(mozView.child !== undefined)
+            testcaseid.verify(MyScript.waitLoadFinished(mozView))
             while (!mozView.child.painted) {
-                wait();
+                testcaseid.wait();
             }
-            compare(mozView.child.url, "about:mozilla")
+            testcaseid.compare(mozView.child.url, "about:mozilla")
             mozContext.dumpTS("test_viewTestNewWindowAPI end")
         }
     }

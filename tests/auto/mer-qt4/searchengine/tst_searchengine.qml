@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property variant testResult : null
@@ -24,7 +21,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTSROOT") + "/components/TestHelpers.manifest");
             mozContext.instance.setPref("browser.search.log", true);
             mozContext.instance.addObserver("browser-search-engine-modified");
             mozContext.instance.addObserver("embed:search");
@@ -78,28 +75,28 @@ ApplicationWindow {
         function test_TestCheckDefaultSearch()
         {
             mozContext.dumpTS("TestCheckDefaultSearch start")
-            verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozContext())
             mozContext.instance.setPref("browser.search.log", true);
             mozContext.instance.addObserver("browser-search-engine-modified");
             mozContext.instance.addObserver("embed:search");
             mozContext.instance.setPref("keyword.enabled", true);
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozView())
             mozContext.instance.sendObserve("embedui:search", {msg:"remove", name: "QMOZTest"})
-            mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTPATH") + "/auto/searchengine/test.xml", confirm: false})
+            mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTSLOCATION") + "/searchengine/test.xml", confirm: false})
             while (appWindow.testResult !== "loaded") {
-                wait();
+                testcaseid.wait();
             }
             mozContext.instance.sendObserve("embedui:search", {msg:"getlist"})
             while (appWindow.testResult !== "QMOZTest") {
-                wait();
+                testcaseid.wait();
             }
             webViewport.child.load("linux home");
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
-            compare(webViewport.child.url.toString().substr(0, 34), "https://webhook/?search=linux+home")
+            testcaseid.compare(webViewport.child.url.toString().substr(0, 34), "https://webhook/?search=linux+home")
             mozContext.dumpTS("TestCheckDefaultSearch end");
         }
     }

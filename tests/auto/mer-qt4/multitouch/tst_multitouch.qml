@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property string testResult : ""
@@ -24,7 +21,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTSROOT") + "/components/TestHelpers.manifest");
         }
     }
 
@@ -71,13 +68,13 @@ ApplicationWindow {
         function test_Test1MultiTouchPage()
         {
             mozContext.dumpTS("test_Test1MultiTouchPage start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
-            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/multitouch/touch.html";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
+            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/multitouch/touch.html";
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             var params = [Qt.point(50,50), Qt.point(51,51), Qt.point(52,52)];
             webViewport.child.synthTouchBegin(params);
@@ -88,9 +85,9 @@ ApplicationWindow {
             webViewport.child.sendAsyncMessage("embedtest:getelementinner", {
                                                 name: "result" })
             while (appWindow.testResult == "") {
-                wait();
+                testcaseid.wait();
             }
-            compare(appWindow.testResult, "ok");
+            testcaseid.compare(appWindow.testResult, "ok");
             mozContext.dumpTS("test_Test1MultiTouchPage end");
         }
     }

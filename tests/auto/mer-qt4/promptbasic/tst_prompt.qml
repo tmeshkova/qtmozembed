@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property variant promptReceived : null
@@ -26,7 +23,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTSROOT") + "/components/TestHelpers.manifest");
         }
     }
 
@@ -85,78 +82,78 @@ ApplicationWindow {
         function test_TestPromptPage()
         {
             mozContext.dumpTS("test_TestPromptPage start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             appWindow.testCaseNum = 0
             appWindow.promptReceived = null
             appWindow.testResult = null
-            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/promptbasic/prompt.html";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/promptbasic/prompt.html";
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             while (!appWindow.promptReceived) {
-                wait();
+                testcaseid.wait();
             }
             webViewport.child.sendAsyncMessage("embedtest:getelementinner", {
                                                 name: "result" })
             while (!appWindow.testResult) {
-                wait();
+                testcaseid.wait();
             }
-            compare(appWindow.testResult, "ok");
+            testcaseid.compare(appWindow.testResult, "ok");
             mozContext.dumpTS("test_TestPromptPage end");
         }
 
         function test_TestPromptWithBadResponse()
         {
             mozContext.dumpTS("test_TestPromptWithBadResponse start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             appWindow.testCaseNum = 1
             appWindow.promptReceived = null
             appWindow.testResult = null
-            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/promptbasic/prompt.html";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/promptbasic/prompt.html";
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             while (!appWindow.promptReceived) {
-                wait();
+                testcaseid.wait();
             }
             webViewport.child.sendAsyncMessage("embedtest:getelementinner", {
                                                 name: "result" })
             while (!appWindow.testResult) {
-                wait();
+                testcaseid.wait();
             }
-            compare(appWindow.testResult, "failed");
+            testcaseid.compare(appWindow.testResult, "failed");
             mozContext.dumpTS("test_TestPromptWithBadResponse end");
         }
 
         function test_TestPromptWithoutResponse()
         {
             mozContext.dumpTS("test_TestPromptWithoutResponse start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             appWindow.testCaseNum = 2
             appWindow.promptReceived = null
             appWindow.testResult = null
-            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/promptbasic/prompt.html";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/promptbasic/prompt.html";
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             while (!appWindow.promptReceived) {
-                wait();
+                testcaseid.wait();
             }
             webViewport.child.sendAsyncMessage("embedtest:getelementinner", {
                                                 name: "result" })
             while (!appWindow.testResult) {
-                wait();
+                testcaseid.wait();
             }
-            compare(appWindow.testResult, "unknown");
+            testcaseid.compare(appWindow.testResult, "unknown");
             mozContext.dumpTS("test_TestPromptWithoutResponse end");
         }
     }

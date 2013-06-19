@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property variant promptReceived : null
@@ -24,7 +21,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTSROOT") + "/components/TestHelpers.manifest");
         }
     }
 
@@ -65,17 +62,17 @@ ApplicationWindow {
         function test_TestLoginMgrPage()
         {
             mozContext.dumpTS("test_TestLoginMgrPage start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             appWindow.promptReceived = null
-            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/passwordmgr/subtst_notifications_1.html";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/passwordmgr/subtst_notifications_1.html";
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             while (!appWindow.promptReceived) {
-                wait();
+                testcaseid.wait();
             }
             mozContext.dumpTS("test_TestLoginMgrPage end");
         }

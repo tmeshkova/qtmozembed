@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
 
@@ -51,13 +48,13 @@ ApplicationWindow {
         function test_Test1LoadSimpleBlank()
         {
             mozContext.dumpTS("test_Test1LoadSimpleBlank start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             webViewport.child.url = "about:blank";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100)
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100)
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             mozContext.dumpTS("test_Test1LoadSimpleBlank end")
         }
@@ -65,10 +62,10 @@ ApplicationWindow {
         {
             mozContext.dumpTS("test_Test2LoadAboutMozillaCheckTitle start")
             webViewport.child.url = "about:mozilla";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.title, "The Book of Mozilla, 15:1")
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.title, "The Book of Mozilla, 15:1")
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             mozContext.dumpTS("test_Test2LoadAboutMozillaCheckTitle end")
         }

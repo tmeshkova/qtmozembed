@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property variant promptReceived : null
@@ -24,7 +21,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTSROOT") + "/components/TestHelpers.manifest");
         }
         onRecvObserve: {
             if (message == "embed:download") {
@@ -72,26 +69,26 @@ ApplicationWindow {
         function test_TestDownloadMgrPage()
         {
             mozContext.dumpTS("test_TestLoginMgrPage start")
-            verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozContext())
             mozContext.instance.setPref("browser.download.folderList", 2); // 0 - Desktop, 1 - Downloads, 2 - Custom
             mozContext.instance.setPref("browser.download.useDownloadDir", false); // Invoke filepicker instead of immediate download to ~/Downloads
             mozContext.instance.setPref("browser.download.manager.retention", 2);
             mozContext.instance.setPref("browser.helperApps.deleteTempFileOnExit", false);
             mozContext.instance.setPref("browser.download.manager.quitBehavior", 1);
             mozContext.instance.addObserver("embed:download");
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozView())
             appWindow.promptReceived = null
             webViewport.child.url = "about:mozilla";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
-            webViewport.child.url = mozContext.getenv("QTTESTPATH") + "/auto/downloadmgr/tt.bin";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/downloadmgr/tt.bin";
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!appWindow.promptReceived) {
-                wait();
+                testcaseid.wait();
             }
             mozContext.dumpTS("test_TestDownloadMgrPage end");
         }

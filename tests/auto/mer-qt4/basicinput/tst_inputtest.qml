@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property string inputContent : ""
@@ -34,7 +31,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTSROOT") + "/components/TestHelpers.manifest");
         }
     }
 
@@ -88,17 +85,17 @@ ApplicationWindow {
         function test_Test1LoadInputPage()
         {
             mozContext.dumpTS("test_Test1LoadInputPage start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             webViewport.child.url = "data:text/html,<input id=myelem value=''>";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             mouseClick(webViewport, 10, 10)
             while (!appWindow.isState(1, 0, 3)) {
-                wait();
+                testcaseid.wait();
             }
             appWindow.inputState = false;
             keyClick(Qt.Key_K);
@@ -110,28 +107,28 @@ ApplicationWindow {
                                                 property: "value"
                                                })
             while (appWindow.inputContent == "") {
-                wait();
+                testcaseid.wait();
             }
-            compare(appWindow.inputContent, "korp");
+            testcaseid.compare(appWindow.inputContent, "korp");
             mozContext.dumpTS("test_Test1LoadInputPage end");
         }
 
         function test_Test1LoadInputURLPage()
         {
             mozContext.dumpTS("test_Test1LoadInputPage start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             appWindow.inputContent = ""
             appWindow.inputType = ""
             webViewport.child.url = "data:text/html,<input type=number id=myelem value=''>";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             mouseClick(webViewport, 10, 10)
             while (!appWindow.isState(1, 0, 3)) {
-                wait();
+                testcaseid.wait();
             }
             appWindow.inputState = false;
             keyClick(Qt.Key_1);
@@ -143,12 +140,12 @@ ApplicationWindow {
                                                 property: "value"
                                                })
             while (appWindow.inputContent == "") {
-                wait();
+                testcaseid.wait();
             }
             while (appWindow.inputType == "") {
-                wait();
+                testcaseid.wait();
             }
-            compare(appWindow.inputContent, "1234");
+            testcaseid.compare(appWindow.inputContent, "1234");
             mozContext.dumpTS("test_Test1LoadInputPage end");
         }
     }

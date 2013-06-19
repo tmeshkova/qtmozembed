@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property string selectedContent : ""
@@ -63,13 +60,13 @@ ApplicationWindow {
         function test_SelectionInit()
         {
             mozContext.dumpTS("test_SelectionInit start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             webViewport.child.url = "data:text/html,hello test selection";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             webViewport.child.sendAsyncMessage("Browser:SelectionStart", {
                                                 xPos: 56,
@@ -83,9 +80,9 @@ ApplicationWindow {
                                                 yPos: 16
                                               })
             while (appWindow.selectedContent == "") {
-                wait();
+                testcaseid.wait();
             }
-            compare(appWindow.selectedContent, "test");
+            testcaseid.compare(appWindow.selectedContent, "test");
             mozContext.dumpTS("test_SelectionInit end")
         }
     }

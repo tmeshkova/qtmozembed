@@ -30,15 +30,15 @@ SOURCES += \
     main.cpp \
     qmlmozcontext.cpp
 
-import.files = qmldir
-import.path = $$TARGETPATH
-INSTALLS += import
-
 TARGET = $$qtLibraryTarget($$TARGET)
 TARGETPATH = /opt/tests/qtmozembed/imports/$$MODULENAME
 
 target.path = $$TARGETPATH
 INSTALLS += target
+
+import.files = qmldir
+import.path = $$TARGETPATH
+INSTALLS += import
 
 !isEmpty(OBJ_BUILD_PATH) {
   QMAKE_POST_LINK = rm -f $$OBJECTS_DIR/qmldir

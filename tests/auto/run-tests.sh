@@ -11,9 +11,11 @@ else
   export QML_IMPORT_PATH=/opt/tests/qtmozembed/imports
 fi
 CURDIR=$PWD
+export QTTESTSROOT=${QTTESTSROOT:-"/opt/tests/qtmozembed"}
 if [ "$QTTESTSLOCATION" != "" ]; then
   cd $QTTESTSLOCATION
 fi
+export QTTESTSLOCATION=${QTTESTSLOCATION:-"/opt/tests/qtmozembed/auto/mer-qt4"}
 
 #export NSPR_LOG_MODULES=EmbedLiteTrace:5,EmbedNonImpl:5,EmbedLiteApp:5,EmbedLiteView:5,EmbedLiteViewThreadParent:5
 

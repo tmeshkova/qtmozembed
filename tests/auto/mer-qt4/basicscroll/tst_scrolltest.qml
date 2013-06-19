@@ -2,14 +2,11 @@ import QtQuickTest 1.0
 import QtQuick 1.0
 import Sailfish.Silica 1.0
 import QtMozilla 1.0
-import "../componentCreation.js" as MyScript
+import "../../shared/componentCreation.js" as MyScript
+import "../../shared/sharedTests.js" as SharedTests
 
 ApplicationWindow {
     id: appWindow
-
-    property string currentPageName: pageStack.currentPage != null
-            ? pageStack.currentPage.objectName
-            : ""
 
     property bool mozViewInitialized : false
     property int scrollX : 0
@@ -27,7 +24,7 @@ ApplicationWindow {
             // and qmlmoztestrunner does not build in GL mode
             // Let's put it here for now in SW mode always
             mozContext.instance.setIsAccelerated(true);
-            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTPATH") + "/components/TestHelpers.manifest");
+            mozContext.instance.addComponentManifest(mozContext.getenv("QTTESTSROOT") + "/components/TestHelpers.manifest");
         }
     }
 
@@ -66,31 +63,31 @@ ApplicationWindow {
         function test_TestScrollPaintOperations()
         {
             mozContext.dumpTS("test_TestScrollPaintOperations start")
-            verify(MyScript.waitMozContext())
-            verify(MyScript.waitMozView())
+            testcaseid.verify(MyScript.waitMozContext())
+            testcaseid.verify(MyScript.waitMozView())
             webViewport.child.url = "data:text/html,<body bgcolor=red leftmargin=0 topmargin=0 marginwidth=0 marginheight=0><input style='position:absolute; left:0px; top:1200px;'>";
-            verify(MyScript.waitLoadFinished(webViewport))
-            compare(webViewport.child.loadProgress, 100);
+            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+            testcaseid.compare(webViewport.child.loadProgress, 100);
             while (!webViewport.child.painted) {
-                wait();
+                testcaseid.wait();
             }
             while (appWindow.scrollY === 0) {
                 MyScript.scrollBy(100, 301, 0, -200, 100, false);
-                wait(100);
+                testcaseid.wait(100);
             }
-            verify(appWindow.scrollX === 0)
+            testcaseid.verify(appWindow.scrollX === 0)
             while (appWindow.clickX === 0) {
-                wait();
+                testcaseid.wait();
             }
-            verify(appWindow.clickX === 100)
-            verify(appWindow.clickY === 101)
+            testcaseid.verify(appWindow.clickX === 100)
+            testcaseid.verify(appWindow.clickY === 101)
             appWindow.clickX = 0
             mouseClick(webViewport, 10, 20)
             while (appWindow.clickX === 0) {
-                wait();
+                testcaseid.wait();
             }
-            verify(appWindow.clickX === 10)
-            verify(appWindow.clickY === 20)
+            testcaseid.verify(appWindow.clickX === 10)
+            testcaseid.verify(appWindow.clickY === 20)
             mozContext.dumpTS("test_TestScrollPaintOperations end");
         }
     }
