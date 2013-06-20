@@ -1,0 +1,19 @@
+<html>
+<head>
+<script>
+function disp_prompt()
+{
+    document.getElementById("result").innerHTML = "unknown";
+    var fname=prompt("Please enter your name:","Your name")
+    if (fname == "expectedPromptResult") {
+      document.getElementById("result").innerHTML = "ok";
+    } else {
+      document.getElementById("result").innerHTML = "failed";
+    }
+}
+</script>
+</head>
+<body onload="disp_prompt()">
+<div id="result"></div>
+</body>
+</html>

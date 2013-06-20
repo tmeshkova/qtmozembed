@@ -1,0 +1,77 @@
+<html>
+<head>
+  <script>
+    var ongoingTouches = new Array;
+    var offX = 0;
+    var offY = 0;
+    var status = 0;
+
+    function getOffset(el) {
+        if (el.getBoundingClientRect)
+            return el.getBoundingClientRect();
+        else {
+            var x = 0, y = 0;
+            do {
+                x += el.offsetLeft - el.scrollLeft;
+                y += el.offsetTop - el.scrollTop;
+            }
+            while (el = el.offsetParent);
+            return { "left": x, "top": y }
+        }
+    }
+
+    function ongoingTouchIndexById(idToFind) {
+      for (var i=0; i<ongoingTouches.length; i++) {
+        var id = ongoingTouches[i].identifier;
+        if (id == idToFind) {
+          return i;
+        }
+      }
+      return -1;    // not found
+    }
+
+    function handleStart(evt) {
+      // window.dump("handleStart:\n");
+      evt.preventDefault();
+      var touches = evt.changedTouches;
+      if (touches.length === 3) {
+        status++;
+      }
+    }
+
+    function handleMove(evt) {
+      // window.dump("handleMove\n");
+      evt.preventDefault();
+      var touches = evt.changedTouches;
+      if (touches.length === 3) {
+        status++;
+      }
+    }
+
+    function handleEnd(evt) {
+      evt.preventDefault();
+      var touches = evt.changedTouches;
+      if (touches.length === 3) {
+        status++;
+      }
+      if (touches[0].pageX === 52 && touches[1].pageX === 53 && touches[2].pageX === 54 && status === 9) {
+        var el = document.getElementById("result");
+        el.innerHTML = "ok";
+      }
+    }
+
+    function startup() {
+      var el = document.getElementById("testarea");
+      el.addEventListener("touchstart", handleStart, false);
+      el.addEventListener("touchend", handleEnd, false);
+      el.addEventListener("touchmove", handleMove, false);
+    }
+  </script>
+</head>
+<body topmargin="10px" leftmargin="10px" marginheight="10px" marginwidth="10px" onload="startup()">
+  <div id="result"></div>
+  <div id="testarea" style="width:50;height:50;background-color:green;">
+    Test Div
+  </div>
+</body>
+</html>

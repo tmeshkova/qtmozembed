@@ -1,16 +1,13 @@
-import QtQuickTest 1.0
-import QtQuick 1.0
-import Sailfish.Silica 1.0
-import QtMozilla 1.0
+import QtTest 1.0
+import QtQuick 2.0
+import Qt5Mozilla 1.0
 import "../../shared/componentCreation.js" as MyScript
 import "../../shared/sharedTests.js" as SharedTests
 
-ApplicationWindow {
+Item {
     id: appWindow
 
     property bool mozViewInitialized : false
-    property variant mozView : null
-    property variant createParentID : 0
 
     QmlMozContext {
         id: mozContext
@@ -25,26 +22,35 @@ ApplicationWindow {
         }
     }
 
+    QmlMozView {
+        id: webViewport
+        visible: true
+        focus: true
+        anchors.fill: parent
+        Connections {
+            target: webViewport.child
+            onViewInitialized: {
+                appWindow.mozViewInitialized = true
+            }
+        }
+    }
+
     resources: TestCase {
         id: testcaseid
         name: "mozContextPage"
         when: windowShown
 
         function cleanup() {
-            mozContext.dumpTS("tst_basicview cleanup")
+            mozContext.dumpTS("tst_viewtest cleanup")
         }
 
-        function test_1contextPrepareViewContext()
+        function test_Test1LoadSimpleBlank()
         {
-            SharedTests.shared_1contextPrepareViewContext()
+            SharedTests.shared_Test1LoadSimpleBlank()
         }
-        function test_2viewInit()
+        function test_Test2LoadAboutMozillaCheckTitle()
         {
-            SharedTests.shared_2viewInit(false)
-        }
-        function test_3viewLoadURL()
-        {
-            SharedTests.shared_3viewLoadURL()
+            SharedTests.shared_Test2LoadAboutMozillaCheckTitle()
         }
     }
 }

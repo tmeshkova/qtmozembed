@@ -1,5 +1,7 @@
 var component;
 var sprite;
+var context_view_wait_timeout = 300;
+var load_finish_wait_timeout = 10000;
 
 function createSpriteObjects() {
     component = Qt.createComponent(mozContext.getenv("QTTESTSROOT") + "/auto/shared/ViewComponent.qml");
@@ -41,30 +43,33 @@ function waitMozContext() {
     if (mozContext.instance.initialized()) {
         return true;
     }
-    while (!mozContext.instance.initialized()) {
-        mozContext.waitLoop();
+    var ticks = 0;
+    while (!mozContext.instance.initialized() && ticks++ < context_view_wait_timeout) {
+        testcaseid.wait();
     }
-    return true;
+    return ticks < context_view_wait_timeout;
 }
 
 function waitMozView() {
     if (appWindow.mozViewInitialized) {
         return true;
     }
-    while (!appWindow.mozViewInitialized) {
-        mozContext.waitLoop();
+    var ticks = 0;
+    while (!appWindow.mozViewInitialized && ticks++ < context_view_wait_timeout) {
+        testcaseid.wait();
     }
-    return true;
+    return ticks < context_view_wait_timeout;
 }
 
 function waitLoadFinished(view) {
     if (!view.child.loading && view.child.loadProgress !== 0) {
         return true;
     }
-    while (view.child.loading || view.child.loadProgress === 0) {
-        mozContext.waitLoop();
+    var ticks = 0;
+    while ((view.child.loading || view.child.loadProgress === 0) && ticks++ < load_finish_wait_timeout) {
+        testcaseid.wait();
     }
-    return true;
+    return ticks < load_finish_wait_timeout;
 }
 
 function dumpTs(message) {

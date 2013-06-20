@@ -1,11 +1,10 @@
-import QtQuickTest 1.0
-import QtQuick 1.0
-import Sailfish.Silica 1.0
-import QtMozilla 1.0
+import QtTest 1.0
+import QtQuick 2.0
+import Qt5Mozilla 1.0
 import "../../shared/componentCreation.js" as MyScript
 import "../../shared/sharedTests.js" as SharedTests
 
-ApplicationWindow {
+Item {
     id: appWindow
 
     property bool mozViewInitialized : false
@@ -53,7 +52,7 @@ ApplicationWindow {
         }
         function test_2newviewInit()
         {
-            SharedTests.shared_2newviewInit(false)
+            SharedTests.shared_2newviewInit(true)
         }
         function test_viewTestNewWindowAPI()
         {
