@@ -14,16 +14,17 @@
 #include <QString>
 #include <QPointF>
 #include "mozilla/embedlite/EmbedLiteView.h"
+#include "qmozview_templated_wrapper.h"
 
 class QGraphicsView;
 class QTouchEvent;
-class QGraphicsMozView;
 class QMozContext;
+class QMozReturnValue;
 
 class QGraphicsMozViewPrivate : public mozilla::embedlite::EmbedLiteViewListener
 {
 public:
-    QGraphicsMozViewPrivate(QGraphicsMozView* view);
+    QGraphicsMozViewPrivate(IMozQViewIface* aViewIface);
     virtual ~QGraphicsMozViewPrivate();
 
     void ReceiveInputEvent(const mozilla::InputData& event);
@@ -63,7 +64,7 @@ public:
     virtual bool HandleSingleTap(const nsIntPoint& aPoint);
     virtual bool HandleDoubleTap(const nsIntPoint& aPoint);
 
-    QGraphicsMozView* q;
+    IMozQViewIface* mViewIface;
     QMozContext* mContext;
     mozilla::embedlite::EmbedLiteView* mView;
     bool mViewInitialized;

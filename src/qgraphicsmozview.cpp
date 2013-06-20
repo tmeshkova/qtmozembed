@@ -33,7 +33,7 @@ using namespace mozilla::embedlite;
 
 QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     : QGraphicsWidget(parent)
-    , d(new QGraphicsMozViewPrivate(this))
+    , d(new QGraphicsMozViewPrivate(new IMozQView<QGraphicsMozView>(*this)))
     , mParentID(0)
     , mUseQmlMouse(false)
 {

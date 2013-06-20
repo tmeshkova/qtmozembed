@@ -26,8 +26,8 @@
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
-QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(QGraphicsMozView* view)
-    : q(view)
+QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
+    : mViewIface(aViewIface)
     , mContext(NULL)
     , mView(NULL)
     , mViewInitialized(false)
@@ -50,6 +50,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(QGraphicsMozView* view)
 
 QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
 {
+    delete mViewIface;
 }
 
 void QGraphicsMozViewPrivate::UpdateViewSize()
@@ -74,7 +75,7 @@ bool QGraphicsMozViewPrivate::RequestCurrentGLContext()
 bool QGraphicsMozViewPrivate::RequestCurrentGLContext(QSize& aViewPortSize)
 {
     bool hasContext = false;
-    Q_EMIT q->requestGLContext(hasContext, aViewPortSize);
+    mViewIface->requestGLContext(hasContext, aViewPortSize);
     return hasContext;
 }
 
@@ -83,19 +84,19 @@ void QGraphicsMozViewPrivate::ViewInitialized()
     mViewInitialized = true;
     UpdateViewSize();
     // This is currently part of official API, so let's subscribe to these messages by default
-    Q_EMIT q->viewInitialized();
-    Q_EMIT q->navigationHistoryChanged();
+    mViewIface->viewInitialized();
+    mViewIface->navigationHistoryChanged();
 }
 
 void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     mBgColor = QColor(r, g, b, a);
-    Q_EMIT q->bgColorChanged();
+    mViewIface->bgColorChanged();
 }
 
 bool QGraphicsMozViewPrivate::Invalidate()
 {
-    q->update();
+    mViewIface->Invalidate();
     return true;
 }
 
@@ -105,27 +106,27 @@ void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCan
     if (mCanGoBack != aCanGoBack || mCanGoForward != aCanGoForward) {
         mCanGoBack = aCanGoBack;
         mCanGoForward = aCanGoForward;
-        Q_EMIT q->navigationHistoryChanged();
+        mViewIface->navigationHistoryChanged();
     }
-    Q_EMIT q->urlChanged();
+    mViewIface->urlChanged();
 }
 
 void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal)
 {
     mProgress = aProgress;
-    Q_EMIT q->loadProgressChanged();
+    mViewIface->loadProgressChanged();
 }
 
 void QGraphicsMozViewPrivate::OnLoadStarted(const char* aLocation)
 {
     if (mLocation != aLocation) {
         mLocation = aLocation;
-        Q_EMIT q->urlChanged();
+        mViewIface->urlChanged();
     }
     if (!mIsLoading) {
         mIsLoading = true;
         mProgress = 1;
-        Q_EMIT q->loadingChanged();
+        mViewIface->loadingChanged();
     }
 }
 
@@ -134,7 +135,7 @@ void QGraphicsMozViewPrivate::OnLoadFinished(void)
     if (mIsLoading) {
         mProgress = 100;
         mIsLoading = false;
-        Q_EMIT q->loadingChanged();
+        mViewIface->loadingChanged();
     }
 }
 
@@ -144,7 +145,7 @@ void QGraphicsMozViewPrivate::ViewDestroyed()
     LOGT();
     mView = NULL;
     mViewInitialized = false;
-    Q_EMIT q->viewDestroyed();
+    mViewIface->viewDestroyed();
 }
 
 void QGraphicsMozViewPrivate::RecvAsyncMessage(const PRUnichar* aMessage, const PRUnichar* aData)
@@ -165,7 +166,7 @@ void QGraphicsMozViewPrivate::RecvAsyncMessage(const PRUnichar* aMessage, const 
 
     if (ok) {
         LOGT("mesg:%s, data:%s", message.get(), data.get());
-        Q_EMIT q->recvAsyncMessage(message.get(), vdata);
+        mViewIface->recvAsyncMessage(message.get(), vdata);
     } else {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
         LOGT("parse: err:%s, errLine:%i", parser.errorString().toUtf8().data(), parser.errorLine());
@@ -191,7 +192,7 @@ char* QGraphicsMozViewPrivate::RecvSyncMessage(const PRUnichar* aMessage, const 
     ok = error.error == QJsonParseError::NoError;
     QVariant vdata = doc.toVariant();
 #endif
-    Q_EMIT q->recvSyncMessage(message.get(), vdata, &response);
+    mViewIface->recvSyncMessage(message.get(), vdata, &response);
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
     QJson::Serializer serializer;
@@ -207,19 +208,19 @@ char* QGraphicsMozViewPrivate::RecvSyncMessage(const PRUnichar* aMessage, const 
 void QGraphicsMozViewPrivate::OnLoadRedirect(void)
 {
     LOGT();
-    Q_EMIT q->loadRedirect();
+    mViewIface->loadRedirect();
 }
 
 void QGraphicsMozViewPrivate::OnSecurityChanged(const char* aStatus, unsigned int aState)
 {
     LOGT();
-    Q_EMIT q->securityChanged(aStatus, aState);
+    mViewIface->securityChanged(aStatus, aState);
 }
 void QGraphicsMozViewPrivate::OnFirstPaint(int32_t aX, int32_t aY)
 {
     LOGT();
     mIsPainted = true;
-    Q_EMIT q->firstPaint(aX, aY);
+    mViewIface->firstPaint(aX, aY);
 }
 
 void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
@@ -242,7 +243,7 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
     else if (imType.contains("url", Qt::CaseInsensitive)) {
         hints |= Qt::ImhUrlCharactersOnly;
     }
-    q->setInputMethodHints(hints);
+    mViewIface->setInputMethodHints(hints);
 
     QWidget* focusWidget = qApp->focusWidget();
     if (focusWidget && aFocusChange) {
@@ -266,7 +267,7 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
         LOGT("Fixme IME for Qt5");
 #endif
     }
-    Q_EMIT q->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
+    mViewIface->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
 
 void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
@@ -281,7 +282,7 @@ void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
 void QGraphicsMozViewPrivate::OnTitleChanged(const PRUnichar* aTitle)
 {
     mTitle = QString((QChar*)aTitle);
-    Q_EMIT q->titleChanged();
+    mViewIface->titleChanged();
 }
 
 void QGraphicsMozViewPrivate::SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
@@ -306,7 +307,7 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
 {
     mContentRect = QRect(aContentRect.x, aContentRect.y, aContentRect.width, aContentRect.height);
     mScrollableSize = QSize(aScrollableSize.width, aScrollableSize.height);
-    Q_EMIT q->viewAreaChanged();
+    mViewIface->viewAreaChanged();
     return false;
 }
 
@@ -314,7 +315,7 @@ bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const floa
 {
     mScrollableOffset = QPointF(aPosition.x, aPosition.y);
     mContentResolution = aResolution;
-    Q_EMIT q->viewAreaChanged();
+    mViewIface->viewAreaChanged();
     return false;
 }
 
@@ -322,7 +323,7 @@ bool QGraphicsMozViewPrivate::HandleLongTap(const nsIntPoint& aPoint)
 {
     QMozReturnValue retval;
     retval.setMessage(false);
-    Q_EMIT q->handleLongTap(QPoint(aPoint.x, aPoint.y), &retval);
+    mViewIface->handleLongTap(QPoint(aPoint.x, aPoint.y), &retval);
     return retval.getMessage().toBool();
 }
 
@@ -330,7 +331,7 @@ bool QGraphicsMozViewPrivate::HandleSingleTap(const nsIntPoint& aPoint)
 {
     QMozReturnValue retval;
     retval.setMessage(false);
-    Q_EMIT q->handleSingleTap(QPoint(aPoint.x, aPoint.y), &retval);
+    mViewIface->handleSingleTap(QPoint(aPoint.x, aPoint.y), &retval);
     return retval.getMessage().toBool();
 }
 
@@ -338,7 +339,7 @@ bool QGraphicsMozViewPrivate::HandleDoubleTap(const nsIntPoint& aPoint)
 {
     QMozReturnValue retval;
     retval.setMessage(false);
-    Q_EMIT q->handleDoubleTap(QPoint(aPoint.x, aPoint.y), &retval);
+    mViewIface->handleDoubleTap(QPoint(aPoint.x, aPoint.y), &retval);
     return retval.getMessage().toBool();
 }
 
@@ -348,7 +349,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     mPendingTouchEvent = true;
     event->setAccepted(true);
     if (event->type() == QEvent::TouchBegin) {
-        q->forceActiveFocus();
+        mViewIface->forceActiveFocus();
         mTouchTime.restart();
     }
 

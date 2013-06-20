@@ -73,6 +73,7 @@ public:
     QColor bgcolor() const;
     bool getUseQmlMouse();
     void setUseQmlMouse(bool value);
+    void forceActiveFocus();
 
 public Q_SLOTS:
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl());
@@ -140,8 +141,6 @@ private Q_SLOTS:
     void onInitialized();
 
 private:
-    void forceActiveFocus();
-
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
