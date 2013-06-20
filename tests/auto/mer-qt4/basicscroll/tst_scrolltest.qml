@@ -62,33 +62,7 @@ ApplicationWindow {
 
         function test_TestScrollPaintOperations()
         {
-            mozContext.dumpTS("test_TestScrollPaintOperations start")
-            testcaseid.verify(MyScript.waitMozContext())
-            testcaseid.verify(MyScript.waitMozView())
-            webViewport.child.url = "data:text/html,<body bgcolor=red leftmargin=0 topmargin=0 marginwidth=0 marginheight=0><input style='position:absolute; left:0px; top:1200px;'>";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100);
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            while (appWindow.scrollY === 0) {
-                MyScript.scrollBy(100, 301, 0, -200, 100, false);
-                testcaseid.wait(100);
-            }
-            testcaseid.verify(appWindow.scrollX === 0)
-            while (appWindow.clickX === 0) {
-                testcaseid.wait();
-            }
-            testcaseid.verify(appWindow.clickX === 100)
-            testcaseid.verify(appWindow.clickY === 101)
-            appWindow.clickX = 0
-            mouseClick(webViewport, 10, 20)
-            while (appWindow.clickX === 0) {
-                testcaseid.wait();
-            }
-            testcaseid.verify(appWindow.clickX === 10)
-            testcaseid.verify(appWindow.clickY === 20)
-            mozContext.dumpTS("test_TestScrollPaintOperations end");
+            SharedTests.shared_TestScrollPaintOperations()
         }
     }
 }

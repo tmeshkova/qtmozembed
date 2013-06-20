@@ -61,20 +61,7 @@ ApplicationWindow {
 
         function test_TestLoginMgrPage()
         {
-            mozContext.dumpTS("test_TestLoginMgrPage start")
-            testcaseid.verify(MyScript.waitMozContext())
-            testcaseid.verify(MyScript.waitMozView())
-            appWindow.promptReceived = null
-            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/passwordmgr/subtst_notifications_1.html";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100);
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            while (!appWindow.promptReceived) {
-                testcaseid.wait();
-            }
-            mozContext.dumpTS("test_TestLoginMgrPage end");
+            SharedTests.shared_TestLoginMgrPage()
         }
     }
 }

@@ -47,27 +47,11 @@ ApplicationWindow {
 
         function test_Test1LoadSimpleBlank()
         {
-            mozContext.dumpTS("test_Test1LoadSimpleBlank start")
-            testcaseid.verify(MyScript.waitMozContext())
-            testcaseid.verify(MyScript.waitMozView())
-            webViewport.child.url = "about:blank";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100)
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            mozContext.dumpTS("test_Test1LoadSimpleBlank end")
+            SharedTests.shared_Test1LoadSimpleBlank()
         }
         function test_Test2LoadAboutMozillaCheckTitle()
         {
-            mozContext.dumpTS("test_Test2LoadAboutMozillaCheckTitle start")
-            webViewport.child.url = "about:mozilla";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.title, "The Book of Mozilla, 15:1")
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            mozContext.dumpTS("test_Test2LoadAboutMozillaCheckTitle end")
+            SharedTests.shared_Test2LoadAboutMozillaCheckTitle()
         }
     }
 }

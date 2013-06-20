@@ -34,13 +34,7 @@ Item {
 
         function test_1contextPrepareViewContext()
         {
-            mozContext.dumpTS("test_1contextPrepareViewContext start")
-            testcaseid.verify(mozContext.instance !== undefined)
-            while (mozContext.instance.initialized() === false) {
-                testcaseid.wait(500)
-            }
-            testcaseid.verify(mozContext.instance.initialized())
-            mozContext.dumpTS("test_1contextPrepareViewContext end")
+            SharedTests.shared_1contextPrepareViewContext()
         }
         function test_2viewInit()
         {

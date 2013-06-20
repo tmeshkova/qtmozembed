@@ -36,40 +36,15 @@ ApplicationWindow {
 
         function test_1contextPrepareViewContext()
         {
-            mozContext.dumpTS("test_1contextPrepareViewContext start")
-            testcaseid.verify(mozContext.instance !== undefined)
-            while (mozContext.instance.initialized() === false) {
-                testcaseid.wait(500)
-            }
-            testcaseid.verify(mozContext.instance.initialized())
-            mozContext.dumpTS("test_1contextPrepareViewContext end")
+            SharedTests.shared_1contextPrepareViewContext()
         }
         function test_2viewInit()
         {
-            mozContext.dumpTS("test_2viewInit start")
-            testcaseid.verify(mozContext.instance.initialized())
-            appWindow.createParentID = 0;
-            MyScript.createSpriteObjects();
-            while (mozView === null) {
-                testcaseid.wait(500)
-            }
-            while (mozViewInitialized !== true) {
-                testcaseid.wait(500)
-            }
-            testcaseid.verify(mozView.child !== undefined)
-            mozContext.dumpTS("test_2viewInit end")
+            SharedTests.shared_2viewInit()
         }
         function test_3viewLoadURL()
         {
-            mozContext.dumpTS("test_3viewLoadURL start")
-            testcaseid.verify(mozView.child !== undefined)
-            mozView.child.url = "about:mozilla";
-            testcaseid.verify(MyScript.waitLoadFinished(mozView))
-            testcaseid.compare(mozView.child.url, "about:mozilla")
-            while (!mozView.child.painted) {
-                testcaseid.wait();
-            }
-            mozContext.dumpTS("test_3viewLoadURL end")
+            SharedTests.shared_3viewLoadURL()
         }
     }
 }

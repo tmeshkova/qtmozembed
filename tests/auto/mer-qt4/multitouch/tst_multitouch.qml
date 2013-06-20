@@ -67,28 +67,7 @@ ApplicationWindow {
 
         function test_Test1MultiTouchPage()
         {
-            mozContext.dumpTS("test_Test1MultiTouchPage start")
-            testcaseid.verify(MyScript.waitMozContext())
-            testcaseid.verify(MyScript.waitMozView())
-            webViewport.child.url = mozContext.getenv("QTTESTSLOCATION") + "/multitouch/touch.html";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100);
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            var params = [Qt.point(50,50), Qt.point(51,51), Qt.point(52,52)];
-            webViewport.child.synthTouchBegin(params);
-            params = [Qt.point(51,51), Qt.point(52,52), Qt.point(53,53)];
-            webViewport.child.synthTouchMove(params);
-            params = [Qt.point(52,52), Qt.point(53,53), Qt.point(54,54)];
-            webViewport.child.synthTouchEnd(params);
-            webViewport.child.sendAsyncMessage("embedtest:getelementinner", {
-                                                name: "result" })
-            while (appWindow.testResult == "") {
-                testcaseid.wait();
-            }
-            testcaseid.compare(appWindow.testResult, "ok");
-            mozContext.dumpTS("test_Test1MultiTouchPage end");
+            SharedTests.shared_Test1MultiTouchPage()
         }
     }
 }

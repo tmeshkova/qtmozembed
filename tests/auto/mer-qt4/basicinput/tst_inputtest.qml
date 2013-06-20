@@ -84,69 +84,12 @@ ApplicationWindow {
 
         function test_Test1LoadInputPage()
         {
-            mozContext.dumpTS("test_Test1LoadInputPage start")
-            testcaseid.verify(MyScript.waitMozContext())
-            testcaseid.verify(MyScript.waitMozView())
-            webViewport.child.url = "data:text/html,<input id=myelem value=''>";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100);
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            mouseClick(webViewport, 10, 10)
-            while (!appWindow.isState(1, 0, 3)) {
-                testcaseid.wait();
-            }
-            appWindow.inputState = false;
-            keyClick(Qt.Key_K);
-            keyClick(Qt.Key_O);
-            keyClick(Qt.Key_R);
-            keyClick(Qt.Key_P);
-            webViewport.child.sendAsyncMessage("embedtest:getelementprop", {
-                                                name: "myelem",
-                                                property: "value"
-                                               })
-            while (appWindow.inputContent == "") {
-                testcaseid.wait();
-            }
-            testcaseid.compare(appWindow.inputContent, "korp");
-            mozContext.dumpTS("test_Test1LoadInputPage end");
+            SharedTests.shared_Test1LoadInputPage()
         }
 
         function test_Test1LoadInputURLPage()
         {
-            mozContext.dumpTS("test_Test1LoadInputPage start")
-            testcaseid.verify(MyScript.waitMozContext())
-            testcaseid.verify(MyScript.waitMozView())
-            appWindow.inputContent = ""
-            appWindow.inputType = ""
-            webViewport.child.url = "data:text/html,<input type=number id=myelem value=''>";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100);
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            mouseClick(webViewport, 10, 10)
-            while (!appWindow.isState(1, 0, 3)) {
-                testcaseid.wait();
-            }
-            appWindow.inputState = false;
-            keyClick(Qt.Key_1);
-            keyClick(Qt.Key_2);
-            keyClick(Qt.Key_3);
-            keyClick(Qt.Key_4);
-            webViewport.child.sendAsyncMessage("embedtest:getelementprop", {
-                                                name: "myelem",
-                                                property: "value"
-                                               })
-            while (appWindow.inputContent == "") {
-                testcaseid.wait();
-            }
-            while (appWindow.inputType == "") {
-                testcaseid.wait();
-            }
-            testcaseid.compare(appWindow.inputContent, "1234");
-            mozContext.dumpTS("test_Test1LoadInputPage end");
+            SharedTests.shared_Test1LoadInputURLPage()
         }
     }
 }

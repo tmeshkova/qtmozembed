@@ -59,31 +59,7 @@ ApplicationWindow {
 
         function test_SelectionInit()
         {
-            mozContext.dumpTS("test_SelectionInit start")
-            testcaseid.verify(MyScript.waitMozContext())
-            testcaseid.verify(MyScript.waitMozView())
-            webViewport.child.url = "data:text/html,hello test selection";
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100);
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            webViewport.child.sendAsyncMessage("Browser:SelectionStart", {
-                                                xPos: 56,
-                                                yPos: 16
-                                              })
-            webViewport.child.sendAsyncMessage("Browser:SelectionMoveStart", {
-                                                change: "start"
-                                              })
-            webViewport.child.sendAsyncMessage("Browser:SelectionCopy", {
-                                                xPos: 56,
-                                                yPos: 16
-                                              })
-            while (appWindow.selectedContent == "") {
-                testcaseid.wait();
-            }
-            testcaseid.compare(appWindow.selectedContent, "test");
-            mozContext.dumpTS("test_SelectionInit end")
+            SharedTests.shared_SelectionInit()
         }
     }
 }

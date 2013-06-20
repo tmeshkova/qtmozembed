@@ -47,55 +47,17 @@ ApplicationWindow {
             mozContext.dumpTS("tst_newviewrequest cleanup")
         }
 
-        function test_1contextPrepareViewContext()
+        function test_1newcontextPrepareViewContext()
         {
-            mozContext.dumpTS("test_1contextPrepareViewContext start")
-            testcaseid.verify(mozContext.instance !== undefined)
-            while (mozContext.instance.initialized() === false) {
-                testcaseid.wait(500)
-            }
-            testcaseid.verify(mozContext.instance.initialized())
-            mozContext.dumpTS("test_1contextPrepareViewContext end")
+            SharedTests.shared_1newcontextPrepareViewContext()
         }
-        function test_2viewInit()
+        function test_2newviewInit()
         {
-            mozContext.dumpTS("test_2viewInit start")
-            testcaseid.verify(mozContext.instance.initialized())
-            MyScript.createSpriteObjects();
-            while (mozView === null) {
-                testcaseid.wait(500)
-            }
-            while (mozViewInitialized !== true) {
-                testcaseid.wait(500)
-            }
-            testcaseid.verify(mozView.child !== undefined)
-            mozContext.dumpTS("test_2viewInit end")
+            SharedTests.shared_2newviewInit()
         }
         function test_viewTestNewWindowAPI()
         {
-            mozContext.dumpTS("test_viewTestNewWindowAPI start")
-            testcaseid.verify(mozView.child !== undefined)
-            mozView.child.url = mozContext.getenv("QTTESTSLOCATION") + "/newviewrequest/newwin.html";
-            testcaseid.verify(MyScript.waitLoadFinished(mozView))
-            testcaseid.compare(mozView.child.title, "NewWinExample")
-            while (!mozView.child.painted) {
-                testcaseid.wait();
-            }
-            mozViewInitialized = false;
-            mouseClick(mozView, 10, 10)
-            while (!mozView || !oldMozView) {
-                testcaseid.wait()
-            }
-            while (mozViewInitialized !== true) {
-                testcaseid.wait()
-            }
-            testcaseid.verify(mozView.child !== undefined)
-            testcaseid.verify(MyScript.waitLoadFinished(mozView))
-            while (!mozView.child.painted) {
-                testcaseid.wait();
-            }
-            testcaseid.compare(mozView.child.url, "about:mozilla")
-            mozContext.dumpTS("test_viewTestNewWindowAPI end")
+            SharedTests.shared_viewTestNewWindowAPI()
         }
     }
 }

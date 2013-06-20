@@ -74,30 +74,7 @@ ApplicationWindow {
 
         function test_TestCheckDefaultSearch()
         {
-            mozContext.dumpTS("TestCheckDefaultSearch start")
-            testcaseid.verify(MyScript.waitMozContext())
-            mozContext.instance.setPref("browser.search.log", true);
-            mozContext.instance.addObserver("browser-search-engine-modified");
-            mozContext.instance.addObserver("embed:search");
-            mozContext.instance.setPref("keyword.enabled", true);
-            testcaseid.verify(MyScript.waitMozView())
-            mozContext.instance.sendObserve("embedui:search", {msg:"remove", name: "QMOZTest"})
-            mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTSLOCATION") + "/searchengine/test.xml", confirm: false})
-            while (appWindow.testResult !== "loaded") {
-                testcaseid.wait();
-            }
-            mozContext.instance.sendObserve("embedui:search", {msg:"getlist"})
-            while (appWindow.testResult !== "QMOZTest") {
-                testcaseid.wait();
-            }
-            webViewport.child.load("linux home");
-            testcaseid.verify(MyScript.waitLoadFinished(webViewport))
-            testcaseid.compare(webViewport.child.loadProgress, 100);
-            while (!webViewport.child.painted) {
-                testcaseid.wait();
-            }
-            testcaseid.compare(webViewport.child.url.toString().substr(0, 34), "https://webhook/?search=linux+home")
-            mozContext.dumpTS("TestCheckDefaultSearch end");
+            SharedTests.shared_TestCheckDefaultSearch()
         }
     }
 }
