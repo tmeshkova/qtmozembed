@@ -176,13 +176,204 @@ void QuickMozView::cleanup()
 {
 }
 
-void QuickMozView::setParentID(unsigned aParentID)
+QUrl QuickMozView::url() const
 {
-    printf("QuickMozView::%s FIXME Not implemented: id:%i\n", __FUNCTION__, aParentID);
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return QUrl();
+}
+
+void QuickMozView::setUrl(const QUrl&)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+QString QuickMozView::title() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return QString();
+}
+
+int QuickMozView::loadProgress() const
+{
+    return 0;
+}
+
+bool QuickMozView::canGoBack() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return false;
+}
+
+bool QuickMozView::canGoForward() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return false;
+}
+
+bool QuickMozView::loading() const
+{
+    return false;
+}
+
+QRect QuickMozView::contentRect() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return QRect();
+}
+
+QSize QuickMozView::scrollableSize() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return QSize();
+}
+
+QPointF QuickMozView::scrollableOffset() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return QPointF();
+}
+
+float QuickMozView::resolution() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return 0.0;
+}
+
+bool QuickMozView::isPainted() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return false;
+}
+
+QColor QuickMozView::bgcolor() const
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return QColor();
+}
+
+bool QuickMozView::getUseQmlMouse()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return false;
+}
+
+void QuickMozView::setUseQmlMouse(bool value)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::forceActiveFocus()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::loadHtml(const QString& html, const QUrl& baseUrl)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::goBack()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::goForward()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::stop()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::reload()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::load(const QString&)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::sendAsyncMessage(const QString& name, const QVariant& variant)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::addMessageListener(const QString& name)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::addMessageListeners(const QStringList& messageNamesList)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::loadFrameScript(const QString& name)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::newWindow(const QString& url)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
 }
 
 quint32 QuickMozView::uniqueID() const
 {
     printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
     return 0;
+}
+
+void QuickMozView::setParentID(unsigned aParentID)
+{
+    printf("QuickMozView::%s FIXME Not implemented: id:%i\n", __FUNCTION__, aParentID);
+}
+
+void QuickMozView::synthTouchBegin(const QVariant& touches)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::synthTouchMove(const QVariant& touches)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::synthTouchEnd(const QVariant& touches)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::scrollTo(const QPointF& position)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::suspendView()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::resumeView()
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::recvMouseMove(int posX, int posY)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::recvMousePress(int posX, int posY)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+}
+
+void QuickMozView::recvMouseRelease(int posX, int posY)
+{
+    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
 }
