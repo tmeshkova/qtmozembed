@@ -8,6 +8,7 @@
 #define qgraphicsmozview_h
 
 #include <QGraphicsWidget>
+#include <QUrl>
 #include "qmozview_defined_wrapper.h"
 
 class QMozContext;
@@ -32,12 +33,51 @@ public:
     Q_MOZ_VIEW_PUBLIC_METHODS
 
 public Q_SLOTS:
-
-    Q_MOZ_VIEW_PUBLIC_SLOTS
+    void loadHtml(const QString& html, const QUrl& baseUrl = QUrl());
+    void goBack();
+    void goForward();
+    void stop();
+    void reload();
+    void load(const QString&);
+    void sendAsyncMessage(const QString& name, const QVariant& variant);
+    void addMessageListener(const QString& name);
+    void addMessageListeners(const QStringList& messageNamesList);
+    void loadFrameScript(const QString& name);
+    void newWindow(const QString& url = "about:blank");
+    quint32 uniqueID() const;
+    void setParentID(unsigned aParentID);
+    void synthTouchBegin(const QVariant& touches);
+    void synthTouchMove(const QVariant& touches);
+    void synthTouchEnd(const QVariant& touches);
+    void scrollTo(const QPointF& position);
+    void suspendView();
+    void resumeView();
+    void recvMouseMove(int posX, int posY);
+    void recvMousePress(int posX, int posY);
+    void recvMouseRelease(int posX, int posY);
 
 Q_SIGNALS:
-
-    Q_MOZ_VIEW_SIGNALS
+    void viewInitialized();
+    void urlChanged();
+    void titleChanged();
+    void loadProgressChanged();
+    void navigationHistoryChanged();
+    void loadingChanged();
+    void viewDestroyed();
+    void recvAsyncMessage(const QString message, const QVariant data);
+    bool recvSyncMessage(const QString message, const QVariant data, QMozReturnValue* response);
+    void loadRedirect();
+    void securityChanged(QString status, uint state);
+    void firstPaint(int offx, int offy);
+    void contentLoaded(QString docuri);
+    void viewAreaChanged();
+    void handleLongTap(QPoint point, QMozReturnValue* retval);
+    void handleSingleTap(QPoint point, QMozReturnValue* retval);
+    void handleDoubleTap(QPoint point, QMozReturnValue* retval);
+    void imeNotification(int state, bool open, int cause, int focusChange, const QString& type);
+    void bgColorChanged();
+    void requestGLContext(bool& hasContext, QSize& viewPortSize);
+    void useQmlMouse(bool value);
 
 protected:
     virtual void setGeometry(const QRectF& rect);
