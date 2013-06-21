@@ -3,26 +3,35 @@
 
 #include <QtQuick/QQuickItem>
 #include <QtGui/QOpenGLShaderProgram>
+#include "qmozview_defined_wrapper.h"
 
 class QuickMozViewPrivate;
+
 class QuickMozView : public QQuickItem
 {
     Q_OBJECT
     Q_PROPERTY(unsigned parentid WRITE setParentID)
     Q_PROPERTY(QObject* child READ getChild NOTIFY childChanged)
+
+    Q_MOZ_VIEW_PRORERTIES
+
 public:
     QuickMozView(QQuickItem *parent = 0);
     ~QuickMozView();
 
+    Q_MOZ_VIEW_PUBLIC_METHODS
+
 private:
     QObject* getChild() { return this; }
-    void setParentID(unsigned);
 
 public Q_SLOTS:
-    quint32 uniqueID() const;
+
+    Q_MOZ_VIEW_PUBLIC_SLOTS
 
 Q_SIGNALS:
     void childChanged();
+
+    Q_MOZ_VIEW_SIGNALS
 
 // INTERNAL
 protected:

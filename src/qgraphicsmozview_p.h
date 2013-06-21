@@ -15,11 +15,11 @@
 #include <QPointF>
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "qmozview_templated_wrapper.h"
+#include "qmozview_defined_wrapper.h"
 
 class QGraphicsView;
 class QTouchEvent;
 class QMozContext;
-class QMozReturnValue;
 
 class QGraphicsMozViewPrivate : public mozilla::embedlite::EmbedLiteViewListener
 {

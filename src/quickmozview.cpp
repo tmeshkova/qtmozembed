@@ -76,6 +76,12 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QuickMozViewPrivate(this))
 {
+    static bool Initialized = false;
+    if (!Initialized) {
+        qmlRegisterType<QMozReturnValue>("QtMozilla", 1, 0, "QMozReturnValue");
+        Initialized = true;
+    }
+
     setFlag(ItemHasContents, true);
     d->mContext = QMozContext::GetInstance();
     QTimer::singleShot(0, QMozContext::GetInstance(), SLOT(runEmbedding()));
