@@ -41,16 +41,18 @@ Item {
         }
         function test_2viewInit()
         {
-            mozContext.dumpTS("test_2viewInit start")
+            mozContext.dumpTS("test_2viewInitBasic start")
             testcaseid.verify(mozContext.instance.initialized())
             MyScript.createSpriteObjectsQt5();
             while (mozView == null) {
                 testcaseid.wait(500)
             }
-            mozView.parentid = 1
+            mozContext.dumpTS("test_2viewInitBasic start1")
+            testcaseid.verify(MyScript.waitMozView())
             testcaseid.verify(mozView.uniqueID() > 0)
             testcaseid.verify(mozView.child)
-            mozContext.dumpTS("test_2viewInit end")
+            mozView = null
+            mozContext.dumpTS("test_2viewInitBasic end")
         }
     }
 }
