@@ -44,7 +44,7 @@ Item {
                 webViewport.child.addMessageListeners([ "Content:ContextMenu", "Content:SelectionRange", "Content:SelectionCopied" ])
             }
             onRecvAsyncMessage: {
-                // print("onRecvAsyncMessage:" + message + ", data:" + data)
+                print("onRecvAsyncMessage:" + message + ", data:" + data)
             }
         }
     }

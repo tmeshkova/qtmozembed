@@ -30,7 +30,7 @@ Item {
             appWindow.oldMozView = appWindow.mozView;
             appWindow.mozView = null;
             appWindow.createParentID = parentId;
-            MyScript.createSpriteObjects();
+            MyScript.createSpriteObjectsQt5();
             while (appWindow.mozView === null) {
                 testcaseid.wait()
             }

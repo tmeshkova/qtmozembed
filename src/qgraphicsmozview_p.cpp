@@ -273,6 +273,15 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
     mViewIface->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
 
+void QGraphicsMozViewPrivate::GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext)
+{
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    *aNativeIMEContext = (intptr_t)qApp->inputContext();
+#else
+    *aNativeIMEContext = (intptr_t)qApp->inputMethod();
+#endif
+}
+
 void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
 {
     LOGT();
