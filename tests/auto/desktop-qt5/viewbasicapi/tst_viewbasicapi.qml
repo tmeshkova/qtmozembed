@@ -48,7 +48,7 @@ Item {
                 testcaseid.wait(500)
             }
             mozView.parentid = 1
-            testcaseid.compare(mozView.uniqueID(), 0)
+            testcaseid.verify(mozView.uniqueID() > 0)
             testcaseid.verify(mozView.child)
             mozContext.dumpTS("test_2viewInit end")
         }

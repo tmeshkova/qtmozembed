@@ -364,6 +364,7 @@ function shared_SelectionInit()
 {
     mozContext.dumpTS("test_SelectionInit start")
     testcaseid.verify(MyScript.waitMozContext())
+    mozContext.instance.addObserver("clipboard:setdata");
     testcaseid.verify(MyScript.waitMozView())
     webViewport.child.url = "data:text/html,hello test selection";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
