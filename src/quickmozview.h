@@ -5,7 +5,7 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include "qmozview_defined_wrapper.h"
 
-class QuickMozViewPrivate;
+class QGraphicsMozViewPrivate;
 
 class QuickMozView : public QQuickItem
 {
@@ -43,13 +43,16 @@ public Q_SLOTS:
     void paint();
     void sceneGraphInitialized();
     void cleanup();
+    void setInputMethodHints(Qt::InputMethodHints hints);
 
 private Q_SLOTS:
     void onInitialized();
 
 private:
-    QuickMozViewPrivate* d;
-    friend class QuickMozViewPrivate;
+    QGraphicsMozViewPrivate* d;
+    friend class QGraphicsMozViewPrivate;
+    unsigned mParentID;
+    bool mUseQmlMouse;
 };
 
 #endif // QuickMozView_H

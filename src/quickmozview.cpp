@@ -10,71 +10,23 @@
 #include <QTimer>
 #include <QtOpenGL/QGLContext>
 #include <QApplication>
+#include <QJsonDocument>
+#include <QJsonParseError>
 #include <QtQuick/qquickwindow.h>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLContext>
 #include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
+#include "qgraphicsmozview_p.h"
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
-class QuickMozViewPrivate : public EmbedLiteViewListener {
-public:
-    QuickMozViewPrivate(QuickMozView* view)
-      : q(view)
-      , mContext(NULL)
-      , mView(NULL)
-      , mViewInitialized(false)
-      , mViewGLSized(false)
-      , mTempTexture(NULL)
-    {
-    }
-    virtual ~QuickMozViewPrivate() {}
-
-    virtual bool RequestCurrentGLContext()
-    {
-        // Need really check what is what and switch to common implementation
-        const QOpenGLContext* ctx = QOpenGLContext::currentContext();
-        return ctx && ctx->surface();
-    }
-
-    void UpdateViewSize(bool updateSize = true)
-    {
-        if (mViewInitialized) {
-            if (mContext->GetApp()->IsAccelerated()) {
-                const QOpenGLContext* ctx = QOpenGLContext::currentContext();
-                if (ctx && ctx->surface()) {
-                    QRectF r(0, 0, ctx->surface()->size().width(), ctx->surface()->size().height());
-                    r = q->mapRectToScene(r);
-                    mView->SetGLViewPortSize(r.width(), r.height());
-                }
-            }
-            mView->SetViewSize(q->boundingRect().width(), q->boundingRect().height());
-        }
-    }
-    virtual void ViewInitialized() {
-        mViewInitialized = true;
-        UpdateViewSize();
-        mView->LoadURL("about:mozilla");
-    }
-    virtual bool Invalidate() {
-        q->update();
-        return true;
-    }
-
-    QuickMozView* q;
-    QMozContext* mContext;
-    EmbedLiteView* mView;
-    bool mViewInitialized;
-    bool mViewGLSized;
-    QImage mTempBufferImage;
-    QSGTexture* mTempTexture;
-};
-
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
-  , d(new QuickMozViewPrivate(this))
+  , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
+  , mParentID(0)
+  , mUseQmlMouse(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -84,7 +36,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
     setFlag(ItemHasContents, true);
     d->mContext = QMozContext::GetInstance();
-    QTimer::singleShot(0, QMozContext::GetInstance(), SLOT(runEmbedding()));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
@@ -94,6 +45,10 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
 QuickMozView::~QuickMozView()
 {
+    if (d->mView) {
+        d->mView->SetListener(NULL);
+        d->mContext->GetApp()->DestroyView(d->mView);
+    }
     delete d;
 }
 
@@ -101,10 +56,12 @@ void
 QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
-    const QOpenGLContext* ctx = QOpenGLContext::currentContext();
-    d->mContext->GetApp()->SetIsAccelerated(ctx && ctx->surface() && !getenv("SWRENDER"));
-    d->mView = d->mContext->GetApp()->CreateView();
-    d->mView->SetListener(d);
+    if (!d->mView) {
+      const QOpenGLContext* ctx = QOpenGLContext::currentContext();
+      d->mContext->GetApp()->SetIsAccelerated(ctx && ctx->surface() && !getenv("SWRENDER"));
+      d->mView = d->mContext->GetApp()->CreateView();
+      d->mView->SetListener(d);
+    }
 }
 
 void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
@@ -130,11 +87,19 @@ void QuickMozView::sceneGraphInitialized()
 
 void QuickMozView::paint()
 {
-    if (d->mViewInitialized && d->mContext->GetApp()->IsAccelerated()) {
-        if (!d->mViewGLSized) {
-            d->UpdateViewSize(false);
-            d->mViewGLSized = true;
+    if (!d->mGraphicsViewAssigned) {
+        d->UpdateViewSize();
+        d->mGraphicsViewAssigned = true;
+        // Disable for future gl context in case if we did not get it yet
+        if (d->mViewInitialized &&
+            d->mContext->GetApp()->IsAccelerated() &&
+            !QGLContext::currentContext()) {
+            LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
+            d->mContext->setIsAccelerated(false);
         }
+    }
+
+    if (d->mViewInitialized && d->mContext->GetApp()->IsAccelerated()) {
         QMatrix qmatr;
         qmatr.translate(x(), y());
         qmatr.rotate(rotation());
@@ -176,204 +141,307 @@ void QuickMozView::cleanup()
 {
 }
 
-QUrl QuickMozView::url() const
+void QuickMozView::setInputMethodHints(Qt::InputMethodHints hints)
 {
     printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return QUrl();
 }
 
-void QuickMozView::setUrl(const QUrl&)
+QUrl QuickMozView::url() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    return QUrl(d->mLocation);
+}
+
+void QuickMozView::setUrl(const QUrl& url)
+{
+    load(url.toString());
 }
 
 QString QuickMozView::title() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return QString();
+    return d->mTitle;
 }
 
 int QuickMozView::loadProgress() const
 {
-    return 0;
+    return d->mProgress;
 }
 
 bool QuickMozView::canGoBack() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return false;
+    return d->mCanGoBack;
 }
 
 bool QuickMozView::canGoForward() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return false;
+    return d->mCanGoForward;
 }
 
 bool QuickMozView::loading() const
 {
-    return false;
+    return d->mIsLoading;
 }
 
 QRect QuickMozView::contentRect() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return QRect();
+    return d->mContentRect;
 }
 
 QSize QuickMozView::scrollableSize() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return QSize();
+    return d->mScrollableSize;
 }
 
 QPointF QuickMozView::scrollableOffset() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return QPointF();
+    return d->mScrollableOffset;
 }
 
 float QuickMozView::resolution() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return 0.0;
+    return d->mContentResolution;
 }
 
 bool QuickMozView::isPainted() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return false;
+    return d->mIsPainted;
 }
 
 QColor QuickMozView::bgcolor() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return QColor();
+    return d->mBgColor;
 }
 
 bool QuickMozView::getUseQmlMouse()
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return false;
+    return mUseQmlMouse;
 }
 
 void QuickMozView::setUseQmlMouse(bool value)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-}
-
-void QuickMozView::forceActiveFocus()
-{
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    mUseQmlMouse = value;
 }
 
 void QuickMozView::loadHtml(const QString& html, const QUrl& baseUrl)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    LOGT();
 }
 
 void QuickMozView::goBack()
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mViewInitialized)
+        return;
+    d->mView->GoBack();
 }
 
 void QuickMozView::goForward()
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mViewInitialized)
+        return;
+    d->mView->GoForward();
 }
 
 void QuickMozView::stop()
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mViewInitialized)
+        return;
+    d->mView->StopLoad();
 }
 
 void QuickMozView::reload()
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mViewInitialized)
+        return;
+    d->mView->Reload(false);
 }
 
-void QuickMozView::load(const QString&)
+void QuickMozView::load(const QString& url)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (url.isEmpty())
+        return;
+
+    if (!d->mViewInitialized) {
+        return;
+    }
+    LOGT("url: %s", url.toUtf8().data());
+    d->mProgress = 0;
+    d->mView->LoadURL(url.toUtf8().data());
 }
 
 void QuickMozView::sendAsyncMessage(const QString& name, const QVariant& variant)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mViewInitialized)
+        return;
+
+    QJsonDocument doc = QJsonDocument::fromVariant(variant);
+    QByteArray array = doc.toJson();
+
+    d->mView->SendAsyncMessage((const PRUnichar*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }
 
 void QuickMozView::addMessageListener(const QString& name)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mViewInitialized)
+        return;
+
+    d->mView->AddMessageListener(name.toUtf8().data());
 }
 
 void QuickMozView::addMessageListeners(const QStringList& messageNamesList)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mViewInitialized)
+        return;
+
+    nsTArray<nsString> messages;
+    for (int i = 0; i < messageNamesList.size(); i++) {
+        messages.AppendElement((PRUnichar*)messageNamesList.at(i).data());
+    }
+    d->mView->AddMessageListeners(messages);
 }
 
 void QuickMozView::loadFrameScript(const QString& name)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    d->mView->LoadFrameScript(name.toUtf8().data());
 }
 
 void QuickMozView::newWindow(const QString& url)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    LOGT("New Window: %s", url.toUtf8().data());
 }
 
 quint32 QuickMozView::uniqueID() const
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
-    return 0;
+    return d->mView ? d->mView->GetUniqueID() : 0;
 }
 
 void QuickMozView::setParentID(unsigned aParentID)
 {
-    printf("QuickMozView::%s FIXME Not implemented: id:%i\n", __FUNCTION__, aParentID);
+    mParentID = aParentID;
+    if (mParentID) {
+        onInitialized();
+    }
 }
 
 void QuickMozView::synthTouchBegin(const QVariant& touches)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    QList<QVariant> list = touches.toList();
+    d->mTouchTime.restart();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, d->mTouchTime.elapsed());
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           mozilla::ScreenSize(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    d->mView->ReceiveInputEvent(meventStart);
 }
 
 void QuickMozView::synthTouchMove(const QVariant& touches)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    QList<QVariant> list = touches.toList();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_MOVE, d->mTouchTime.elapsed());
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           mozilla::ScreenSize(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    d->mView->ReceiveInputEvent(meventStart);
 }
 
 void QuickMozView::synthTouchEnd(const QVariant& touches)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    QList<QVariant> list = touches.toList();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_END, d->mTouchTime.elapsed());
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           mozilla::ScreenSize(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    d->mView->ReceiveInputEvent(meventStart);
 }
 
 void QuickMozView::scrollTo(const QPointF& position)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    LOGT("NOT IMPLEMENTED");
 }
 
 void QuickMozView::suspendView()
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mView) {
+        return;
+    }
+    d->mView->SetIsActive(false);
+    d->mView->SuspendTimeouts();
 }
 
 void QuickMozView::resumeView()
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (!d->mView) {
+        return;
+    }
+    d->mView->SetIsActive(true);
+    d->mView->ResumeTimeouts();
 }
 
 void QuickMozView::recvMouseMove(int posX, int posY)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (d->mViewInitialized && !d->mPendingTouchEvent) {
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE, d->mPanningTime.elapsed());
+        event.mTouches.AppendElement(SingleTouchData(0,
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
+                                     180.0f,
+                                     1.0f));
+        d->ReceiveInputEvent(event);
+    }
 }
 
 void QuickMozView::recvMousePress(int posX, int posY)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    d->mPanningTime.restart();
+    forceActiveFocus();
+    if (d->mViewInitialized && !d->mPendingTouchEvent) {
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, d->mPanningTime.elapsed());
+        event.mTouches.AppendElement(SingleTouchData(0,
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
+                                     180.0f,
+                                     1.0f));
+        d->ReceiveInputEvent(event);
+    }
 }
 
 void QuickMozView::recvMouseRelease(int posX, int posY)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    if (d->mViewInitialized && !d->mPendingTouchEvent) {
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_END, d->mPanningTime.elapsed());
+        event.mTouches.AppendElement(SingleTouchData(0,
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
+                                     180.0f,
+                                     1.0f));
+        d->ReceiveInputEvent(event);
+    }
+    if (d->mPendingTouchEvent) {
+        d->mPendingTouchEvent = false;
+    }
 }

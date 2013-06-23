@@ -13,6 +13,9 @@
 #include <QTime>
 #include <QString>
 #include <QPointF>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include <QSGSimpleTextureNode>
+#endif
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "qmozview_templated_wrapper.h"
 #include "qmozview_defined_wrapper.h"
@@ -70,6 +73,9 @@ public:
     bool mViewInitialized;
     QColor mBgColor;
     QImage mTempBufferImage;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    QSGTexture* mTempTexture;
+#endif
     QSize mSize;
     QTime mTouchTime;
     bool mPendingTouchEvent;
