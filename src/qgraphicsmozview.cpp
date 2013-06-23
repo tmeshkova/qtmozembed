@@ -392,7 +392,7 @@ void QGraphicsMozView::recvMouseMove(int posX, int posY)
 void QGraphicsMozView::recvMousePress(int posX, int posY)
 {
     d->mPanningTime.restart();
-    forceActiveFocus();
+    forceViewActiveFocus();
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,
@@ -420,7 +420,7 @@ void QGraphicsMozView::recvMouseRelease(int posX, int posY)
     }
 }
 
-void QGraphicsMozView::forceActiveFocus()
+void QGraphicsMozView::forceViewActiveFocus()
 {
     QGraphicsItem *parent = parentItem();
     while (parent) {

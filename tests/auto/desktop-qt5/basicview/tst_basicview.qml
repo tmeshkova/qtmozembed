@@ -6,6 +6,8 @@ import "../../shared/sharedTests.js" as SharedTests
 
 Item {
     id: appWindow
+    width: 480
+    height: 800
 
     property bool mozViewInitialized : false
     property variant mozView : null
@@ -28,6 +30,7 @@ Item {
         id: testcaseid
         name: "mozContextPage"
         when: windowShown
+        parent: appWindow
 
         function cleanup() {
             mozContext.dumpTS("tst_basicview cleanup")

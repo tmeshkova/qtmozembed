@@ -94,6 +94,7 @@ public:
     QPointF mScrollableOffset;
     float mContentResolution;
     bool mIsPainted;
+    Qt::InputMethodHints mInputMethodHints;
 };
 
 #endif /* qgraphicsmozview_p_h */

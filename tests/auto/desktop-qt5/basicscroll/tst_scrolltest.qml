@@ -6,6 +6,9 @@ import "../../shared/sharedTests.js" as SharedTests
 
 Item {
     id: appWindow
+    width: 480
+    height: 800
+    focus: true
 
     property bool mozViewInitialized : false
     property int scrollX : 0
@@ -32,6 +35,7 @@ Item {
         visible: true
         focus: true
         anchors.fill: parent
+
         Connections {
             target: webViewport.child
             onViewInitialized: {
@@ -54,6 +58,7 @@ Item {
         id: testcaseid
         name: "mozContextPage"
         when: windowShown
+        parent: appWindow
 
         function cleanup() {
             mozContext.dumpTS("tst_scrolltest cleanup")

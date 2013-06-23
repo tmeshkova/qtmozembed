@@ -17,7 +17,7 @@ public:
     // Methods
     virtual void Invalidate() = 0;
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
-    virtual void forceActiveFocus() = 0;
+    virtual void forceViewActiveFocus() = 0;
     // Signals
     virtual void viewInitialized() = 0;
     virtual void urlChanged() = 0;
@@ -58,9 +58,9 @@ public:
         view.setInputMethodHints(hints);
     }
 
-    void forceActiveFocus()
+    void forceViewActiveFocus()
     {
-        view.forceActiveFocus();
+        view.forceViewActiveFocus();
     }
 
     void viewInitialized()

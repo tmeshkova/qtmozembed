@@ -38,12 +38,20 @@ protected:
     void itemChange(ItemChange change, const ItemChangeData &);
     virtual void geometryChanged(const QRectF & newGeometry, const QRectF & oldGeometry);
     virtual QSGNode* updatePaintNode(QSGNode* node, UpdatePaintNodeData* data);
+    virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
+    virtual QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
+    virtual void inputMethodEvent(QInputMethodEvent* event);
+    virtual void keyPressEvent(QKeyEvent*);
+    virtual void keyReleaseEvent(QKeyEvent*);
 
 public Q_SLOTS:
     void paint();
     void sceneGraphInitialized();
     void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
+    void onRequestGLContext(bool& hasContext, QSize& viewPortSize);
 
 private Q_SLOTS:
     void onInitialized();

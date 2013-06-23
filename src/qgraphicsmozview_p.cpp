@@ -352,7 +352,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     mPendingTouchEvent = true;
     event->setAccepted(true);
     if (event->type() == QEvent::TouchBegin) {
-        mViewIface->forceActiveFocus();
+        mViewIface->forceViewActiveFocus();
         mTouchTime.restart();
     }
 

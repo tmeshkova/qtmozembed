@@ -6,6 +6,8 @@ import "../../shared/sharedTests.js" as SharedTests
 
 Item {
     id: appWindow
+    width: 480
+    height: 800
 
     property bool mozViewInitialized : false
     property string inputContent : ""
@@ -36,8 +38,10 @@ Item {
 
     QmlMozView {
         id: webViewport
+        clip: false
         visible: true
         focus: true
+
         anchors.fill: parent
         Connections {
             target: webViewport.child
@@ -76,6 +80,7 @@ Item {
         id: testcaseid
         name: "mozContextPage"
         when: windowShown
+        parent: appWindow
 
         function cleanup() {
             mozContext.dumpTS("tst_inputtest cleanup")

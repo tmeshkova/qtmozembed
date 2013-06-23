@@ -18,6 +18,7 @@
 #include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
 #include "qgraphicsmozview_p.h"
+#include "EmbedQtKeyUtils.h"
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -35,7 +36,15 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     }
 
     setFlag(ItemHasContents, true);
+
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
+    setFlag(ItemClipsChildrenToShape, true);
+    setFlag(ItemAcceptsInputMethod, true);
+    setFlag(ItemIsFocusScope, true);
+    setFlag(ItemAcceptsDrops, true);
+
     d->mContext = QMozContext::GetInstance();
+    connect(this, SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
@@ -64,6 +73,21 @@ QuickMozView::onInitialized()
     }
 }
 
+void
+QuickMozView::onRequestGLContext(bool& hasContext, QSize& viewPortSize)
+{
+    hasContext = false;
+    if (d->mContext->GetApp()->IsAccelerated()) {
+        const QOpenGLContext* ctx = QOpenGLContext::currentContext();
+        if (ctx && ctx->surface()) {
+            QRectF r(0, 0, ctx->surface()->size().width(), ctx->surface()->size().height());
+            r = mapRectToScene(r);
+            viewPortSize = r.size().toSize();
+            hasContext = true;
+        }
+    }
+}
+
 void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
 {
     if (change == ItemSceneChange) {
@@ -78,6 +102,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
 
 void QuickMozView::geometryChanged(const QRectF & newGeometry, const QRectF&)
 {
+    d->mSize = newGeometry.size().toSize();
     d->UpdateViewSize();
 }
 
@@ -141,9 +166,104 @@ void QuickMozView::cleanup()
 {
 }
 
+void QuickMozView::mouseMoveEvent(QMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMouseMove(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QQuickItem::mouseMoveEvent(e);
+    }
+}
+
+void QuickMozView::mousePressEvent(QMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMousePress(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QQuickItem::mousePressEvent(e);
+    }
+}
+
+void QuickMozView::mouseReleaseEvent(QMouseEvent* e)
+{
+    if (!mUseQmlMouse) {
+        const bool accepted = e->isAccepted();
+        recvMouseRelease(e->pos().x(), e->pos().y());
+        e->setAccepted(accepted);
+    }
+    else {
+        QQuickItem::mouseReleaseEvent(e);
+    }
+}
+
 void QuickMozView::setInputMethodHints(Qt::InputMethodHints hints)
 {
-    printf("QuickMozView::%s FIXME Not implemented\n", __FUNCTION__);
+    d->mInputMethodHints = hints;
+}
+
+void QuickMozView::inputMethodEvent(QInputMethodEvent* event)
+{
+    LOGT("cStr:%s, preStr:%s, replLen:%i, replSt:%i", event->commitString().toUtf8().data(), event->preeditString().toUtf8().data(), event->replacementLength(), event->replacementStart());
+    if (d->mViewInitialized) {
+        d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+    }
+}
+
+void QuickMozView::keyPressEvent(QKeyEvent* event)
+{
+    if (!d->mViewInitialized)
+        return;
+
+    int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
+    int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
+    int32_t charCode = 0;
+    if (event->text().length() && event->text()[0].isPrint()) {
+        charCode = (int32_t)event->text()[0].unicode();
+        if (getenv("USE_TEXT_EVENTS")) {
+            return;
+        }
+    }
+    d->mView->SendKeyPress(domKeyCode, gmodifiers, charCode);
+}
+
+void QuickMozView::keyReleaseEvent(QKeyEvent* event)
+{
+    if (!d->mViewInitialized)
+        return;
+
+    int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
+    int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
+    int32_t charCode = 0;
+    if (event->text().length() && event->text()[0].isPrint()) {
+        charCode = (int32_t)event->text()[0].unicode();
+        if (getenv("USE_TEXT_EVENTS")) {
+            d->mView->SendTextEvent(event->text().toUtf8().data(), "");
+            return;
+        }
+    }
+    d->mView->SendKeyRelease(domKeyCode, gmodifiers, charCode);
+}
+
+QVariant
+QuickMozView::inputMethodQuery(Qt::InputMethodQuery aQuery) const
+{
+    static bool commitNow = getenv("DO_FAST_COMMIT") != 0;
+    return commitNow ? QVariant(0) : QVariant();
+}
+
+
+void QuickMozView::forceViewActiveFocus()
+{
+    forceActiveFocus();
+    if (d->mViewInitialized) {
+        d->mView->SetIsActive(true);
+    }
 }
 
 QUrl QuickMozView::url() const
@@ -418,7 +538,7 @@ void QuickMozView::recvMouseMove(int posX, int posY)
 void QuickMozView::recvMousePress(int posX, int posY)
 {
     d->mPanningTime.restart();
-    forceActiveFocus();
+    forceViewActiveFocus();
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, d->mPanningTime.elapsed());
         event.mTouches.AppendElement(SingleTouchData(0,

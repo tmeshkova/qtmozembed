@@ -4,6 +4,7 @@ import Qt5Mozilla 1.0
 QmlMozView {
     id: webViewport
     parentid: appWindow.createParentID ? appWindow.createParentID : 0
+    clip: false
     visible: true
     focus: true
     anchors.fill: parent
