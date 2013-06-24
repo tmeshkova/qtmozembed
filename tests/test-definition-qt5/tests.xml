@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testdefinition version="1.0">
+   <suite name="qtmozembed-tests" domain="ui">
+       <description>QtMozEmbed Application automatic tests</description>
+       <set name="unit-tests" feature="QtMozEmbed">
+           <description>QML component unit tests</description>
+           <case manual="false" timeout="200" name="unittests-context">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/context &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-basicview">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/basicview &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-view">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/view &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-basicinput">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/basicinput &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-basicscroll">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/basicscroll &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-multitouch">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/multitouch &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-favicons">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/favicons &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-promptbasic">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/promptbasic &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-searchengine">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/searchengine &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-passwordmgr">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/passwordmgr &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-downloadmgr">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/downloadmgr &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-newviewrequest">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/newviewrequest &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+           <case manual="false" timeout="200" name="unittests-selection">
+               <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/selection &amp;&amp;DISPLAY=:0 ../../run-tests.sh</step>
+           </case>
+       </set>
+   </suite>
+</testdefinition>
