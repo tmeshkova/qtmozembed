@@ -35,11 +35,12 @@ Item {
             target: webViewport.child
             onViewInitialized: {
                 webViewport.child.loadFrameScript("chrome://tests/content/testHelper.js");
+                webViewport.child.loadFrameScript("chrome://embedlite/content/embedhelper.js");
                 appWindow.mozViewInitialized = true
                 webViewport.child.addMessageListener("embed:login");
             }
             onRecvAsyncMessage: {
-                // print("onRecvAsyncMessage:" + message + ", data:" + data)
+                print("onRecvAsyncMessage:" + message + ", data:" + data)
                 if (message == "embed:login") {
                     webViewport.child.sendAsyncMessage("embedui:login", {
                                                         buttonidx: 1,

@@ -1,6 +1,6 @@
 var component;
 var sprite;
-var context_view_wait_timeout = 300;
+var context_view_wait_timeout = 1000;
 var load_finish_wait_timeout = 10000;
 
 function createSpriteObjects() {

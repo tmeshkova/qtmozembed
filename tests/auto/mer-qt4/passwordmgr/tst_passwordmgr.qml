@@ -34,6 +34,7 @@ ApplicationWindow {
             target: webViewport.child
             onViewInitialized: {
                 webViewport.child.loadFrameScript("chrome://tests/content/testHelper.js");
+                webViewport.child.loadFrameScript("chrome://embedlite/content/embedhelper.js");
                 appWindow.mozViewInitialized = true
                 webViewport.child.addMessageListener("embed:login");
             }
