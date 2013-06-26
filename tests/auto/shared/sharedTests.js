@@ -181,7 +181,7 @@ function shared_TestDownloadMgrPage()
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
-    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/downloadmgr/tt.bin";
+    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/downloadmgr/tt.bin";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!appWindow.promptReceived); }))
@@ -193,7 +193,7 @@ function shared_TestFaviconPage()
     mozContext.dumpTS("test_TestFaviconPage start")
     testcaseid.verify(MyScript.waitMozContext())
     testcaseid.verify(MyScript.waitMozView())
-    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/favicons/favicon.html";
+    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/favicons/favicon.html";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -207,7 +207,7 @@ function shared_Test1MultiTouchPage()
     mozContext.dumpTS("test_Test1MultiTouchPage start")
     testcaseid.verify(MyScript.waitMozContext())
     testcaseid.verify(MyScript.waitMozView())
-    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/multitouch/touch.html";
+    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/multitouch/touch.html";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -249,7 +249,7 @@ function shared_viewTestNewWindowAPI()
 {
     mozContext.dumpTS("test_viewTestNewWindowAPI start")
     testcaseid.verify(mozView.child !== undefined)
-    mozView.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/newviewrequest/newwin.html";
+    mozView.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/newviewrequest/newwin.html";
     testcaseid.verify(MyScript.waitLoadFinished(mozView))
     testcaseid.compare(mozView.child.title, "NewWinExample")
     testcaseid.verify(wrtWait(function() { return (!mozView.child.painted); }))
@@ -270,7 +270,7 @@ function shared_TestLoginMgrPage()
     testcaseid.verify(MyScript.waitMozContext())
     testcaseid.verify(MyScript.waitMozView())
     appWindow.promptReceived = null
-    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/passwordmgr/subtst_notifications_1.html";
+    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/passwordmgr/subtst_notifications_1.html";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -286,7 +286,7 @@ function shared_TestPromptPage()
     appWindow.testCaseNum = 0
     appWindow.promptReceived = null
     appWindow.testResult = null
-    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/promptbasic/prompt.html";
+    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/promptbasic/prompt.html";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -306,7 +306,7 @@ function shared_TestPromptWithBadResponse()
     appWindow.testCaseNum = 1
     appWindow.promptReceived = null
     appWindow.testResult = null
-    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/promptbasic/prompt.html";
+    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/promptbasic/prompt.html";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -326,7 +326,7 @@ function shared_TestPromptWithoutResponse()
     appWindow.testCaseNum = 2
     appWindow.promptReceived = null
     appWindow.testResult = null
-    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/shared/promptbasic/prompt.html";
+    webViewport.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/promptbasic/prompt.html";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -348,7 +348,7 @@ function shared_TestCheckDefaultSearch()
     mozContext.instance.setPref("keyword.enabled", true);
     testcaseid.verify(MyScript.waitMozView())
     mozContext.instance.sendObserve("embedui:search", {msg:"remove", name: "QMOZTest"})
-    mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTSROOT") + "/shared/searchengine/test.xml", confirm: false})
+    mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTSROOT") + "/auto/shared/searchengine/test.xml", confirm: false})
     testcaseid.verify(wrtWait(function() { return (appWindow.testResult !== "loaded"); }))
     mozContext.instance.sendObserve("embedui:search", {msg:"getlist"})
     testcaseid.verify(wrtWait(function() { return (appWindow.testResult !== "QMOZTest"); }))
