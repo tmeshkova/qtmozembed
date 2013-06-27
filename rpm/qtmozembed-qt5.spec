@@ -18,6 +18,7 @@ BuildRequires:  xulrunner-qt5-devel
 BuildRequires:  pkgconfig(nspr)
 BuildRequires:  qt5-default
 BuildRequires:  qt5-qttools
+Requires:       xulrunner-qt5
 
 %description
 Qt embeddings for Gecko browser engine
