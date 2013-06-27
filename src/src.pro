@@ -17,8 +17,8 @@ HEADERS += qmozcontext.h \
            qmozview_defined_wrapper.h
 
 !contains(QT_MAJOR_VERSION, 4) {
-  SOURCES += quickmozview.cpp
-  HEADERS += quickmozview.h
+  SOURCES += quickmozview.cpp qmozviewsgnode.cpp
+  HEADERS += quickmozview.h qmozviewsgnode.h
 }
 SOURCES += qdeclarativemozview.cpp
 HEADERS += qdeclarativemozview.h
@@ -42,7 +42,7 @@ contains(QT_MAJOR_VERSION, 4) {
   QT += opengl
   PKGCONFIG += QJson
 } else {
-  QT += quick opengl declarative
+  QT += quick opengl declarative qml quick-private
 }
 
 target.path = $$PREFIX/lib

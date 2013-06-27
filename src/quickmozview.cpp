@@ -1,3 +1,8 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "quickmozview.h"
 
 #include "mozilla-config.h"
@@ -19,6 +24,8 @@
 #include <QSGSimpleTextureNode>
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
+#include "qmozviewsgnode.h"
+#include "assert.h"
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -94,7 +101,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
         QQuickWindow *win = window();
         if (!win)
             return;
-        connect(win, SIGNAL(beforeRendering()), this, SLOT(paint()), Qt::DirectConnection);
+        connect(win, SIGNAL(beforeRendering()), this, SLOT(beforeRendering()), Qt::DirectConnection);
         connect(win, SIGNAL(sceneGraphInitialized()), this, SLOT(sceneGraphInitialized()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
@@ -110,7 +117,7 @@ void QuickMozView::sceneGraphInitialized()
 {
 }
 
-void QuickMozView::paint()
+void QuickMozView::beforeRendering()
 {
     if (!d->mGraphicsViewAssigned) {
         d->UpdateViewSize();
@@ -123,23 +130,15 @@ void QuickMozView::paint()
             d->mContext->setIsAccelerated(false);
         }
     }
-
-    if (d->mViewInitialized && d->mContext->GetApp()->IsAccelerated()) {
-        QMatrix qmatr;
-        qmatr.translate(x(), y());
-        qmatr.rotate(rotation());
-        qmatr.scale(scale(), scale());
-        gfxMatrix matr(qmatr.m11(), qmatr.m12(), qmatr.m21(), qmatr.m22(), qmatr.dx(), qmatr.dy());
-        d->mView->SetGLViewTransform(matr);
-        d->mView->SetViewClipping(0, 0, boundingRect().width(), boundingRect().height());
-        d->mView->RenderGL();
-    }
 }
 
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
-    if (d->mViewInitialized && !d->mContext->GetApp()->IsAccelerated()) {
+    if (!d->mViewInitialized)
+        return oldNode;
+
+    if (!d->mContext->GetApp()->IsAccelerated()) {
         QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode*>(oldNode);
         if (!n) {
             n = new QSGSimpleTextureNode();
@@ -159,7 +158,21 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         n->setRect(boundingRect());
         return n;
     }
-    return nullptr;
+
+    QMozViewSGNode* node = static_cast<QMozViewSGNode*>(oldNode);
+
+    const QWindow* window = this->window();
+    assert(window);
+
+    if (!node)
+        node = new QMozViewSGNode;
+
+    node->setRenderer(d);
+    QColor backgroundColor = 1 == 0 ? Qt::transparent : Qt::white;
+    QRectF backgroundRect(QPointF(0, 0), d->mSize);
+    node->setBackground(backgroundRect, backgroundColor);
+
+    return node;
 }
 
 void QuickMozView::cleanup()
