@@ -24,7 +24,19 @@ class QGraphicsMozView : public QGraphicsWidget
 {
     Q_OBJECT
 
-    Q_MOZ_VIEW_PRORERTIES
+    Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
+    Q_PROPERTY(QString title READ title NOTIFY titleChanged)
+    Q_PROPERTY(bool canGoBack READ canGoBack NOTIFY navigationHistoryChanged FINAL)
+    Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY navigationHistoryChanged FINAL)
+    Q_PROPERTY(int loadProgress READ loadProgress NOTIFY loadProgressChanged)
+    Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged FINAL)
+    Q_PROPERTY(QRect contentRect READ contentRect NOTIFY viewAreaChanged FINAL)
+    Q_PROPERTY(QSize scrollableSize READ scrollableSize)
+    Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset)
+    Q_PROPERTY(float resolution READ resolution)
+    Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL)
+    Q_PROPERTY(QColor bgcolor READ bgcolor NOTIFY bgColorChanged FINAL)
+    Q_PROPERTY(bool useQmlMouse READ getUseQmlMouse WRITE setUseQmlMouse)
 
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
