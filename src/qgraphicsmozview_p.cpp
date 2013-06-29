@@ -8,16 +8,16 @@
 
 #include <QTouchEvent>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#include <QApplication>
 #include <QInputContext>
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
 #else
 #include <QJsonDocument>
+#include <QGuiApplication>
 #endif
-#include <QApplication>
 
 #include "qgraphicsmozview_p.h"
-#include "qgraphicsmozview.h"
 #include "qmozcontext.h"
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
@@ -248,9 +248,9 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
     }
     mViewIface->setInputMethodHints(hints);
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
     QWidget* focusWidget = qApp->focusWidget();
     if (focusWidget && aFocusChange) {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
         QInputContext* inputContext = qApp->inputContext();
         if (!inputContext) {
             LOGT("Requesting SIP: but no input context");
@@ -266,10 +266,10 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
             inputContext->filterEvent(&request);
             inputContext->reset();
         }
+    }
 #else
         LOGT("Fixme IME for Qt5");
 #endif
-    }
     mViewIface->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
 

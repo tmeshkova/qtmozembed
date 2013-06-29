@@ -7,7 +7,6 @@
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQml/qqml.h>
 #include "quickmozview.h"
-#include "qgraphicsmozview.h"
 #include "qmozcontext.h"
 #include "qmlmozcontext.h"
 

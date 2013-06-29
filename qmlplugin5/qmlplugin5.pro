@@ -3,7 +3,10 @@ TARGET  = qmlmozembedpluginqt5
 
 TEMPLATE = lib
 CONFIG += qt plugin
-QT += qml declarative widgets quick
+QT += qml quick
+!isEmpty(BUILD_QT5QUICK1) {
+  QT += declarative widgets
+}
 
 SOURCES += main.cpp qmlmozcontext.cpp
 HEADERS += qmlmozcontext.h

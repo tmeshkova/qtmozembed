@@ -7,14 +7,15 @@
 #define LOG_COMPONENT "QMozContext"
 
 #include <QTimer>
-#include <QApplication>
 #include <QVariant>
 #include <QThread>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#include <QApplication>
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
 #include <QtDeclarative/qdeclarative.h>
 #else
+#include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QtQml/QtQml>

@@ -14,7 +14,7 @@
 
 #include <QTimer>
 #include <QtOpenGL/QGLContext>
-#include <QApplication>
+#include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QtQuick/qquickwindow.h>

@@ -6,13 +6,11 @@ VERSION = 1.0.1
 
 SOURCES += qmozcontext.cpp \
            EmbedQtKeyUtils.cpp \
-           qgraphicsmozview.cpp \
            qgraphicsmozview_p.cpp \
            geckoworker.cpp
 
 HEADERS += qmozcontext.h \
            EmbedQtKeyUtils.h \
-           qgraphicsmozview.h \
            geckoworker.h \
            qmozview_defined_wrapper.h
 
@@ -20,14 +18,21 @@ HEADERS += qmozcontext.h \
   SOURCES += quickmozview.cpp qmozviewsgnode.cpp
   HEADERS += quickmozview.h qmozviewsgnode.h
 }
-SOURCES += qdeclarativemozview.cpp
-HEADERS += qdeclarativemozview.h
+contains(QT_MAJOR_VERSION, 4) {
+  SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
+  HEADERS += qdeclarativemozview.h qgraphicsmozview.h
+} else {
+  !isEmpty(BUILD_QT5QUICK1) {
+    SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
+    HEADERS += qdeclarativemozview.h qgraphicsmozview.h
+  }
+}
 
 
 CONFIG(opengl) {
-     message(Building with OpenGL support.)
+  message(Building with OpenGL support.)
 } else {
-     message(OpenGL support is not available.)
+  message(OpenGL support is not available.)
 }
 
 include(qmozembed.pri)
@@ -42,7 +47,10 @@ contains(QT_MAJOR_VERSION, 4) {
   QT += opengl
   PKGCONFIG += QJson
 } else {
-  QT += quick opengl declarative qml quick-private
+  QT += quick qml quick-private
+  !isEmpty(BUILD_QT5QUICK1) {
+    QT += declarative widgets
+  }
 }
 
 target.path = $$PREFIX/lib
