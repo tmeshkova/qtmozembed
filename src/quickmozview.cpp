@@ -125,7 +125,7 @@ void QuickMozView::beforeRendering()
         // Disable for future gl context in case if we did not get it yet
         if (d->mViewInitialized &&
             d->mContext->GetApp()->IsAccelerated() &&
-            !QGLContext::currentContext()) {
+            !QOpenGLContext::currentContext()) {
             LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
             d->mContext->setIsAccelerated(false);
         }
