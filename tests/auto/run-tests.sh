@@ -20,11 +20,8 @@ export QTTESTSLOCATION=${QTTESTSLOCATION:-"/opt/tests/qtmozembed/auto/mer-qt$QTV
 #export NSPR_LOG_MODULES=EmbedLiteTrace:5,EmbedNonImpl:5,EmbedLiteApp:5,EmbedLiteView:5,EmbedLiteViewThreadParent:5
 
 $QMLMOZTESTRUNNER -opengl $@
-
-cd $CURDIR
-
 exit_code=$?
-
+cd $CURDIR
 kill $DBUS_SESSION_BUS_PID
 
 exit $exit_code

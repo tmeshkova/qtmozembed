@@ -406,3 +406,32 @@ function shared_Test2LoadAboutMozillaCheckTitle()
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
     mozContext.dumpTS("test_Test2LoadAboutMozillaCheckTitle end")
 }
+
+function shared_ActiveHyperLink()
+{
+    mozContext.dumpTS("test_ActiveHyperLink start")
+    testcaseid.verify(MyScript.waitMozContext())
+    mozContext.instance.sendObserve("embedui:setprefs", { prefs :
+    [
+        { n: "embedlite.azpc.handle.singletap", v: false},
+        { n: "embedlite.azpc.json.singletap", v: true},
+        { n: "embedlite.azpc.handle.longtap", v: false},
+        { n: "embedlite.azpc.json.longtap", v: true},
+        { n: "embedlite.azpc.json.viewport", v: true},
+        { n: "browser.ui.touch.left", v: 32},
+        { n: "browser.ui.touch.right", v: 32},
+        { n: "browser.ui.touch.top", v: 48},
+        { n: "browser.ui.touch.bottom", v: 16},
+        { n: "browser.ui.touch.weight.visited", v: 120}
+    ]});
+    testcaseid.verify(MyScript.waitMozView())
+    webViewport.child.url = "data:text/html,<a href=about:mozilla>ActiveLink</a>";
+    testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+    testcaseid.compare(webViewport.child.loadProgress, 100);
+    testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
+    testcaseid.mouseClick(webViewport, 10, 20)
+    testcaseid.verify(wrtWait(function() {
+        return webViewport.child.url != "about:mozilla";
+    }))
+    mozContext.dumpTS("test_ActiveHyperLink end")
+}
