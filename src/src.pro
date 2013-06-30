@@ -49,7 +49,7 @@ contains(QT_MAJOR_VERSION, 4) {
 } else {
   QT += quick qml quick-private
   !isEmpty(BUILD_QT5QUICK1) {
-    QT += declarative widgets
+    QT += declarative widgets opengl
   }
 }
 
