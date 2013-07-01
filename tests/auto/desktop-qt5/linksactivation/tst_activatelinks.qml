@@ -70,6 +70,7 @@ Item {
         function test_ActiveHyperLink()
         {
             SharedTests.shared_ActiveHyperLink();
+            webViewport.child.useQmlMouse = false;
         }
     }
 }

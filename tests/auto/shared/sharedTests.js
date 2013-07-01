@@ -436,5 +436,18 @@ function shared_ActiveHyperLink()
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
+    mozContext.instance.sendObserve("embedui:setprefs", { prefs :
+    [
+        { n: "embedlite.azpc.handle.singletap", v: true},
+        { n: "embedlite.azpc.json.singletap", v: false},
+        { n: "embedlite.azpc.handle.longtap", v: true},
+        { n: "embedlite.azpc.json.longtap", v: false},
+        { n: "embedlite.azpc.json.viewport", v: false},
+        { n: "browser.ui.touch.left", v: 32},
+        { n: "browser.ui.touch.right", v: 32},
+        { n: "browser.ui.touch.top", v: 48},
+        { n: "browser.ui.touch.bottom", v: 16},
+        { n: "browser.ui.touch.weight.visited", v: 120}
+    ]});
     mozContext.dumpTS("test_ActiveHyperLink end")
 }
