@@ -433,5 +433,8 @@ function shared_ActiveHyperLink()
     testcaseid.verify(wrtWait(function() {
         return webViewport.child.url != "about:mozilla";
     }))
+    testcaseid.verify(MyScript.waitLoadFinished(webViewport))
+    testcaseid.compare(webViewport.child.loadProgress, 100);
+    testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
     mozContext.dumpTS("test_ActiveHyperLink end")
 }
