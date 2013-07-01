@@ -28,6 +28,9 @@ public:
 
     virtual void render(const RenderState& state)
     {
+        QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
+        gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
+        mPrivate->mView->SetGLViewTransform(matr);
         if (state.scissorEnabled) {
             mPrivate->mView->SetViewClipping(state.scissorRect.x(),
                                                state.scissorRect.x(),
