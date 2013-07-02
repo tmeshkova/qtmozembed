@@ -53,15 +53,7 @@ private:
 
 QMozViewSGNode::QMozViewSGNode()
     : m_contentsNode(0)
-    , m_backgroundNode(new QSGSimpleRectNode)
 {
-    appendChildNode(m_backgroundNode);
-}
-
-void QMozViewSGNode::setBackground(const QRectF& rect, const QColor& color)
-{
-    m_backgroundNode->setRect(rect);
-    m_backgroundNode->setColor(color);
 }
 
 void QMozViewSGNode::setRenderer(QGraphicsMozViewPrivate* aPrivate)
@@ -69,7 +61,10 @@ void QMozViewSGNode::setRenderer(QGraphicsMozViewPrivate* aPrivate)
     if (m_contentsNode && m_contentsNode->getPrivate() == aPrivate)
         return;
 
-    delete m_contentsNode;
+    if (m_contentsNode) {
+        removeChildNode(m_contentsNode);
+        delete m_contentsNode;
+    }
     m_contentsNode = new MozContentSGNode(aPrivate);
     // This sets the parent node of the content to QMozViewSGNode.
     appendChildNode(m_contentsNode);

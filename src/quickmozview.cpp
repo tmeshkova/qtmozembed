@@ -168,9 +168,6 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         node = new QMozViewSGNode;
 
     node->setRenderer(d);
-    QColor backgroundColor = 1 == 0 ? Qt::transparent : Qt::white;
-    QRectF backgroundRect(QPointF(0, 0), d->mSize);
-    node->setBackground(backgroundRect, backgroundColor);
 
     return node;
 }

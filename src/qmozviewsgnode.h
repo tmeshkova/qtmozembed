@@ -16,15 +16,13 @@ QT_END_NAMESPACE
 class MozContentSGNode;
 class QGraphicsMozViewPrivate;
 
-class QMozViewSGNode : public QSGTransformNode {
+class QMozViewSGNode : public QSGNode {
     public:
         QMozViewSGNode();
-        void setBackground(const QRectF&, const QColor&);
         void setRenderer(QGraphicsMozViewPrivate* renderer);
 
     private:
         MozContentSGNode* m_contentsNode;
-        QSGSimpleRectNode* m_backgroundNode;
 };
 
 #endif /* qmozviewsgnode_h */
