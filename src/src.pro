@@ -1,6 +1,10 @@
 CONFIG += qt thread debug ordered create_pc create_prl no_install_prl
 
-TARGET = qtembedwidget
+contains(QT_MAJOR_VERSION, 5) {
+  TARGET = qt5embedwidget
+} else {
+  TARGET = qtembedwidget
+}
 TEMPLATE = lib
 VERSION = 1.0.1
 
@@ -55,7 +59,11 @@ contains(QT_MAJOR_VERSION, 4) {
 
 target.path = $$PREFIX/lib
 
-QMAKE_PKGCONFIG_NAME = qtembedwidget
+contains(QT_MAJOR_VERSION, 5) {
+  QMAKE_PKGCONFIG_NAME = qt5embedwidget
+} else {
+  QMAKE_PKGCONFIG_NAME = qtembedwidget
+}
 QMAKE_PKGCONFIG_DESCRIPTION = Model that emits process info
 QMAKE_PKGCONFIG_LIBDIR = $$target.path
 QMAKE_PKGCONFIG_INCDIR = $$target.path
