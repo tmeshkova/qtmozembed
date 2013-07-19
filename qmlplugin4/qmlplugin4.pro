@@ -14,7 +14,12 @@ include($$RELATIVE_PATH/relative-objdir.pri)
 QTMOZEMBED_SOURCE_PATH = $$PWD/$$RELATIVE_PATH/src
 
 LIBS+=-lX11
-LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqtembedwidget
+contains(QT_MAJOR_VERSION, 5) {
+  LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqt5embedwidget
+} else {
+  LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqtembedwidget
+}
+
 
 isEmpty(DEFAULT_COMPONENT_PATH) {
   DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"/usr/lib/mozembedlite/\\\"\"
