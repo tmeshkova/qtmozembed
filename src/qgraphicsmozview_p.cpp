@@ -268,7 +268,20 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
         }
     }
 #else
-        LOGT("Fixme IME for Qt5");
+#ifndef QT_NO_IM
+    if (aFocusChange) {
+        QInputMethod* inputContext = qApp->inputMethod();
+        if (!inputContext) {
+            LOGT("Requesting SIP: but no input context");
+            return;
+        }
+        if (aIstate) {
+            inputContext->show();
+        } else {
+            inputContext->hide();
+        }
+    }
+#endif
 #endif
     mViewIface->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
