@@ -105,6 +105,8 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent*);
     virtual void inputMethodEvent(QInputMethodEvent*);
     virtual QVariant inputMethodQuery(Qt::InputMethodQuery aQuery) const;
+    virtual void focusInEvent(QFocusEvent*);
+    virtual void focusOutEvent(QFocusEvent*);
 
 private Q_SLOTS:
     void onInitialized();

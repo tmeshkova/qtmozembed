@@ -46,9 +46,9 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
     setFlag(ItemClipsChildrenToShape, true);
-    setFlag(ItemAcceptsInputMethod, true);
     setFlag(ItemIsFocusScope, true);
     setFlag(ItemAcceptsDrops, true);
+    setFlag(ItemAcceptsInputMethod, true);
 
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
@@ -261,18 +261,36 @@ void QuickMozView::keyReleaseEvent(QKeyEvent* event)
 }
 
 QVariant
-QuickMozView::inputMethodQuery(Qt::InputMethodQuery aQuery) const
+QuickMozView::inputMethodQuery(Qt::InputMethodQuery property) const
 {
-    static bool commitNow = getenv("DO_FAST_COMMIT") != 0;
-    return commitNow ? QVariant(0) : QVariant();
+    switch (property) {
+    case Qt::ImEnabled:
+        return QVariant((bool) d->mIsInputFieldFocused);
+    case Qt::ImHints:
+        return QVariant((int) d->mInputMethodHints);
+    default:
+        return QVariant();
+    }
 }
 
+void QuickMozView::focusInEvent(QFocusEvent* event)
+{
+    d->SetIsFocused(true);
+    QQuickItem::focusInEvent(event);
+}
+
+void QuickMozView::focusOutEvent(QFocusEvent* event)
+{
+    d->SetIsFocused(false);
+    QQuickItem::focusOutEvent(event);
+}
 
 void QuickMozView::forceViewActiveFocus()
 {
     forceActiveFocus();
     if (d->mViewInitialized) {
         d->mView->SetIsActive(true);
+        d->mView->SetIsFocused(true);
     }
 }
 

@@ -48,6 +48,9 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mScrollableOffset(0,0)
     , mContentResolution(1.0)
     , mIsPainted(false)
+    , mInputMethodHints(0)
+    , mIsInputFieldFocused(false)
+    , mViewIsFocused(false)
 {
 }
 
@@ -226,6 +229,14 @@ void QGraphicsMozViewPrivate::OnFirstPaint(int32_t aX, int32_t aY)
     mViewIface->firstPaint(aX, aY);
 }
 
+void QGraphicsMozViewPrivate::SetIsFocused(bool aIsFocused)
+{
+    mViewIsFocused = aIsFocused;
+    if (mViewInitialized) {
+        mView->SetIsFocused(aIsFocused);
+    }
+}
+
 void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
                                               const PRUnichar* inputType, const PRUnichar* inputMode)
 {
@@ -246,43 +257,48 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
     else if (imType.contains("url", Qt::CaseInsensitive)) {
         hints |= Qt::ImhUrlCharactersOnly;
     }
-    mViewIface->setInputMethodHints(hints);
 
+    mViewIface->setInputMethodHints(hints);
+    if (aFocusChange) {
+        mIsInputFieldFocused = aIstate;
+        if (mViewIsFocused) {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-    QWidget* focusWidget = qApp->focusWidget();
-    if (focusWidget && aFocusChange) {
-        QInputContext* inputContext = qApp->inputContext();
-        if (!inputContext) {
-            LOGT("Requesting SIP: but no input context");
-            return;
-        }
-        if (aIstate) {
-            QEvent request(QEvent::RequestSoftwareInputPanel);
-            inputContext->filterEvent(&request);
-            focusWidget->setAttribute(Qt::WA_InputMethodEnabled, true);
-            inputContext->setFocusWidget(focusWidget);
-        } else {
-            QEvent request(QEvent::CloseSoftwareInputPanel);
-            inputContext->filterEvent(&request);
-            inputContext->reset();
-        }
-    }
+            QWidget* focusWidget = qApp->focusWidget();
+            if (focusWidget && aFocusChange) {
+                QInputContext* inputContext = qApp->inputContext();
+                if (!inputContext) {
+                    LOGT("Requesting SIP: but no input context");
+                    return;
+                }
+                if (aIstate) {
+                    QEvent request(QEvent::RequestSoftwareInputPanel);
+                    inputContext->filterEvent(&request);
+                    focusWidget->setAttribute(Qt::WA_InputMethodEnabled, true);
+                    inputContext->setFocusWidget(focusWidget);
+                } else {
+                    QEvent request(QEvent::CloseSoftwareInputPanel);
+                    inputContext->filterEvent(&request);
+                    inputContext->reset();
+                }
+            }
 #else
 #ifndef QT_NO_IM
-    if (aFocusChange) {
-        QInputMethod* inputContext = qApp->inputMethod();
-        if (!inputContext) {
-            LOGT("Requesting SIP: but no input context");
-            return;
+            QInputMethod* inputContext = qGuiApp->inputMethod();
+            if (!inputContext) {
+                LOGT("Requesting SIP: but no input context");
+                return;
+            }
+            inputContext->update(Qt::ImEnabled);
+            if (aIstate) {
+                inputContext->show();
+            } else {
+                inputContext->hide();
+            }
+            inputContext->update(Qt::ImQueryAll);
         }
-        if (aIstate) {
-            inputContext->show();
-        } else {
-            inputContext->hide();
-        }
+#endif
+#endif
     }
-#endif
-#endif
     mViewIface->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
 

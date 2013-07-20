@@ -435,6 +435,19 @@ void QGraphicsMozView::forceViewActiveFocus()
     }
 }
 
+void QGraphicsMozView::focusInEvent(QFocusEvent* event)
+{
+    d->SetIsFocused(true);
+    QGraphicsWidget::focusInEvent(event);
+}
+
+void QGraphicsMozView::focusOutEvent(QFocusEvent* event)
+{
+    d->SetIsFocused(false);
+    QGraphicsWidget::focusOutEvent(event);
+}
+
+
 void QGraphicsMozView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
     if (!mUseQmlMouse) {
