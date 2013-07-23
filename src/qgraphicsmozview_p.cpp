@@ -296,8 +296,9 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
             }
             inputContext->update(Qt::ImQueryAll);
 #endif
-        }
 #endif
+        }
+
     }
     mViewIface->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
