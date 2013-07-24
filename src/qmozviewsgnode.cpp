@@ -31,6 +31,7 @@ public:
         QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
         gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
         mPrivate->mView->SetGLViewTransform(matr);
+        mPrivate->mView->SetViewClipping(0, 0, mPrivate->mSize.width(), mPrivate->mSize.height());
         mPrivate->mView->RenderGL();
     }
 
