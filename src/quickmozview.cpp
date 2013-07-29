@@ -107,10 +107,11 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
     }
 }
 
-void QuickMozView::geometryChanged(const QRectF & newGeometry, const QRectF&)
+void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     d->mSize = newGeometry.size().toSize();
     d->UpdateViewSize();
+    QQuickItem::geometryChanged(newGeometry, oldGeometry);
 }
 
 void QuickMozView::sceneGraphInitialized()
