@@ -9,11 +9,13 @@ TEMPLATE = lib
 VERSION = 1.0.1
 
 SOURCES += qmozcontext.cpp \
+           qmessagepump.cpp \
            EmbedQtKeyUtils.cpp \
            qgraphicsmozview_p.cpp \
            geckoworker.cpp
 
 HEADERS += qmozcontext.h \
+           qmessagepump.h \
            EmbedQtKeyUtils.h \
            geckoworker.h \
            qmozview_defined_wrapper.h
@@ -56,6 +58,8 @@ contains(QT_MAJOR_VERSION, 4) {
     QT += declarative widgets opengl
   }
 }
+
+#DEFINES += Q_DEBUG_LOG
 
 target.path = $$PREFIX/lib
 

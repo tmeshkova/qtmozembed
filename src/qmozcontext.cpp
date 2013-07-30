@@ -24,8 +24,10 @@
 #include "qmozembedlog.h"
 #include "qmozcontext.h"
 #include "geckoworker.h"
+#include "qmessagepump.h"
 
 #include "nsDebug.h"
+#include "mozilla/embedlite/EmbedLiteMessagePump.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/embedlite/EmbedInitGlue.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
@@ -42,8 +44,18 @@ public:
     , mInitialized(false)
     , mThread(new QThread())
     , mEmbedStarted(false)
+    , mQtPump(NULL)
+    , mAsyncContext(getenv("USE_ASYNC"))
     {
         qmlRegisterType<QNewWindowResponse>("QtMozilla", 1, 0, "QNewWindowResponse");
+        LOGT("Create new Context: %p, parent:%p", (void*)this, (void*)qq);
+        setenv("BUILD_GRE_HOME", BUILD_GRE_HOME, 1);
+        LoadEmbedLite();
+        mApp = XRE_GetEmbedLite();
+        mApp->SetListener(this);
+        if (mAsyncContext) {
+            mQtPump = new MessagePumpQt(mApp);
+        }
     }
 
     virtual ~QMozContextPrivate() {
@@ -100,6 +112,9 @@ public:
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {
         LOGT("");
+        if (mAsyncContext) {
+            mQtPump->deleteLater();
+        }
     }
     virtual void OnObserve(const char* aTopic, const PRUnichar* aData) {
         // LOGT("aTopic: %s, data: %s", aTopic, NS_ConvertUTF16toUTF8(aData).get());
@@ -159,6 +174,8 @@ public:
         return retval;
     }
 
+    EmbedLiteMessagePump* EmbedLoop() { return mQtPump->EmbedLoop(); }
+
     QList<QString> mObserversList;
 private:
     QMozContext* q;
@@ -167,6 +184,9 @@ private:
     friend class QMozContext;
     QThread* mThread;
     bool mEmbedStarted;
+    EmbedLiteMessagePump* mEventLoopPrivate;
+    MessagePumpQt* mQtPump;
+    bool mAsyncContext;
 };
 
 QMozContext::QMozContext(QObject* parent)
@@ -175,11 +195,6 @@ QMozContext::QMozContext(QObject* parent)
 {
     Q_ASSERT(protectSingleton == nullptr);
     protectSingleton = this;
-    LOGT("Create new Context: %p, parent:%p", (void*)this, (void*)parent);
-    setenv("BUILD_GRE_HOME", BUILD_GRE_HOME, 1);
-    LoadEmbedLite();
-    d->mApp = XRE_GetEmbedLite();
-    d->mApp->SetListener(d);
 }
 
 void QMozContext::setProfile(const QString profilePath)
@@ -268,8 +283,12 @@ void QMozContext::runEmbedding(int aDelay)
 {
     if (!d->mEmbedStarted) {
         d->mEmbedStarted = true;
-        d->mApp->Start(EmbedLiteApp::EMBED_THREAD);
-        d->mEmbedStarted = false;
+        if (d->mAsyncContext) {
+            d->mApp->StartWithCustomPump(EmbedLiteApp::EMBED_THREAD, d->EmbedLoop());
+        } else {
+            d->mApp->Start(EmbedLiteApp::EMBED_THREAD);
+            d->mEmbedStarted = false;
+        }
     }
 }
 
