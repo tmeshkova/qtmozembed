@@ -51,6 +51,8 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mInputMethodHints(0)
     , mIsInputFieldFocused(false)
     , mViewIsFocused(false)
+    , mHasContext(false)
+    , mGLSurfaceSize(0,0)
 {
 }
 
@@ -65,9 +67,8 @@ void QGraphicsMozViewPrivate::UpdateViewSize()
         return;
     }
 
-    QSize viewPortSize;
-    if (mContext->GetApp()->IsAccelerated() && RequestCurrentGLContext(viewPortSize)) {
-        mView->SetGLViewPortSize(viewPortSize.width(), viewPortSize.height());
+    if (mContext->GetApp()->IsAccelerated() && mHasContext) {
+        mView->SetGLViewPortSize(mGLSurfaceSize.width(), mGLSurfaceSize.height());
     }
     mView->SetViewSize(mSize.width(), mSize.height());
 }
@@ -81,6 +82,7 @@ bool QGraphicsMozViewPrivate::RequestCurrentGLContext()
 bool QGraphicsMozViewPrivate::RequestCurrentGLContext(QSize& aViewPortSize)
 {
     bool hasContext = false;
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     mViewIface->requestGLContext(hasContext, aViewPortSize);
     return hasContext;
 }

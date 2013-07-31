@@ -6,11 +6,13 @@
 #ifndef QuickMozView_H
 #define QuickMozView_H
 
+#include <QSize>
 #include <QtQuick/QQuickItem>
 #include <QtGui/QOpenGLShaderProgram>
 #include "qmozview_defined_wrapper.h"
 
 class QGraphicsMozViewPrivate;
+class QSGThreadObject;
 
 class QuickMozView : public QQuickItem
 {
@@ -25,16 +27,19 @@ public:
     ~QuickMozView();
 
     Q_MOZ_VIEW_PUBLIC_METHODS
+    void SetIsActive(bool aIsActive);
 
 private:
     QObject* getChild() { return this; }
 
 public Q_SLOTS:
-
     Q_MOZ_VIEW_PUBLIC_SLOTS
+    void onSetIsActive(bool);
+    void onSheduleUpdate();
 
 Q_SIGNALS:
     void childChanged();
+    void setIsActive(bool);
 
     Q_MOZ_VIEW_SIGNALS
 
@@ -59,6 +64,7 @@ public Q_SLOTS:
     void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
     void onRequestGLContext(bool& hasContext, QSize& viewPortSize);
+    void updateGLContextInfo(bool hasContext, QSize viewPortSize);
 
 private Q_SLOTS:
     void onInitialized();
@@ -68,6 +74,7 @@ private:
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
     bool mUseQmlMouse;
+    QSGThreadObject* mSGRenderer;
 };
 
 #endif // QuickMozView_H

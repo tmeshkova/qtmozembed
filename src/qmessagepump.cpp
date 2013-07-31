@@ -29,9 +29,10 @@ namespace {
 static int sPokeEvent;
 }  // namespace
 
-MessagePumpQt::MessagePumpQt(EmbedLiteApp* aApp)
-  : mApp(aApp), mTimer(new QTimer(this)), state_(0), mLastDelayedWorkTime(-1)
+MessagePumpQt::MessagePumpQt(EmbedLiteApp* aApp, MessagePumpQtListener* aListener)
+  : mApp(aApp), mTimer(new QTimer(this)), state_(0), mLastDelayedWorkTime(-1), mListener(aListener)
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   mEventLoopPrivate = mApp->CreateEmbedLiteMessagePump(this);
   // Register our custom event type, to use in qApp event loop
   sPokeEvent = QEvent::registerEventType();
@@ -41,6 +42,7 @@ MessagePumpQt::MessagePumpQt(EmbedLiteApp* aApp)
 
 MessagePumpQt::~MessagePumpQt()
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   mTimer->stop();
   delete mTimer;
   delete state_;
@@ -50,7 +52,9 @@ MessagePumpQt::~MessagePumpQt()
 bool
 MessagePumpQt::event(QEvent *e)
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, etype:%i\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), e->type());
   if (e->type() == sPokeEvent) {
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     HandleDispatch();
     return true;
   }
@@ -59,25 +63,32 @@ MessagePumpQt::event(QEvent *e)
 
 void MessagePumpQt::HandleDispatch()
 {
-  if (state_->should_quit) {
+  if (!state_ || state_->should_quit) {
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     return;
   }
 
   if (mEventLoopPrivate->DoWork(state_->delegate)) {
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     // there might be more, see more_work_is_plausible 
     // variable above, that's why we ScheduleWork() to keep going.
     ScheduleWorkLocal();
   }
 
   if (state_->should_quit) {
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     return;
   }
 
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   bool doIdleWork = !mEventLoopPrivate->DoDelayedWork(state_->delegate);
   scheduleDelayedIfNeeded();
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
 
   if (doIdleWork) {
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     if (mEventLoopPrivate->DoIdleWork(state_->delegate)) {
+      printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
       ScheduleWorkLocal();
     }
   }
@@ -85,14 +96,23 @@ void MessagePumpQt::HandleDispatch()
 
 void MessagePumpQt::ScheduleWorkLocal()
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   QCoreApplication::postEvent(this,
                               new QEvent((QEvent::Type)sPokeEvent));
+  if (mListener) {
+//    mListener->scheduleUpdate();
+    QThread::currentThread()
+  }
+//  QCoreApplication::processEvents();
+  // Process any "deleteLater" objects...
+//  QCoreApplication::sendPostedEvents(0, (QEvent::Type)sPokeEvent);
 }
 
 void
 MessagePumpQt::scheduleDelayedIfNeeded()
 {
   if (mLastDelayedWorkTime == -1) {
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     return;
   }
 
@@ -100,12 +120,14 @@ MessagePumpQt::scheduleDelayedIfNeeded()
     mTimer->stop();
   }
 
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   mTimer->start(mLastDelayedWorkTime >= 0 ? mLastDelayedWorkTime : 0);
 }
 
 void
 MessagePumpQt::dispatchDelayed()
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   HandleDispatch();
 }
 
@@ -116,11 +138,13 @@ void MessagePumpQt::Run(void* delegate)
   state->should_quit = false;
   state->run_depth = state_ ? state_->run_depth + 1 : 1;
   state_ = state;
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   HandleDispatch();
 }
 
 void MessagePumpQt::Quit()
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   if (state_) {
     state_->should_quit = true;
     state_->delegate = NULL;
@@ -129,11 +153,13 @@ void MessagePumpQt::Quit()
 
 void MessagePumpQt::ScheduleWork()
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
   ScheduleWorkLocal();
 }
 
 void MessagePumpQt::ScheduleDelayedWork(const int aDelay)
 {
+  printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, aDelay:%i\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), aDelay);
   mLastDelayedWorkTime = aDelay;
   scheduleDelayedIfNeeded();
 }

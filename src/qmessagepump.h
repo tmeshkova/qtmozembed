@@ -18,12 +18,18 @@ namespace embedlite {
 class EmbedLiteApp;
 }}
 
+class MessagePumpQtListener
+{
+public:
+  virtual void scheduleUpdate() = 0;
+};
+
 class MessagePumpQt : public QObject, public mozilla::embedlite::EmbedLiteMessagePumpListener
 {
   Q_OBJECT
 
 public:
-  MessagePumpQt(mozilla::embedlite::EmbedLiteApp* aApp);
+  MessagePumpQt(mozilla::embedlite::EmbedLiteApp* aApp, MessagePumpQtListener* aListener = 0);
   ~MessagePumpQt();
 
   virtual bool event(QEvent* e);
@@ -58,6 +64,7 @@ private:
   RunState* state_;
   int mLastDelayedWorkTime;
   bool mStarted;
+  MessagePumpQtListener* mListener;
 };
 
 #endif /* qmessagepump_h */

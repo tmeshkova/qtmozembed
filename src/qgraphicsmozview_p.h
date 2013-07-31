@@ -99,6 +99,8 @@ public:
     Qt::InputMethodHints mInputMethodHints;
     bool mIsInputFieldFocused;
     bool mViewIsFocused;
+    bool mHasContext;
+    QSize mGLSurfaceSize;
 };
 
 #endif /* qgraphicsmozview_p_h */

@@ -15,11 +15,12 @@ QT_END_NAMESPACE
 
 class MozContentSGNode;
 class QGraphicsMozViewPrivate;
+class QuickMozView;
 
 class QMozViewSGNode : public QSGNode {
     public:
         QMozViewSGNode();
-        void setRenderer(QGraphicsMozViewPrivate* renderer);
+        void setRenderer(QGraphicsMozViewPrivate* renderer, QuickMozView* aView);
 
     private:
         MozContentSGNode* m_contentsNode;

@@ -7,6 +7,8 @@
 #ifndef qmozview_templated_wrapper_h
 #define qmozview_templated_wrapper_h
 
+#include <QThread>
+
 class QPoint;
 class QString;
 class QMozReturnValue;
@@ -18,6 +20,7 @@ public:
     virtual void Invalidate() = 0;
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
     virtual void forceViewActiveFocus() = 0;
+    virtual void requestGLContext(bool& hasContext, QSize& viewPortSize) = 0;
     // Signals
     virtual void viewInitialized() = 0;
     virtual void urlChanged() = 0;
@@ -38,7 +41,6 @@ public:
     virtual void handleDoubleTap(QPoint point, QMozReturnValue* retval) = 0;
     virtual void imeNotification(int state, bool open, int cause, int focusChange, const QString& type) = 0;
     virtual void bgColorChanged() = 0;
-    virtual void requestGLContext(bool& hasContext, QSize& viewPortSize) = 0;
     virtual void useQmlMouse(bool value) = 0;
 };
 
@@ -141,7 +143,8 @@ public:
     }
     void requestGLContext(bool& hasContext, QSize& viewPortSize)
     {
-        Q_EMIT view.requestGLContext(hasContext, viewPortSize);
+        printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
+        view.requestGLContext(hasContext, viewPortSize);
     }
     void useQmlMouse(bool value)
     {
