@@ -39,17 +39,12 @@ QSGThreadObject::onInitialized()
 
 void QSGThreadObject::scheduleUpdate()
 {
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, mGLContext:%p Custom Update\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mGLContext);
     mView->update();
 }
 
 QSGThreadObject::~QSGThreadObject()
 {
-}
-
-void
-QSGThreadObject::onRequestGLContext(bool& hasContext, QSize& viewPortSize)
-{
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, mGLContext:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mGLContext);
 }
 
 void
@@ -59,4 +54,10 @@ QSGThreadObject::setupCurrentGLContext()
     mGLSurface = mGLContext->surface();
     printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, mGLContext:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mGLContext);
     Q_EMIT updateGLContextInfo(mGLContext && mGLSurface, mGLSurface->size());
+}
+
+void
+QSGThreadObject::makeContextCurrent()
+{
+    mGLContext->makeCurrent(mGLSurface);
 }

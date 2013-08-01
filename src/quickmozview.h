@@ -28,6 +28,8 @@ public:
 
     Q_MOZ_VIEW_PUBLIC_METHODS
     void SetIsActive(bool aIsActive);
+    bool isCustomUpdate();
+    void resetCustomUpdate();
 
 private:
     QObject* getChild() { return this; }

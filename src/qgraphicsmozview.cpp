@@ -95,6 +95,11 @@ QGraphicsMozView::uniqueID() const
 }
 
 void
+QGraphicsMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
+{
+}
+
+void
 QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, QWidget*)
 {
     if (!d->mGraphicsViewAssigned) {

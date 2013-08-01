@@ -101,9 +101,12 @@ QuickMozView::onInitialized()
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, sgRenderThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread());
     hasContext = d->mHasContext;
     viewPortSize = d->mGLSurfaceSize;
+    if (mSGRenderer->thread() == QThread::currentThread()) {
+        mSGRenderer->makeContextCurrent();
+    }
 }
 
 void
@@ -160,7 +163,6 @@ void QuickMozView::sceneGraphInitialized()
     printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     if (!mSGRenderer) {
         mSGRenderer = new QSGThreadObject(this);
-        connect(this, SIGNAL(requestGLContext(bool&,QSize&)), mSGRenderer, SLOT(onRequestGLContext(bool&,QSize&)));
         connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
     }
 }
@@ -170,6 +172,7 @@ void QuickMozView::beforeRendering()
     if (!mSGRenderer) {
         mSGRenderer->setupCurrentGLContext();
     }
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     if (!d->mGraphicsViewAssigned) {
         d->UpdateViewSize();
         d->mGraphicsViewAssigned = true;
@@ -189,6 +192,8 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     if (!d->mViewInitialized)
         return oldNode;
 
+
+    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     if (!d->mContext->GetApp()->IsAccelerated()) {
         printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p NOT ACCEL\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode*>(oldNode);

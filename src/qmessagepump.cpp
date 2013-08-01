@@ -100,8 +100,7 @@ void MessagePumpQt::ScheduleWorkLocal()
   QCoreApplication::postEvent(this,
                               new QEvent((QEvent::Type)sPokeEvent));
   if (mListener) {
-//    mListener->scheduleUpdate();
-    QThread::currentThread()
+    mListener->scheduleUpdate();
   }
 //  QCoreApplication::processEvents();
   // Process any "deleteLater" objects...

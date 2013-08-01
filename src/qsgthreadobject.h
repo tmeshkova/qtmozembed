@@ -21,11 +21,11 @@ public:
     ~QSGThreadObject();
 
     void scheduleUpdate();
+    void makeContextCurrent();
 
 public Q_SLOTS:
     void setupCurrentGLContext();
     void onInitialized();
-    void onRequestGLContext(bool& hasContext, QSize& viewPortSize);
 
 Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
@@ -35,6 +35,7 @@ private:
     QOpenGLContext* mGLContext;
     QSurface* mGLSurface;
     MessagePumpQt* mQtPump;
+
 };
 
 #endif // QSGThreadObject_H
