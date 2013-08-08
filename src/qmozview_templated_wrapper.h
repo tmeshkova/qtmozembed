@@ -21,6 +21,7 @@ public:
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
     virtual void forceViewActiveFocus() = 0;
     virtual void requestGLContext(bool& hasContext, QSize& viewPortSize) = 0;
+    virtual void createGeckoGLContext() = 0;
     // Signals
     virtual void viewInitialized() = 0;
     virtual void urlChanged() = 0;
@@ -52,7 +53,8 @@ public:
 
     void Invalidate()
     {
-        view.update();
+        printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
+        view.Invalidate();
     }
 
     void setInputMethodHints(Qt::InputMethodHints hints)
@@ -145,6 +147,11 @@ public:
     {
         printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         view.requestGLContext(hasContext, viewPortSize);
+    }
+    void createGeckoGLContext()
+    {
+        printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
+        view.createGeckoGLContext();
     }
     void useQmlMouse(bool value)
     {

@@ -8,27 +8,31 @@
 
 #include <QObject>
 #include <QSize>
+#include <QMatrix>
 #include <QtGui/QOpenGLContext>
 #include "qmessagepump.h"
 
 class QuickMozView;
 //class MessagePumpQt;
-class QSGThreadObject : public QObject, public MessagePumpQtListener
+class QSGThreadObject : public QObject
 {
     Q_OBJECT
 public:
     QSGThreadObject(QuickMozView* aView);
     ~QSGThreadObject();
 
-    void scheduleUpdate();
-    void makeContextCurrent();
-
 public Q_SLOTS:
     void setupCurrentGLContext();
     void onInitialized();
+    void makeContextCurrent();
+    void RenderToCurrentContext(QMatrix affine, QSize size);
+
+    QOpenGLContext* context() { return mGLContext; }
 
 Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
+    void updateSignal();
+    void renderRequest(QMatrix matrix, QSize size);
 
 private:
     QuickMozView* mView;

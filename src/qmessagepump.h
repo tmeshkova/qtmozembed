@@ -18,18 +18,12 @@ namespace embedlite {
 class EmbedLiteApp;
 }}
 
-class MessagePumpQtListener
-{
-public:
-  virtual void scheduleUpdate() = 0;
-};
-
 class MessagePumpQt : public QObject, public mozilla::embedlite::EmbedLiteMessagePumpListener
 {
   Q_OBJECT
 
 public:
-  MessagePumpQt(mozilla::embedlite::EmbedLiteApp* aApp, MessagePumpQtListener* aListener = 0);
+  MessagePumpQt(mozilla::embedlite::EmbedLiteApp* aApp);
   ~MessagePumpQt();
 
   virtual bool event(QEvent* e);
@@ -48,6 +42,8 @@ public Q_SLOTS:
   void dispatchDelayed();
 
 private:
+  static void HandleDispatchStatic(void* aPump);
+
   // We may make recursive calls to Run, so we save state that needs to be
   // separate between them in this structure type.
   struct RunState {
@@ -64,7 +60,7 @@ private:
   RunState* state_;
   int mLastDelayedWorkTime;
   bool mStarted;
-  MessagePumpQtListener* mListener;
+  Qt::HANDLE mThread;
 };
 
 #endif /* qmessagepump_h */

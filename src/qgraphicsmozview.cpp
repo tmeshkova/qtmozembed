@@ -100,6 +100,11 @@ QGraphicsMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 }
 
 void
+QGraphicsMozView::createGeckoGLContext()
+{
+}
+
+void
 QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, QWidget*)
 {
     if (!d->mGraphicsViewAssigned) {
@@ -423,6 +428,11 @@ void QGraphicsMozView::recvMouseRelease(int posX, int posY)
     if (d->mPendingTouchEvent) {
         d->mPendingTouchEvent = false;
     }
+}
+
+void QGraphicsMozView::Invalidate()
+{
+    update();
 }
 
 void QGraphicsMozView::forceViewActiveFocus()

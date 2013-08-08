@@ -26,21 +26,14 @@ QSGThreadObject::QSGThreadObject(QuickMozView* aView)
   , mQtPump(0)
 {
     QTimer::singleShot(0, this, SLOT(onInitialized()));
-    mQtPump = new MessagePumpQt(QMozContext::GetInstance()->GetApp(), this);
+    mQtPump = new MessagePumpQt(QMozContext::GetInstance()->GetApp());
 }
 
 void
 QSGThreadObject::onInitialized()
 {
     printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, mGLContext:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mGLContext);
-    QMozContext::GetInstance()->GetApp()->StartRenderLoopWithCustomPump(mQtPump->EmbedLoop());
     setupCurrentGLContext();
-}
-
-void QSGThreadObject::scheduleUpdate()
-{
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, mGLContext:%p Custom Update\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mGLContext);
-    mView->update();
 }
 
 QSGThreadObject::~QSGThreadObject()
@@ -60,4 +53,12 @@ void
 QSGThreadObject::makeContextCurrent()
 {
     mGLContext->makeCurrent(mGLSurface);
+}
+
+void
+QSGThreadObject::RenderToCurrentContext(QMatrix affine, QSize size)
+{
+    printf(">>>>>>Func:%s::%d START RENDER curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
+    Q_EMIT renderRequest(affine, size);
+    printf(">>>>>>Func:%s::%d END RENDER  curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
 }
