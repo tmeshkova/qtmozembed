@@ -7,17 +7,39 @@
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
+#include "mozilla/embedlite/EmbedLiteMessagePump.h"
 
 QMCThreadObject::QMCThreadObject(QSGThreadObject* sgThreadObj)
-  : mGLContext(0)
-  , mGLSurface(0)
+  : mGLContext(NULL)
+  , mGLSurface(NULL)
   , mSGThreadObj(sgThreadObj)
+  , mLoop(NULL)
+  , mOwnGLContext(false)
 {
     mLoop = QMozContext::GetInstance()->GetApp()->CreateEmbedLiteMessagePump(NULL);
-    mGLContext = new QOpenGLContext;
-    mGLContext->setShareContext(mSGThreadObj->context());
-    mGLSurface = mSGThreadObj->context()->surface();
-    if (mGLContext->create()) {
-        mGLContext->makeCurrent(mGLSurface);
+    if (sgThreadObj->thread() != thread()) {
+        mOwnGLContext = true;
+        mGLContext = new QOpenGLContext;
+        mGLContext->setShareContext(mSGThreadObj->context());
+        mGLSurface = mSGThreadObj->context()->surface();
+        if (mGLContext->create()) {
+            mGLContext->makeCurrent(mGLSurface);
+        }
+    } else {
+        mGLContext = mSGThreadObj->context();
+        if (mGLContext) {
+            mGLSurface = mSGThreadObj->context()->surface();
+            if (mGLSurface) {
+                mGLContext->makeCurrent(mGLSurface);
+            }
+        }
+    }
+}
+
+QMCThreadObject::~QMCThreadObject()
+{
+    delete mLoop;
+    if (mOwnGLContext) {
+        delete mGLContext;
     }
 }

@@ -70,7 +70,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     bool getUseQmlMouse(); \
     void setUseQmlMouse(bool value); \
     void forceViewActiveFocus(); \
-    void Invalidate();
+    void Invalidate(); \
+    void createGeckoGLContext();
 
 #define Q_MOZ_VIEW_PUBLIC_SLOTS \
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl()); \

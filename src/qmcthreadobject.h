@@ -20,13 +20,14 @@ class QMCThreadObject : public QObject
     Q_OBJECT
 public:
     QMCThreadObject(QSGThreadObject* sgThreadObj);
-    ~QMCThreadObject() {}
+    ~QMCThreadObject();
 
 private:
     QOpenGLContext* mGLContext;
     QSurface* mGLSurface;
     QSGThreadObject* mSGThreadObj;
     mozilla::embedlite::EmbedLiteMessagePump* mLoop;
+    bool mOwnGLContext;
 };
 
 #endif // QMCThreadObject_H

@@ -26,6 +26,8 @@
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
 #include "qmozviewsgnode.h"
+#include "qsgthreadobject.h"
+#include "qmcthreadobject.h"
 #include "assert.h"
 
 using namespace mozilla;
@@ -36,6 +38,8 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
   , mParentID(0)
   , mUseQmlMouse(false)
+  , mSGRenderer(NULL)
+  , mMCRenderer(NULL)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -64,10 +68,13 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
 QuickMozView::~QuickMozView()
 {
+
     if (d->mView) {
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
     }
+    delete mSGRenderer;
+    delete mMCRenderer;
     delete d;
 }
 
@@ -90,6 +97,13 @@ QuickMozView::onInitialized()
       d->mContext->GetApp()->SetIsAccelerated(ctx && ctx->surface() && !getenv("SWRENDER"));
       d->mView = d->mContext->GetApp()->CreateView();
       d->mView->SetListener(d);
+    }
+}
+
+void QuickMozView::createGeckoGLContext()
+{
+    if (!mMCRenderer && mSGRenderer) {
+        mMCRenderer = new QMCThreadObject(mSGRenderer);
     }
 }
 
@@ -133,6 +147,11 @@ void QuickMozView::sceneGraphInitialized()
 
 void QuickMozView::beforeRendering()
 {
+    if (!mSGRenderer) {
+        mSGRenderer = new QSGThreadObject();
+        mSGRenderer->setupCurrentGLContext();
+    }
+
     if (!d->mGraphicsViewAssigned) {
         d->UpdateViewSize();
         d->mGraphicsViewAssigned = true;

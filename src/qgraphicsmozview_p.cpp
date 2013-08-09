@@ -59,6 +59,11 @@ QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
     delete mViewIface;
 }
 
+void QGraphicsMozViewPrivate::CompositorCreated()
+{
+    mViewIface->createGeckoGLContext();
+}
+
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
     if (!mViewInitialized) {

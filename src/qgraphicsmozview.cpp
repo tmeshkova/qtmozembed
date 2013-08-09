@@ -153,6 +153,11 @@ QGraphicsMozView::Invalidate()
     }
 }
 
+void
+QGraphicsMozView::createGeckoGLContext()
+{
+}
+
 /*! \reimp
 */
 QSizeF QGraphicsMozView::sizeHint(Qt::SizeHint which, const QSizeF& constraint) const

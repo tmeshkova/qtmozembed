@@ -11,6 +11,8 @@
 #include "qmozview_defined_wrapper.h"
 
 class QGraphicsMozViewPrivate;
+class QSGThreadObject;
+class QMCThreadObject;
 
 class QuickMozView : public QQuickItem
 {
@@ -71,6 +73,8 @@ private:
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
     bool mUseQmlMouse;
+    QSGThreadObject* mSGRenderer;
+    QMCThreadObject* mMCRenderer;
 };
 
 #endif // QuickMozView_H

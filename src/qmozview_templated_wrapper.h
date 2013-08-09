@@ -18,6 +18,7 @@ public:
     virtual void Invalidate() = 0;
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
     virtual void forceViewActiveFocus() = 0;
+    virtual void createGeckoGLContext() = 0;
     // Signals
     virtual void viewInitialized() = 0;
     virtual void urlChanged() = 0;
@@ -62,7 +63,10 @@ public:
     {
         view.forceViewActiveFocus();
     }
-
+    void createGeckoGLContext()
+    {
+        view.createGeckoGLContext();
+    }
     void viewInitialized()
     {
         Q_EMIT view.viewInitialized();
