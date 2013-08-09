@@ -58,7 +58,6 @@ private:
   RunState* state_;
   int mLastDelayedWorkTime;
   bool mStarted;
-  Qt::HANDLE mThread;
 };
 
 #endif /* qmessagepump_h */

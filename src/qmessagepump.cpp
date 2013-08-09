@@ -30,9 +30,8 @@ static int sPokeEvent;
 }  // namespace
 
 MessagePumpQt::MessagePumpQt(EmbedLiteApp* aApp)
-  : mApp(aApp), mTimer(new QTimer(this)), state_(0), mLastDelayedWorkTime(-1), mThread(0)
+  : mApp(aApp), mTimer(new QTimer(this)), state_(0), mLastDelayedWorkTime(-1)
 {
-  mThread = QThread::currentThreadId();
   mEventLoopPrivate = mApp->CreateEmbedLiteMessagePump(this);
   // Register our custom event type, to use in qApp event loop
   sPokeEvent = QEvent::registerEventType();
@@ -117,7 +116,6 @@ void MessagePumpQt::Run(void* delegate)
   state->should_quit = false;
   state->run_depth = state_ ? state_->run_depth + 1 : 1;
   state_ = state;
-  mThread = QThread::currentThreadId();
   HandleDispatch();
 }
 
