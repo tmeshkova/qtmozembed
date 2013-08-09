@@ -94,7 +94,7 @@ public:
     // App Initialized and ready to API call
     virtual void Initialized() {
         mInitialized = true;
-#ifdef GL_PROVIDER_EGL
+#if defined(GL_PROVIDER_EGL) || defined(GL_PROVIDER_GLX)
         if (mApp->GetRenderType() == EmbedLiteApp::RENDER_AUTO) {
             mApp->SetIsAccelerated(true);
         }
