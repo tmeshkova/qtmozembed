@@ -50,7 +50,7 @@ public:
 
     void Invalidate()
     {
-        view.update();
+        view.Invalidate();
     }
 
     void setInputMethodHints(Qt::InputMethodHints hints)

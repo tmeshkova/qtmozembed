@@ -90,6 +90,7 @@ Q_SIGNALS:
     void bgColorChanged();
     void requestGLContext(bool& hasContext, QSize& viewPortSize);
     void useQmlMouse(bool value);
+    void updateThreaded();
 
 protected:
     virtual void setGeometry(const QRectF& rect);

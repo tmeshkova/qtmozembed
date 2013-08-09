@@ -9,6 +9,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QTimer>
+#include <QThread>
 #include <QtOpenGL/QGLContext>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QInputContext>
@@ -52,6 +53,7 @@ QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     setInputMethodHints(Qt::ImhPreferLowercase);
 
     d->mContext = QMozContext::GetInstance();
+    connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
@@ -138,6 +140,16 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
                                     d->mTempBufferImage.depth());
             painter->drawImage(QPoint(0, 0), d->mTempBufferImage);
         }
+    }
+}
+
+void
+QGraphicsMozView::Invalidate()
+{
+    if (QThread::currentThread() != thread()) {
+        Q_EMIT updateThreaded();
+    } else {
+        update();
     }
 }
 

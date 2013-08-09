@@ -69,7 +69,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     QColor bgcolor() const; \
     bool getUseQmlMouse(); \
     void setUseQmlMouse(bool value); \
-    void forceViewActiveFocus();
+    void forceViewActiveFocus(); \
+    void Invalidate();
 
 #define Q_MOZ_VIEW_PUBLIC_SLOTS \
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl()); \

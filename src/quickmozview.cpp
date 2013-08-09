@@ -54,6 +54,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
+    connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
@@ -187,6 +188,15 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
 void QuickMozView::cleanup()
 {
+}
+
+void QuickMozView::Invalidate()
+{
+    if (QThread::currentThread() != thread()) {
+        Q_EMIT updateThreaded();
+    } else {
+        update();
+    }
 }
 
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)

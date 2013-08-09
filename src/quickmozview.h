@@ -37,6 +37,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void childChanged();
     void setIsActive(bool);
+    void updateThreaded();
 
     Q_MOZ_VIEW_SIGNALS
 
