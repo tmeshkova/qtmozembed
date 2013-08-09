@@ -30,7 +30,6 @@ QSGThreadObject::QSGThreadObject(QuickMozView* aView)
 void
 QSGThreadObject::onInitialized()
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, mGLContext:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mGLContext);
     setupCurrentGLContext();
 }
 
@@ -43,7 +42,6 @@ QSGThreadObject::setupCurrentGLContext()
 {
     mGLContext = QOpenGLContext::currentContext();
     mGLSurface = mGLContext->surface();
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, mGLContext:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mGLContext);
     Q_EMIT updateGLContextInfo(mGLContext && mGLSurface, mGLSurface->size());
 }
 
@@ -56,7 +54,5 @@ QSGThreadObject::makeContextCurrent()
 void
 QSGThreadObject::RenderToCurrentContext(QMatrix affine, QSize size)
 {
-    printf(">>>>>>Func:%s::%d START RENDER curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     Q_EMIT renderRequest(affine, size);
-    printf(">>>>>>Func:%s::%d END RENDER  curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
 }

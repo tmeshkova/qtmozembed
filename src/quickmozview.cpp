@@ -54,7 +54,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     setFlag(ItemAcceptsInputMethod, true);
 
     d->mContext = QMozContext::GetInstance();
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
 //    connect(this, SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(onSetIsActive(bool)));
     connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
@@ -77,14 +76,12 @@ QuickMozView::~QuickMozView()
 void
 QuickMozView::SetIsActive(bool aIsActive)
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     Q_EMIT setIsActive(aIsActive);
 }
 
 void
 QuickMozView::onSetIsActive(bool aIsActive)
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     d->mView->SetIsActive(aIsActive);
 }
 
@@ -103,7 +100,6 @@ QuickMozView::onInitialized()
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, sgRenderThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread());
     hasContext = d->mHasContext;
     viewPortSize = d->mGLSurfaceSize;
     if (mSGRenderer->thread() == QThread::currentThread()) {
@@ -116,57 +112,41 @@ void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 
 void QuickMozView::RenderToCurrentContext(QMatrix affine, QSize size)
 {
-    printf(">>>>>>Func:%s::%d START RENDER curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread(), mMCRenderer->thread());
     if (mSGRenderer->thread() == QThread::currentThread()) {
-//        Q_EMIT renderRequest(affine, size);
-        printf(">>>>>>Func:%s::%d PUSH SUBTHREAD START RENDER curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread(), mMCRenderer->thread());
-//        mSGRenderer->RenderToCurrentContext(affine,size);
         mMCRenderer->ProcessInGeckoThread(affine, size);
-        //bool ret = mMCRenderer->thread()->wait();
-        printf(">>>>>>Func:%s::%d PUSH SUBTHREAD END RENDER curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread(), mMCRenderer->thread());
-//        mSGRenderer->RenderToCurrentContext(affine,size);
     }
-    printf(">>>>>>Func:%s::%d END RENDER  curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread(), mMCRenderer->thread());
 }
 
 void QuickMozView::RenderToCurrentContext2(QMatrix affine, QSize size)
 {
-    printf(">>>>>>Func:%s::%d START RENDER curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread(), mMCRenderer->thread());
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
     d->mView->SetViewClipping(0, 0, size.width(), size.height());
     d->mView->RenderGL();
-    printf(">>>>>>Func:%s::%d END RENDER  curThread:%p, curThrId:%p, sgRenderThread:%p, mcThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread(), mMCRenderer->thread());
 }
 
 
 void QuickMozView::createGeckoGLContext()
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, sgRenderThread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), mSGRenderer->thread());
     if (!mMCRenderer) {
         mMCRenderer = new QMCThreadObject(this, mSGRenderer);
-//        connect(this, SIGNAL(renderRequest(QMatrix,QSize)), mMCRenderer, SLOT(onRenderRequested(QMatrix,QSize)), Qt::BlockingQueuedConnection);
-//        connect(this, SIGNAL(renderRequest(QMatrix,QSize)), mMCRenderer, SLOT(onRenderRequested(QMatrix,QSize)));
     }
 }
 
 void
 QuickMozView::onRequestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     hasContext = false;
     if (d->mContext->GetApp()->IsAccelerated() && d->mHasContext) {
         QRectF r(0, 0, d->mGLSurfaceSize.width(), d->mGLSurfaceSize.height());
         r = mapRectToScene(r);
         viewPortSize = r.size().toSize();
-        printf(">>>>>>Func:%s::%d YO HAS CONTEXT !!! curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         hasContext = true;
     }
 }
 
 void QuickMozView::updateGLContextInfo(bool hasContext, QSize viewPortSize)
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p, hasContext:%i, size[%i,%i]\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId(), hasContext, viewPortSize.width(), viewPortSize.height());
     d->mHasContext = hasContext;
     d->mGLSurfaceSize = viewPortSize;
     QRectF r(0, 0, d->mGLSurfaceSize.width(), d->mGLSurfaceSize.height());
@@ -177,7 +157,6 @@ void QuickMozView::updateGLContextInfo(bool hasContext, QSize viewPortSize)
 void
 QuickMozView::onSheduleUpdate()
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     update();
 }
 
@@ -206,19 +185,15 @@ void QuickMozView::sceneGraphInitialized()
 
 void QuickMozView::beforeRendering()
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     if (!mSGRenderer) {
         mSGRenderer = new QSGThreadObject(this);
         connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
         connect(mSGRenderer, SIGNAL(updateSignal()), this, SLOT(onSheduleUpdate()));
         mSGRenderer->setupCurrentGLContext();
-//        mMCThread = new QMCThread(this, mSGRenderer);
-//        mMCRenderer = mMCThread->mMCRenderer;
     }
     if (mSGRenderer) {
         mSGRenderer->setupCurrentGLContext();
     }
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     if (!d->mGraphicsViewAssigned) {
         d->UpdateViewSize();
         d->mGraphicsViewAssigned = true;
@@ -239,9 +214,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         return oldNode;
 
 
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     if (!d->mContext->GetApp()->IsAccelerated()) {
-        printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p NOT ACCEL\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode*>(oldNode);
         if (!n) {
             n = new QSGSimpleTextureNode();
@@ -262,7 +235,6 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         return n;
     }
 
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p ACCEL!!!\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     QMozViewSGNode* node = static_cast<QMozViewSGNode*>(oldNode);
 
     const QWindow* window = this->window();
@@ -403,10 +375,8 @@ void QuickMozView::forceViewActiveFocus()
 void QuickMozView::Invalidate()
 {
     if (QThread::currentThread() != thread()) {
-        printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         Q_EMIT updateThreaded();
     } else {
-        printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         update();
     }
 }

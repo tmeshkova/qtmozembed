@@ -53,7 +53,6 @@ public:
 
     void Invalidate()
     {
-        printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
         view.Invalidate();
     }
 
@@ -145,12 +144,10 @@ public:
     }
     void requestGLContext(bool& hasContext, QSize& viewPortSize)
     {
-        printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         view.requestGLContext(hasContext, viewPortSize);
     }
     void createGeckoGLContext()
     {
-        printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
         view.createGeckoGLContext();
     }
     void useQmlMouse(bool value)

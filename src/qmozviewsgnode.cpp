@@ -29,7 +29,6 @@ public:
 
     virtual void render(const RenderState& state)
     {
-        printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
         QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
         mView->RenderToCurrentContext(affine, mPrivate->mSize);
     }

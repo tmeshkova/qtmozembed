@@ -52,8 +52,6 @@ public:
     void wakeup();
 
 public Q_SLOTS:
-    void setupCurrentGLContext();
-    void onInitialized();
     void onRenderRequested(QMatrix, QSize);
 
 

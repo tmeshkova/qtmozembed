@@ -42,8 +42,6 @@ public Q_SLOTS:
   void dispatchDelayed();
 
 private:
-  static void HandleDispatchStatic(void* aPump);
-
   // We may make recursive calls to Run, so we save state that needs to be
   // separate between them in this structure type.
   struct RunState {

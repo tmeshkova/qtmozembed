@@ -54,7 +54,6 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mHasContext(false)
     , mGLSurfaceSize(0,0)
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
 }
 
 QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
@@ -64,7 +63,6 @@ QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
 
 void QGraphicsMozViewPrivate::CompositorCreated()
 {
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     mViewIface->createGeckoGLContext();
 }
 
@@ -89,7 +87,6 @@ bool QGraphicsMozViewPrivate::RequestCurrentGLContext()
 bool QGraphicsMozViewPrivate::RequestCurrentGLContext(QSize& aViewPortSize)
 {
     bool hasContext = false;
-    printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     mViewIface->requestGLContext(hasContext, aViewPortSize);
     return hasContext;
 }
@@ -111,7 +108,6 @@ void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b
 
 bool QGraphicsMozViewPrivate::Invalidate()
 {
-    printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
     mViewIface->Invalidate();
     return true;
 }
