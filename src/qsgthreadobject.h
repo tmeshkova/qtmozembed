@@ -31,7 +31,6 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
-    void updateSignal();
     void renderRequest(QMatrix matrix, QSize size);
 
 private:

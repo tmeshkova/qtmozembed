@@ -55,7 +55,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
     d->mContext = QMozContext::GetInstance();
 //    connect(this, SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
-    connect(this, SIGNAL(setIsActive(bool)), this, SLOT(onSetIsActive(bool)));
+    connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
     connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
@@ -76,13 +76,11 @@ QuickMozView::~QuickMozView()
 void
 QuickMozView::SetIsActive(bool aIsActive)
 {
-    Q_EMIT setIsActive(aIsActive);
-}
-
-void
-QuickMozView::onSetIsActive(bool aIsActive)
-{
-    d->mView->SetIsActive(aIsActive);
+    if (QThread::currentThread() == thread()) {
+        d->mView->SetIsActive(aIsActive);
+    } else {
+        Q_EMIT setIsActive(aIsActive);
+    }
 }
 
 void
@@ -154,12 +152,6 @@ void QuickMozView::updateGLContextInfo(bool hasContext, QSize viewPortSize)
     d->mGLSurfaceSize = r.size().toSize();
 }
 
-void
-QuickMozView::onSheduleUpdate()
-{
-    update();
-}
-
 void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
 {
     if (change == ItemSceneChange) {
@@ -188,7 +180,6 @@ void QuickMozView::beforeRendering()
     if (!mSGRenderer) {
         mSGRenderer = new QSGThreadObject(this);
         connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
-        connect(mSGRenderer, SIGNAL(updateSignal()), this, SLOT(onSheduleUpdate()));
         mSGRenderer->setupCurrentGLContext();
     }
     if (mSGRenderer) {
@@ -252,6 +243,15 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
 void QuickMozView::cleanup()
 {
+}
+
+void QuickMozView::Invalidate()
+{
+    if (QThread::currentThread() != thread()) {
+        Q_EMIT updateThreaded();
+    } else {
+        update();
+    }
 }
 
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)
@@ -369,15 +369,6 @@ void QuickMozView::forceViewActiveFocus()
     if (d->mViewInitialized) {
         d->mView->SetIsActive(true);
         d->mView->SetIsFocused(true);
-    }
-}
-
-void QuickMozView::Invalidate()
-{
-    if (QThread::currentThread() != thread()) {
-        Q_EMIT updateThreaded();
-    } else {
-        update();
     }
 }
 

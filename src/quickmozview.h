@@ -15,7 +15,6 @@
 class QGraphicsMozViewPrivate;
 class QSGThreadObject;
 class QMCThreadObject;
-class QMCThread;
 
 class QuickMozView : public QQuickItem
 {
@@ -31,8 +30,6 @@ public:
 
     Q_MOZ_VIEW_PUBLIC_METHODS
     void SetIsActive(bool aIsActive);
-    bool isCustomUpdate();
-    void resetCustomUpdate();
     void RenderToCurrentContext(QMatrix matrix, QSize size);
     void RenderToCurrentContext2(QMatrix matrix, QSize size);
 
@@ -41,8 +38,6 @@ private:
 
 public Q_SLOTS:
     Q_MOZ_VIEW_PUBLIC_SLOTS
-    void onSetIsActive(bool);
-    void onSheduleUpdate();
 
 Q_SIGNALS:
     void childChanged();
@@ -84,7 +79,6 @@ private:
     unsigned mParentID;
     bool mUseQmlMouse;
     QSGThreadObject* mSGRenderer;
-    QMCThread* mMCThread;
     QMCThreadObject* mMCRenderer;
 };
 

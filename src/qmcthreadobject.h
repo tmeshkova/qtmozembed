@@ -21,24 +21,6 @@ class QuickMozView;
 class QSGThreadObject;
 class QOffscreenSurface;
 class QMCThreadObject;
-class QMCThread : public QThread
-{
-    Q_OBJECT
-public:
-    QMCThread(QuickMozView* aView, QSGThreadObject* sgThreadObj);
-    ~QMCThread() {}
-
-    virtual void run();
-
-    QMCThreadObject* mMCRenderer;
-private:
-    QuickMozView* mView;
-    QSGThreadObject* mSGThreadObj;
-    QOpenGLContext* mGLContext;
-//    QOffscreenSurface* mGLSurface;
-    QSurface* mGLSurface;
-    MessagePumpQt* mQtPump;
-};
 
 class QMCThreadObject : public QObject
 {

@@ -21,24 +21,6 @@
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
-QMCThread::QMCThread(QuickMozView* aView, QSGThreadObject* sgThreadObj)
-  : mView(aView)
-  , mSGThreadObj(sgThreadObj)
-  , mQtPump(0)
-{
-    mGLContext = mSGThreadObj->context();
-    mGLSurface = mSGThreadObj->context()->surface();
-    start();
-}
-
-void
-QMCThread::run()
-{
-    mQtPump = new MessagePumpQt(QMozContext::GetInstance()->GetApp());
-    mMCRenderer = new QMCThreadObject(mView, mSGThreadObj);
-    exec();
-}
-
 QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj)
   : mView(aView)
   , mGLContext(0)
