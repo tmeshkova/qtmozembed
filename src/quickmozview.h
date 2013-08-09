@@ -32,9 +32,11 @@ private:
 public Q_SLOTS:
 
     Q_MOZ_VIEW_PUBLIC_SLOTS
+    void SetIsActive(bool aIsActive);
 
 Q_SIGNALS:
     void childChanged();
+    void setIsActive(bool);
 
     Q_MOZ_VIEW_SIGNALS
 

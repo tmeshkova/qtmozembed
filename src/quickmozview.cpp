@@ -13,6 +13,7 @@
 #include "mozilla/embedlite/EmbedLiteApp.h"
 
 #include <QTimer>
+#include <QThread>
 #include <QtOpenGL/QGLContext>
 #include <QGuiApplication>
 #include <QJsonDocument>
@@ -52,6 +53,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
+    connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
@@ -66,6 +68,16 @@ QuickMozView::~QuickMozView()
         d->mContext->GetApp()->DestroyView(d->mView);
     }
     delete d;
+}
+
+void
+QuickMozView::SetIsActive(bool aIsActive)
+{
+    if (QThread::currentThread() == thread()) {
+        d->mView->SetIsActive(aIsActive);
+    } else {
+        Q_EMIT setIsActive(aIsActive);
+    }
 }
 
 void
@@ -168,7 +180,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     if (!node)
         node = new QMozViewSGNode;
 
-    node->setRenderer(d);
+    node->setRenderer(d, this);
 
     return node;
 }

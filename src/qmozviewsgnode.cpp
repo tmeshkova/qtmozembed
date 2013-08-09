@@ -11,14 +11,15 @@
 #include <QtQuick/QSGSimpleRectNode>
 #include <private/qsgrendernode_p.h>
 #include "qgraphicsmozview_p.h"
+#include "quickmozview.h"
 #include <assert.h>
 
 class MozContentSGNode : public QSGRenderNode {
 public:
-    MozContentSGNode(QGraphicsMozViewPrivate* aPrivate)
-        : mPrivate(aPrivate)
+    MozContentSGNode(QGraphicsMozViewPrivate* aPrivate, QuickMozView* aView)
+        : mPrivate(aPrivate), mView(aView)
     {
-        mPrivate->mView->SetIsActive(true);
+        mView->SetIsActive(true);
     }
 
     virtual StateFlags changedStates()
@@ -50,6 +51,7 @@ public:
 
 private:
     QGraphicsMozViewPrivate* mPrivate;
+    QuickMozView* mView;
 };
 
 QMozViewSGNode::QMozViewSGNode()
@@ -57,7 +59,7 @@ QMozViewSGNode::QMozViewSGNode()
 {
 }
 
-void QMozViewSGNode::setRenderer(QGraphicsMozViewPrivate* aPrivate)
+void QMozViewSGNode::setRenderer(QGraphicsMozViewPrivate* aPrivate, QuickMozView* aView)
 {
     if (m_contentsNode && m_contentsNode->getPrivate() == aPrivate)
         return;
@@ -66,7 +68,7 @@ void QMozViewSGNode::setRenderer(QGraphicsMozViewPrivate* aPrivate)
         removeChildNode(m_contentsNode);
         delete m_contentsNode;
     }
-    m_contentsNode = new MozContentSGNode(aPrivate);
+    m_contentsNode = new MozContentSGNode(aPrivate, aView);
     // This sets the parent node of the content to QMozViewSGNode.
     appendChildNode(m_contentsNode);
 }
