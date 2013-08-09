@@ -151,6 +151,16 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
     }
 }
 
+void
+QGraphicsMozView::Invalidate()
+{
+    if (QThread::currentThread() != thread()) {
+        Q_EMIT updateThreaded();
+    } else {
+        update();
+    }
+}
+
 /*! \reimp
 */
 QSizeF QGraphicsMozView::sizeHint(Qt::SizeHint which, const QSizeF& constraint) const
@@ -428,11 +438,6 @@ void QGraphicsMozView::recvMouseRelease(int posX, int posY)
     if (d->mPendingTouchEvent) {
         d->mPendingTouchEvent = false;
     }
-}
-
-void QGraphicsMozView::Invalidate()
-{
-    update();
 }
 
 void QGraphicsMozView::forceViewActiveFocus()
