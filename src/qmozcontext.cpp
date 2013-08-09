@@ -53,6 +53,8 @@ public:
         LoadEmbedLite();
         mApp = XRE_GetEmbedLite();
         mApp->SetListener(this);
+//        mApp->SetCompositorInSeparateThread(getenv("QML_BAD_GUI_RENDER_LOOP") == 0);
+        mApp->SetCompositorInSeparateThread(true);
         if (mAsyncContext) {
             mQtPump = new MessagePumpQt(mApp);
         }

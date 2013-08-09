@@ -38,7 +38,6 @@ private:
     QuickMozView* mView;
     QOpenGLContext* mGLContext;
     QSurface* mGLSurface;
-    MessagePumpQt* mQtPump;
 
 };
 

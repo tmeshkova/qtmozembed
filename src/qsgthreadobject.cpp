@@ -23,10 +23,8 @@ QSGThreadObject::QSGThreadObject(QuickMozView* aView)
   : mView(aView)
   , mGLContext(0)
   , mGLSurface(0)
-  , mQtPump(0)
 {
     QTimer::singleShot(0, this, SLOT(onInitialized()));
-    mQtPump = new MessagePumpQt(QMozContext::GetInstance()->GetApp());
 }
 
 void

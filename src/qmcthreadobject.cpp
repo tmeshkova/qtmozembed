@@ -37,7 +37,7 @@ QMCThread::run()
 {
     printf(">>>>>>Func:%s::%d curThread:%p, curThrId:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), (void*)QThread::currentThreadId());
     mQtPump = new MessagePumpQt(QMozContext::GetInstance()->GetApp());
-    QMozContext::GetInstance()->GetApp()->StartRenderLoopWithCustomPump(mQtPump->EmbedLoop());
+//    QMozContext::GetInstance()->GetApp()->StartRenderLoopWithCustomPump(mQtPump->EmbedLoop());
     mMCRenderer = new QMCThreadObject(mView, mSGThreadObj);
     exec();
 }
