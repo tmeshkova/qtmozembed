@@ -16,7 +16,8 @@ QMCThreadObject::QMCThreadObject(QSGThreadObject* sgThreadObj)
     mLoop = QMozContext::GetInstance()->GetApp()->CreateEmbedLiteMessagePump(NULL);
     mGLContext = new QOpenGLContext;
     mGLContext->setShareContext(mSGThreadObj->context());
-    bool retval = mGLContext->create();
     mGLSurface = mSGThreadObj->context()->surface();
-    mGLContext->makeCurrent(mGLSurface);
+    if (mGLContext->create()) {
+        mGLContext->makeCurrent(mGLSurface);
+    }
 }
