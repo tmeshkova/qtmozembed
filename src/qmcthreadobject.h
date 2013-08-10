@@ -10,6 +10,8 @@
 #include <QSize>
 #include <QMatrix>
 #include <QtGui/QOpenGLContext>
+#include <QtCore/QMutex>
+#include <QtCore/QWaitCondition>
 
 namespace mozilla {
 namespace embedlite {
@@ -17,11 +19,12 @@ class EmbedLiteMessagePump;
 }}
 
 class QSGThreadObject;
+class QuickMozView;
 class QMCThreadObject : public QObject
 {
     Q_OBJECT
 public:
-    QMCThreadObject(QSGThreadObject* sgThreadObj);
+    QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj);
     ~QMCThreadObject();
     void RenderToCurrentContext(QMatrix affine);
 
@@ -29,11 +32,18 @@ Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
 
 private:
+    static void onThreadSwitch(void* self);
+    void ProcessRenderInGeckoCompositorThread();
+
+    QuickMozView* mView;
     QOpenGLContext* mGLContext;
     QSurface* mGLSurface;
     QSGThreadObject* mSGThreadObj;
     mozilla::embedlite::EmbedLiteMessagePump* mLoop;
     bool mOwnGLContext;
+    QMutex mutex;
+    QWaitCondition waitCondition;
+    QMatrix mProcessingMatrix;
 };
 
 #endif // QMCThreadObject_H

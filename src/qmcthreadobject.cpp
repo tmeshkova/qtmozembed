@@ -7,11 +7,13 @@
 #include "qmcthreadobject.h"
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
+#include "quickmozview.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/embedlite/EmbedLiteMessagePump.h"
 
-QMCThreadObject::QMCThreadObject(QSGThreadObject* sgThreadObj)
-  : mGLContext(NULL)
+QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj)
+  : mView(aView)
+  , mGLContext(NULL)
   , mGLSurface(NULL)
   , mSGThreadObj(sgThreadObj)
   , mLoop(NULL)
@@ -48,5 +50,23 @@ QMCThreadObject::~QMCThreadObject()
 
 void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
 {
-    printf(">>>>>>Func:%s::%d Ups we supposed to render something\n", __PRETTY_FUNCTION__, __LINE__);
+    if (!mutex.tryLock()) {
+        return;
+    }
+    mProcessingMatrix = affine;
+    mLoop->PostTask(&QMCThreadObject::onThreadSwitch, this, 16);
+    waitCondition.wait(&mutex);
+    mutex.unlock();
+}
+
+void QMCThreadObject::onThreadSwitch(void* self)
+{
+    QMCThreadObject* me = static_cast<QMCThreadObject*>(self);
+    me->ProcessRenderInGeckoCompositorThread();
+}
+
+void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
+{
+    mView->RenderToCurrentContext(mProcessingMatrix);
+    waitCondition.wakeAll();
 }

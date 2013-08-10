@@ -103,7 +103,7 @@ QuickMozView::onInitialized()
 void QuickMozView::createGeckoGLContext()
 {
     if (!mMCRenderer && mSGRenderer) {
-        mMCRenderer = new QMCThreadObject(mSGRenderer);
+        mMCRenderer = new QMCThreadObject(this, mSGRenderer);
         connect(mMCRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
     }
 }
@@ -184,7 +184,6 @@ void QuickMozView::beforeRendering()
 
 void QuickMozView::RenderToCurrentContext(QMatrix affine)
 {
-    printf(">>>>>>Func:%s::%d mcRenderThread:%p, SGRenderThread:%p, currThread:%p\n", __PRETTY_FUNCTION__, __LINE__, mMCRenderer->thread(), mSGRenderer->thread(), QThread::currentThread());
     if (mMCRenderer->thread() != QThread::currentThread()) {
         mMCRenderer->RenderToCurrentContext(affine);
         return;
