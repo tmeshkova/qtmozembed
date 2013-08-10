@@ -56,7 +56,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     setFlag(ItemAcceptsInputMethod, true);
 
     d->mContext = QMozContext::GetInstance();
-    connect(this, SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
     connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
     if (!d->mContext->initialized()) {
@@ -105,21 +104,6 @@ void QuickMozView::createGeckoGLContext()
     if (!mMCRenderer && mSGRenderer) {
         mMCRenderer = new QMCThreadObject(this, mSGRenderer);
         connect(mMCRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
-    }
-}
-
-void
-QuickMozView::onRequestGLContext(bool& hasContext, QSize& viewPortSize)
-{
-    hasContext = false;
-    if (d->mContext->GetApp()->IsAccelerated()) {
-        const QOpenGLContext* ctx = QOpenGLContext::currentContext();
-        if (ctx && ctx->surface()) {
-            QRectF r(0, 0, ctx->surface()->size().width(), ctx->surface()->size().height());
-            r = mapRectToScene(r);
-            viewPortSize = r.size().toSize();
-            hasContext = true;
-        }
     }
 }
 
@@ -235,6 +219,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         node = new QMozViewSGNode;
 
     node->setRenderer(this);
+    node->markDirty(QSGNode::DirtyMaterial);
 
     return node;
 }

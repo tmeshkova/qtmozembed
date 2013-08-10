@@ -65,7 +65,6 @@ public Q_SLOTS:
     void sceneGraphInitialized();
     void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
-    void onRequestGLContext(bool& hasContext, QSize& viewPortSize);
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
 
 private Q_SLOTS:

@@ -32,7 +32,7 @@ Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
 
 private:
-    static void onThreadSwitch(void* self);
+    static void doWorkInGeckoCompositorThread(void* self);
     void ProcessRenderInGeckoCompositorThread();
 
     QuickMozView* mView;

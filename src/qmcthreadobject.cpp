@@ -54,12 +54,12 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
         return;
     }
     mProcessingMatrix = affine;
-    mLoop->PostTask(&QMCThreadObject::onThreadSwitch, this, 16);
+    mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this);
     waitCondition.wait(&mutex);
     mutex.unlock();
 }
 
-void QMCThreadObject::onThreadSwitch(void* self)
+void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
 {
     QMCThreadObject* me = static_cast<QMCThreadObject*>(self);
     me->ProcessRenderInGeckoCompositorThread();
