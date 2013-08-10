@@ -182,6 +182,19 @@ void QuickMozView::beforeRendering()
     }
 }
 
+void QuickMozView::RenderToCurrentContext(QMatrix affine)
+{
+    printf(">>>>>>Func:%s::%d mcRenderThread:%p, SGRenderThread:%p, currThread:%p\n", __PRETTY_FUNCTION__, __LINE__, mMCRenderer->thread(), mSGRenderer->thread(), QThread::currentThread());
+    if (mMCRenderer->thread() != QThread::currentThread()) {
+        mMCRenderer->RenderToCurrentContext(affine);
+        return;
+    }
+    gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
+    d->mView->SetGLViewTransform(matr);
+    d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
+    d->mView->RenderGL();
+}
+
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
@@ -197,9 +210,14 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         if (d->mTempBufferImage.isNull() || d->mTempBufferImage.width() != r.width() || d->mTempBufferImage.height() != r.height()) {
             d->mTempBufferImage = QImage(r.size(), QImage::Format_RGB32);
         }
-        d->mView->RenderToImage(d->mTempBufferImage.bits(), d->mTempBufferImage.width(),
-                                d->mTempBufferImage.height(), d->mTempBufferImage.bytesPerLine(),
-                                d->mTempBufferImage.depth());
+        if (mMCRenderer->thread() != QThread::currentThread()) {
+            printf("FIXME: Cannot perform SW rendering across threads\n");
+            d->mTempBufferImage.fill(Qt::white);
+        } else {
+            d->mView->RenderToImage(d->mTempBufferImage.bits(), d->mTempBufferImage.width(),
+                                    d->mTempBufferImage.height(), d->mTempBufferImage.bytesPerLine(),
+                                    d->mTempBufferImage.depth());
+        }
 
         if (d->mTempTexture)
             delete d->mTempTexture;
@@ -217,7 +235,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     if (!node)
         node = new QMozViewSGNode;
 
-    node->setRenderer(d, this);
+    node->setRenderer(this);
 
     return node;
 }

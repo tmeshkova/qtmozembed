@@ -6,6 +6,7 @@
 #ifndef QuickMozView_H
 #define QuickMozView_H
 
+#include <QMatrix>
 #include <QtQuick/QQuickItem>
 #include <QtGui/QOpenGLShaderProgram>
 #include "qmozview_defined_wrapper.h"
@@ -27,6 +28,7 @@ public:
     ~QuickMozView();
 
     Q_MOZ_VIEW_PUBLIC_METHODS
+    void RenderToCurrentContext(QMatrix affine);
 
 private:
     QObject* getChild() { return this; }

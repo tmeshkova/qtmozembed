@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QSize>
+#include <QMatrix>
 #include <QtGui/QOpenGLContext>
 
 namespace mozilla {
@@ -22,6 +23,7 @@ class QMCThreadObject : public QObject
 public:
     QMCThreadObject(QSGThreadObject* sgThreadObj);
     ~QMCThreadObject();
+    void RenderToCurrentContext(QMatrix affine);
 
 Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);

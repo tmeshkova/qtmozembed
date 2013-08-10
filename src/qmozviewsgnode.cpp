@@ -16,8 +16,8 @@
 
 class MozContentSGNode : public QSGRenderNode {
 public:
-    MozContentSGNode(QGraphicsMozViewPrivate* aPrivate, QuickMozView* aView)
-        : mPrivate(aPrivate), mView(aView)
+    MozContentSGNode(QuickMozView* aView)
+        : mView(aView)
     {
         mView->SetIsActive(true);
     }
@@ -30,10 +30,7 @@ public:
     virtual void render(const RenderState& state)
     {
         QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
-        gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
-        mPrivate->mView->SetGLViewTransform(matr);
-        mPrivate->mView->SetViewClipping(0, 0, mPrivate->mSize.width(), mPrivate->mSize.height());
-        mPrivate->mView->RenderGL();
+        mView->RenderToCurrentContext(affine);
     }
 
     ~MozContentSGNode()
@@ -47,10 +44,9 @@ public:
         return parent;
     }
 
-    QGraphicsMozViewPrivate* getPrivate() { return mPrivate; }
+    QuickMozView* getView() { return mView; }
 
 private:
-    QGraphicsMozViewPrivate* mPrivate;
     QuickMozView* mView;
 };
 
@@ -59,16 +55,16 @@ QMozViewSGNode::QMozViewSGNode()
 {
 }
 
-void QMozViewSGNode::setRenderer(QGraphicsMozViewPrivate* aPrivate, QuickMozView* aView)
+void QMozViewSGNode::setRenderer(QuickMozView* aView)
 {
-    if (m_contentsNode && m_contentsNode->getPrivate() == aPrivate)
+    if (m_contentsNode && m_contentsNode->getView() == aView)
         return;
 
     if (m_contentsNode) {
         removeChildNode(m_contentsNode);
         delete m_contentsNode;
     }
-    m_contentsNode = new MozContentSGNode(aPrivate, aView);
+    m_contentsNode = new MozContentSGNode(aView);
     // This sets the parent node of the content to QMozViewSGNode.
     appendChildNode(m_contentsNode);
 }

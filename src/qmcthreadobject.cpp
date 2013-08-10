@@ -45,3 +45,8 @@ QMCThreadObject::~QMCThreadObject()
         delete mGLContext;
     }
 }
+
+void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
+{
+    printf(">>>>>>Func:%s::%d Ups we supposed to render something\n", __PRETTY_FUNCTION__, __LINE__);
+}

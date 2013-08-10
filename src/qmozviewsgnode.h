@@ -20,7 +20,7 @@ class QuickMozView;
 class QMozViewSGNode : public QSGNode {
     public:
         QMozViewSGNode();
-        void setRenderer(QGraphicsMozViewPrivate* renderer, QuickMozView* aView);
+        void setRenderer(QuickMozView* aView);
 
     private:
         MozContentSGNode* m_contentsNode;
