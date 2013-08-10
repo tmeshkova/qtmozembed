@@ -53,6 +53,7 @@ public:
         LoadEmbedLite();
         mApp = XRE_GetEmbedLite();
         mApp->SetListener(this);
+        mApp->SetCompositorInSeparateThread(false);
         if (mAsyncContext) {
             mQtPump = new MessagePumpQt(mApp);
         }

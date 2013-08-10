@@ -30,10 +30,13 @@ public:
 
 Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
+    void workInGeckoCompositorThread();
+
+private Q_SLOTS:
+    void ProcessRenderInGeckoCompositorThread();
 
 private:
     static void doWorkInGeckoCompositorThread(void* self);
-    void ProcessRenderInGeckoCompositorThread();
 
     QuickMozView* mView;
     QOpenGLContext* mGLContext;
