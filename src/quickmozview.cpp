@@ -93,10 +93,10 @@ QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
     if (!d->mView) {
-      const QOpenGLContext* ctx = QOpenGLContext::currentContext();
-      d->mContext->GetApp()->SetIsAccelerated(ctx && ctx->surface() && !getenv("SWRENDER"));
-      d->mView = d->mContext->GetApp()->CreateView();
-      d->mView->SetListener(d);
+        // We really don't care about SW rendering on Qt5 anymore
+        d->mContext->GetApp()->SetIsAccelerated(true);
+        d->mView = d->mContext->GetApp()->CreateView();
+        d->mView->SetListener(d);
     }
 }
 
