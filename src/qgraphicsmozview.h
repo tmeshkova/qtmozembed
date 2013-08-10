@@ -67,6 +67,7 @@ public Q_SLOTS:
     void recvMouseMove(int posX, int posY);
     void recvMousePress(int posX, int posY);
     void recvMouseRelease(int posX, int posY);
+    void requestGLContext(bool& hasContext, QSize& viewPortSize);
 
 Q_SIGNALS:
     void viewInitialized();
@@ -88,9 +89,9 @@ Q_SIGNALS:
     void handleDoubleTap(QPoint point, QMozReturnValue* retval);
     void imeNotification(int state, bool open, int cause, int focusChange, const QString& type);
     void bgColorChanged();
-    void requestGLContext(bool& hasContext, QSize& viewPortSize);
     void useQmlMouse(bool value);
     void updateThreaded();
+    void requestGLContextQGV(bool& hasContext, QSize& viewPortSize);
 
 protected:
     virtual void setGeometry(const QRectF& rect);
@@ -111,6 +112,7 @@ protected:
 
 private Q_SLOTS:
     void onInitialized();
+    void OnUpdateThreaded();
 
 private:
     QGraphicsMozViewPrivate* d;

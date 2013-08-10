@@ -7,6 +7,7 @@
 #define QSGThreadObject_H
 
 #include <QObject>
+#include <QSize>
 #include <QtGui/QOpenGLContext>
 
 class QSGThreadObject : public QObject
@@ -20,6 +21,9 @@ public Q_SLOTS:
     void setupCurrentGLContext();
     void makeContextCurrent();
     QOpenGLContext* context() { return mGLContext; }
+
+Q_SIGNALS:
+    void updateGLContextInfo(bool hasContext, QSize viewPortSize);
 
 private:
     QOpenGLContext* mGLContext;

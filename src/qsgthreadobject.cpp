@@ -3,6 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include <QSurface>
 #include "qsgthreadobject.h"
 
 QSGThreadObject::QSGThreadObject()
@@ -16,6 +17,7 @@ QSGThreadObject::setupCurrentGLContext()
 {
     mGLContext = QOpenGLContext::currentContext();
     mGLSurface = mGLContext->surface();
+    Q_EMIT updateGLContextInfo(mGLContext && mGLSurface, mGLSurface ? mGLSurface->size() : QSize());
 }
 
 void

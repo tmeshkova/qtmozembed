@@ -69,7 +69,7 @@ QDeclarativeMozView::init()
     setClip(true);
 
     d->view = QSharedPointer<GraphicsMozView>(new GraphicsMozView(this));
-    connect(d->view.data(), SIGNAL(requestGLContext(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
+    connect(d->view.data(), SIGNAL(requestGLContextQGV(bool&,QSize&)), this, SLOT(onRequestGLContext(bool&,QSize&)));
     d->view->setFocus();
     if (!preferredWidth())
         setPreferredWidth(d->view->preferredWidth());
@@ -94,6 +94,9 @@ void
 QDeclarativeMozView::onRequestGLContext(bool& hasContext, QSize& viewPortSize)
 {
     hasContext = false;
+    if (!scene()) {
+        return;
+    }
     QList<QGraphicsView *> views = scene()->views();
     for (int i = 0; i < views.length(); ++i) {
         QDeclarativeView *view = qobject_cast<QDeclarativeView *>(views[i]);

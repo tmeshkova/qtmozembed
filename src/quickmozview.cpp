@@ -104,6 +104,7 @@ void QuickMozView::createGeckoGLContext()
 {
     if (!mMCRenderer && mSGRenderer) {
         mMCRenderer = new QMCThreadObject(mSGRenderer);
+        connect(mMCRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
     }
 }
 
@@ -120,6 +121,21 @@ QuickMozView::onRequestGLContext(bool& hasContext, QSize& viewPortSize)
             hasContext = true;
         }
     }
+}
+
+void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
+{
+    hasContext = d->mHasContext;
+    viewPortSize = d->mGLSurfaceSize;
+}
+
+void QuickMozView::updateGLContextInfo(bool hasContext, QSize viewPortSize)
+{
+    d->mHasContext = hasContext;
+    d->mGLSurfaceSize = viewPortSize;
+    QRectF r(0, 0, d->mGLSurfaceSize.width(), d->mGLSurfaceSize.height());
+    r = mapRectToScene(r);
+    d->mGLSurfaceSize = r.size().toSize();
 }
 
 void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
@@ -149,6 +165,7 @@ void QuickMozView::beforeRendering()
 {
     if (!mSGRenderer) {
         mSGRenderer = new QSGThreadObject();
+        connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
         mSGRenderer->setupCurrentGLContext();
     }
 

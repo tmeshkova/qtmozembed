@@ -53,7 +53,7 @@ QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     setInputMethodHints(Qt::ImhPreferLowercase);
 
     d->mContext = QMozContext::GetInstance();
-    connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
+    connect(this, SIGNAL(updateThreaded()), this, SLOT(OnUpdateThreaded()));
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
@@ -108,6 +108,7 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
             LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
             d->mContext->setIsAccelerated(false);
         }
+        Q_EMIT requestGLContextQGV(d->mHasContext, d->mGLSurfaceSize);
     }
 
     QRect r = opt ? opt->exposedRect.toRect() : boundingRect().toRect();
@@ -154,8 +155,23 @@ QGraphicsMozView::Invalidate()
 }
 
 void
+QGraphicsMozView::OnUpdateThreaded()
+{
+    update();
+}
+
+void
 QGraphicsMozView::createGeckoGLContext()
 {
+    Q_EMIT requestGLContextQGV(d->mHasContext, d->mGLSurfaceSize);
+}
+
+void
+QGraphicsMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
+{
+    Q_EMIT requestGLContextQGV(d->mHasContext, d->mGLSurfaceSize);
+    hasContext = d->mHasContext;
+    viewPortSize = d->mGLSurfaceSize;
 }
 
 /*! \reimp
@@ -176,6 +192,7 @@ void QGraphicsMozView::setGeometry(const QRectF& rect)
     // NOTE: call geometry() as setGeometry ensures that
     // the geometry is within legal bounds (minimumSize, maximumSize)
     d->mSize = geometry().size().toSize();
+    Q_EMIT requestGLContext(d->mHasContext, d->mGLSurfaceSize);
     d->UpdateViewSize();
 }
 
