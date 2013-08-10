@@ -61,10 +61,7 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
     if (!mLoop) {
         Q_EMIT workInGeckoCompositorThread();
     } else {
-        if (!mutex.tryLock()) {
-            return;
-        }
-
+        mutex.lock();
         mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this);
         waitCondition.wait(&mutex);
         mutex.unlock();
@@ -80,7 +77,7 @@ void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
 void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 {
     mView->RenderToCurrentContext(mProcessingMatrix);
-    if (!mLoop) {
+    if (mLoop) {
         waitCondition.wakeOne();
     }
 }
