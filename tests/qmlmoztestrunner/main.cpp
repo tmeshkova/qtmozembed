@@ -49,9 +49,6 @@
 
 int main(int argc, char **argv)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-    setenv("QML_BAD_GUI_RENDER_LOOP", "1", 1);
-#endif
 #if defined(Q_WS_X11)
 #if QT_VERSION >= 0x040800
     QApplication::setAttribute(Qt::AA_X11InitThreads, true);
