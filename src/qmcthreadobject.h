@@ -20,6 +20,7 @@ class EmbedLiteMessagePump;
 
 class QSGThreadObject;
 class QuickMozView;
+class QOffscreenSurface;
 class QMCThreadObject : public QObject
 {
     Q_OBJECT
@@ -41,6 +42,7 @@ private:
     QuickMozView* mView;
     QOpenGLContext* mGLContext;
     QSurface* mGLSurface;
+    QOffscreenSurface* mOffGLSurface;
     QSGThreadObject* mSGThreadObj;
     mozilla::embedlite::EmbedLiteMessagePump* mLoop;
     bool mOwnGLContext;

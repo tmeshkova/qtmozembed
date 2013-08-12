@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <QSurface>
+#include <QOffscreenSurface>
 #include "qmcthreadobject.h"
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
@@ -15,6 +16,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   : mView(aView)
   , mGLContext(NULL)
   , mGLSurface(NULL)
+  , mOffGLSurface(NULL)
   , mSGThreadObj(sgThreadObj)
   , mLoop(NULL)
   , mOwnGLContext(false)
@@ -28,10 +30,17 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
     if (sgThreadObj->thread() != thread()) {
         mOwnGLContext = true;
         mGLContext = new QOpenGLContext;
+        mGLContext->setFormat(mSGThreadObj->context()->format());
         mGLContext->setShareContext(mSGThreadObj->context());
         mGLSurface = mSGThreadObj->context()->surface();
         if (mGLContext->create()) {
-            mGLContext->makeCurrent(mGLSurface);
+            if (!mGLContext->makeCurrent(mGLSurface)) {
+                qDebug() << "failed to make Gecko QOpenGLContext current from Qt render thread QSurface, let's make separate offscreen surface here";
+                mOffGLSurface = new QOffscreenSurface;
+                mOffGLSurface->setFormat(mSGThreadObj->context()->format());
+                mOffGLSurface->create();
+                mGLContext->makeCurrent(mOffGLSurface);
+            }
         }
     } else {
         mGLContext = mSGThreadObj->context();
@@ -52,6 +61,9 @@ QMCThreadObject::~QMCThreadObject()
     }
     if (mOwnGLContext) {
         delete mGLContext;
+    }
+    if (mOffGLSurface) {
+        delete mOffGLSurface;
     }
 }
 
