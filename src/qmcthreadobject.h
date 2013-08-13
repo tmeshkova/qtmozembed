@@ -10,7 +10,6 @@
 #include <QSize>
 #include <QMatrix>
 #include <QtGui/QOpenGLContext>
-#include <QGLFramebufferObject>
 #include <QtCore/QMutex>
 #include <QtCore/QWaitCondition>
 
