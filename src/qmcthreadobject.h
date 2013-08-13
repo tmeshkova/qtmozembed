@@ -10,6 +10,7 @@
 #include <QSize>
 #include <QMatrix>
 #include <QtGui/QOpenGLContext>
+#include <QGLFramebufferObject>
 #include <QtCore/QMutex>
 #include <QtCore/QWaitCondition>
 
@@ -18,16 +19,23 @@ namespace embedlite {
 class EmbedLiteMessagePump;
 }}
 
+class QMozViewTexSGNode;
 class QSGThreadObject;
 class QuickMozView;
 class QOffscreenSurface;
+class QOpenGLFramebufferObject;
 class QMCThreadObject : public QObject
 {
     Q_OBJECT
 public:
-    QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj);
+    QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj, QSize aGLSize);
     ~QMCThreadObject();
+    void PostInvalidateToRenderThread();
     void RenderToCurrentContext(QMatrix affine);
+    QOpenGLFramebufferObject* FBOObject() { return m_displayFbo; }
+    QOffscreenSurface* OffscreenSurface() { return mOffGLSurface; }
+    void setTexSGNode(QMozViewTexSGNode* node);
+    void prepareTexture();
 
 Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
@@ -38,6 +46,8 @@ private Q_SLOTS:
 
 private:
     static void doWorkInGeckoCompositorThread(void* self);
+    static void PostNotificationUpdate(void* self);
+    void PostNotificationUpdate();
 
     QuickMozView* mView;
     QOpenGLContext* mGLContext;
@@ -49,6 +59,10 @@ private:
     QMutex mutex;
     QWaitCondition waitCondition;
     QMatrix mProcessingMatrix;
+    QSize m_size;
+    QOpenGLFramebufferObject *m_renderFbo;
+    QOpenGLFramebufferObject *m_displayFbo;
+    QMozViewTexSGNode* mSGnode;
 };
 
 #endif // QMCThreadObject_H

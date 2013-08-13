@@ -26,6 +26,7 @@
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
 #include "qmozviewsgnode.h"
+#include "qmozviewtexsgnode.h"
 #include "qsgthreadobject.h"
 #include "qmcthreadobject.h"
 #include "assert.h"
@@ -102,8 +103,7 @@ QuickMozView::onInitialized()
 void QuickMozView::createGeckoGLContext()
 {
     if (!mMCRenderer && mSGRenderer) {
-        mMCRenderer = new QMCThreadObject(this, mSGRenderer);
-        connect(mMCRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
+        mMCRenderer = new QMCThreadObject(this, mSGRenderer, d->mGLSurfaceSize);
     }
 }
 
@@ -164,6 +164,10 @@ void QuickMozView::beforeRendering()
             d->mContext->setIsAccelerated(false);
         }
     }
+
+    if (mMCRenderer) {
+        mMCRenderer->prepareTexture();
+    }
 }
 
 void QuickMozView::RenderToCurrentContext(QMatrix affine)
@@ -210,18 +214,30 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         return n;
     }
 
-    QMozViewSGNode* node = static_cast<QMozViewSGNode*>(oldNode);
+    if (mMCRenderer->OffscreenSurface()) {
+        printf(">>>>>>Func:%s::%d Renderer Via FBO Object Not yet tested well\n", __PRETTY_FUNCTION__, __LINE__);
+        QMozViewTexSGNode *node = static_cast<QMozViewTexSGNode*>(oldNode);
+        assert(this->window());
 
-    const QWindow* window = this->window();
-    assert(window);
+        if (!node) {
+            node = new QMozViewTexSGNode(this);
+            mMCRenderer->setTexSGNode(node);
+        }
 
-    if (!node)
-        node = new QMozViewSGNode;
+        node->setRect(boundingRect());
+        node->markDirty(QSGNode::DirtyMaterial);
 
-    node->setRenderer(this);
-    node->markDirty(QSGNode::DirtyMaterial);
+        return node;
+    } else {
+        QMozViewSGNode* node = static_cast<QMozViewSGNode*>(oldNode);
 
-    return node;
+        if (!node)
+            node = new QMozViewSGNode;
+
+        node->setRenderer(this);
+        node->markDirty(QSGNode::DirtyMaterial);
+        return node;
+    }
 }
 
 void QuickMozView::cleanup()
@@ -230,7 +246,9 @@ void QuickMozView::cleanup()
 
 void QuickMozView::Invalidate()
 {
-    if (QThread::currentThread() != thread()) {
+    if (mMCRenderer->OffscreenSurface()) {
+        mMCRenderer->PostInvalidateToRenderThread();
+    } else if (QThread::currentThread() != thread()) {
         Q_EMIT updateThreaded();
     } else {
         update();

@@ -67,6 +67,7 @@ public Q_SLOTS:
     void recvMouseMove(int posX, int posY);
     void recvMousePress(int posX, int posY);
     void recvMouseRelease(int posX, int posY);
+    void Invalidate();
     void requestGLContext(bool& hasContext, QSize& viewPortSize);
 
 Q_SIGNALS:
