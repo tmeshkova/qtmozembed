@@ -678,3 +678,12 @@ void QuickMozView::recvMouseRelease(int posX, int posY)
         d->mPendingTouchEvent = false;
     }
 }
+
+void QuickMozView::touchEvent(QTouchEvent *event)
+{
+    if (!mUseQmlMouse || event->touchPoints().count() > 1) {
+        d->touchEvent(event);
+    } else {
+        QQuickItem::touchEvent(event);
+    }
+}

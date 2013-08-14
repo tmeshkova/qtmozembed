@@ -65,6 +65,7 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent*);
     virtual void focusInEvent(QFocusEvent*);
     virtual void focusOutEvent(QFocusEvent*);
+    virtual void touchEvent(QTouchEvent*);
 
 public Q_SLOTS:
     void beforeRendering();
