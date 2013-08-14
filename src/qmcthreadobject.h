@@ -16,6 +16,7 @@
 namespace mozilla {
 namespace embedlite {
 class EmbedLiteMessagePump;
+class EmbedLiteRenderTarget;
 }}
 
 class QMozViewTexSGNode;
@@ -31,7 +32,6 @@ public:
     ~QMCThreadObject();
     void PostInvalidateToRenderThread();
     void RenderToCurrentContext(QMatrix affine);
-    QOpenGLFramebufferObject* FBOObject() { return m_displayFbo; }
     QOffscreenSurface* OffscreenSurface() { return mOffGLSurface; }
     void setTexSGNode(QMozViewTexSGNode* node);
     void prepareTexture();
@@ -59,8 +59,8 @@ private:
     QWaitCondition waitCondition;
     QMatrix mProcessingMatrix;
     QSize m_size;
-    QOpenGLFramebufferObject *m_renderFbo;
-    QOpenGLFramebufferObject *m_displayFbo;
+    mozilla::embedlite::EmbedLiteRenderTarget* m_renderTarget;
+    mozilla::embedlite::EmbedLiteRenderTarget* m_displayTarget;
     QMozViewTexSGNode* mSGnode;
 };
 

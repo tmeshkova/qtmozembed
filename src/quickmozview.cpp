@@ -11,6 +11,7 @@
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
+#include "mozilla/embedlite/EmbedLiteRenderTarget.h"
 
 #include <QTimer>
 #include <QThread>
@@ -170,7 +171,7 @@ void QuickMozView::beforeRendering()
     }
 }
 
-void QuickMozView::RenderToCurrentContext(QMatrix affine)
+void QuickMozView::RenderToCurrentContext(QMatrix affine, EmbedLiteRenderTarget* renderTarget)
 {
     if (mMCRenderer->thread() != QThread::currentThread()) {
         mMCRenderer->RenderToCurrentContext(affine);
@@ -179,7 +180,13 @@ void QuickMozView::RenderToCurrentContext(QMatrix affine)
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
     d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
-    d->mView->RenderGL();
+    d->mView->RenderGL(renderTarget);
+}
+
+mozilla::embedlite::EmbedLiteRenderTarget*
+QuickMozView::CreateEmbedLiteRenderTarget(QSize size)
+{
+    return d->mView->CreateEmbedLiteRenderTarget(size.width(), size.height());
 }
 
 QSGNode*
@@ -215,7 +222,6 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     }
 
     if (mMCRenderer->OffscreenSurface()) {
-        printf(">>>>>>Func:%s::%d Renderer Via FBO Object Not yet tested well\n", __PRETTY_FUNCTION__, __LINE__);
         QMozViewTexSGNode *node = static_cast<QMozViewTexSGNode*>(oldNode);
         assert(this->window());
 

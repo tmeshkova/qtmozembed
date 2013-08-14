@@ -4,15 +4,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <QSurface>
+#include <QPainter>
 #include <QOpenGLFramebufferObject>
+#include <QOpenGLPaintDevice>
 #include <QOffscreenSurface>
 #include "qmcthreadobject.h"
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
 #include "quickmozview.h"
 #include "qmozviewtexsgnode.h"
+#include "qgraphicsmozview_p.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/embedlite/EmbedLiteMessagePump.h"
+#include "mozilla/embedlite/EmbedLiteRenderTarget.h"
 
 QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj, QSize aGLSize)
   : mView(aView)
@@ -22,8 +26,8 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , mSGThreadObj(sgThreadObj)
   , mLoop(NULL)
   , mOwnGLContext(false)
-  , m_renderFbo(NULL)
-  , m_displayFbo(NULL)
+  , m_renderTarget(NULL)
+  , m_displayTarget(NULL)
   , mSGnode(NULL)
 {
     m_size = aGLSize;
@@ -34,6 +38,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
         mGLContext->setShareContext(mSGThreadObj->context());
         mGLSurface = mSGThreadObj->context()->surface();
         if (mGLContext->create()) {
+            mSGThreadObj->context()->doneCurrent();
             if (getenv("FORCE_OFFSCREEN_FBO_RENDER") != 0 || !mGLContext->makeCurrent(mGLSurface)) {
                 qDebug() << "failed to make Gecko QOpenGLContext current from Qt render thread QSurface, let's make separate offscreen surface here";
                 mOffGLSurface = new QOffscreenSurface;
@@ -73,8 +78,8 @@ QMCThreadObject::~QMCThreadObject()
     if (mOwnGLContext)
         delete mGLContext;
     delete mOffGLSurface;
-    delete m_renderFbo;
-    delete m_displayFbo;
+    delete m_renderTarget;
+    delete m_displayTarget;
 }
 
 void QMCThreadObject::PostInvalidateToRenderThread()
@@ -124,24 +129,19 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
     } else {
         mGLContext->makeCurrent(mOffGLSurface);
         m_size = mGLSurface ? mGLSurface->size() : QSize();
-        if (!m_renderFbo) {
+        if (!m_renderTarget) {
             // Initialize the buffers and renderer
-            QOpenGLFramebufferObjectFormat format;
-            format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-            m_renderFbo = new QOpenGLFramebufferObject(m_size, format);
-            m_displayFbo = new QOpenGLFramebufferObject(m_size, format);
+            m_renderTarget = mView->CreateEmbedLiteRenderTarget(m_size);
+            m_displayTarget = mView->CreateEmbedLiteRenderTarget(m_size);
         }
-        m_renderFbo->bind();
-        glViewport(0, 0, m_size.width(), m_size.height());
-        mView->RenderToCurrentContext(mProcessingMatrix);
+
+        mView->RenderToCurrentContext(mProcessingMatrix, m_renderTarget);
         glFlush();
-        m_renderFbo->bindDefault();
-        qSwap(m_renderFbo, m_displayFbo);
-//        QImage img = m_displayFbo->toImage();
-//        static int counts = 0;
-//        img.save(QString("/tmp/images/img%1.png").arg(counts++));
+
+        qSwap(m_renderTarget, m_displayTarget);
+
         if (mSGnode) {
-            mSGnode->newTexture(m_displayFbo->texture(), m_size);
+            mSGnode->newTexture(m_displayTarget->texture(), m_size);
         }
         QMozContext::GetInstance()->GetApp()->PostTask(&QMCThreadObject::PostNotificationUpdate, this);
     }

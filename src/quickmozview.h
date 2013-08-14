@@ -11,6 +11,11 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include "qmozview_defined_wrapper.h"
 
+namespace mozilla {
+namespace embedlite {
+class EmbedLiteRenderTarget;
+}}
+
 class QGraphicsMozViewPrivate;
 class QSGThreadObject;
 class QMCThreadObject;
@@ -28,7 +33,8 @@ public:
     ~QuickMozView();
 
     Q_MOZ_VIEW_PUBLIC_METHODS
-    void RenderToCurrentContext(QMatrix affine);
+    void RenderToCurrentContext(QMatrix affine, mozilla::embedlite::EmbedLiteRenderTarget* renderTarget = 0);
+    mozilla::embedlite::EmbedLiteRenderTarget* CreateEmbedLiteRenderTarget(QSize size);
 
 private:
     QObject* getChild() { return this; }
