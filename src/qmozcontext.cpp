@@ -171,7 +171,7 @@ public:
     virtual uint32_t CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView)
     {
         LOGT("QtMozEmbedContext new Window requested: parent:%p", (void*)aParentView);
-        uint32_t retval = QMozContext::GetInstance()->newWindow(QString(), aParentView ? aParentView->GetUniqueID() : 0);
+        uint32_t retval = QMozContext::GetInstance()->newWindow(QString(uri), aParentView ? aParentView->GetUniqueID() : 0);
         return retval;
     }
 
