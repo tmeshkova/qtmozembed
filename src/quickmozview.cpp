@@ -221,7 +221,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         return n;
     }
 
-    if (mMCRenderer->OffscreenSurface()) {
+    if (mMCRenderer && mMCRenderer->OffscreenSurface()) {
         QMozViewTexSGNode *node = static_cast<QMozViewTexSGNode*>(oldNode);
         assert(this->window());
 
