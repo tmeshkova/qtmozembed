@@ -173,7 +173,7 @@ void QuickMozView::beforeRendering()
 
 void QuickMozView::RenderToCurrentContext(QMatrix affine, EmbedLiteRenderTarget* renderTarget)
 {
-    if (mMCRenderer->thread() != QThread::currentThread()) {
+    if (mMCRenderer && mMCRenderer->thread() != QThread::currentThread()) {
         mMCRenderer->RenderToCurrentContext(affine);
         return;
     }
@@ -204,7 +204,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         if (d->mTempBufferImage.isNull() || d->mTempBufferImage.width() != r.width() || d->mTempBufferImage.height() != r.height()) {
             d->mTempBufferImage = QImage(r.size(), QImage::Format_RGB32);
         }
-        if (mMCRenderer->thread() != QThread::currentThread()) {
+        if (mMCRenderer && mMCRenderer->thread() != QThread::currentThread()) {
             printf("FIXME: Cannot perform SW rendering across threads\n");
             d->mTempBufferImage.fill(Qt::white);
         } else {
@@ -227,7 +227,9 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
         if (!node) {
             node = new QMozViewTexSGNode(this);
-            mMCRenderer->setTexSGNode(node);
+            if (mMCRenderer) {
+                mMCRenderer->setTexSGNode(node);
+            }
         }
 
         node->setRect(boundingRect());
@@ -252,7 +254,7 @@ void QuickMozView::cleanup()
 
 void QuickMozView::Invalidate()
 {
-    if (mMCRenderer->OffscreenSurface()) {
+    if (mMCRenderer && mMCRenderer->OffscreenSurface()) {
         mMCRenderer->PostInvalidateToRenderThread();
     } else if (QThread::currentThread() != thread()) {
         Q_EMIT updateThreaded();
