@@ -49,6 +49,7 @@
 
 int main(int argc, char **argv)
 {
+    setenv("QML_BAD_GUI_RENDER_LOOP", "1", 1);
 #if defined(Q_WS_X11)
 #if QT_VERSION >= 0x040800
     QApplication::setAttribute(Qt::AA_X11InitThreads, true);
