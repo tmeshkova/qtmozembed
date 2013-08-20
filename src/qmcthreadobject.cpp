@@ -12,7 +12,7 @@
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
 #include "quickmozview.h"
-#include "qmozviewtexsgnode.h"
+#include "qmozviewsgnode.h"
 #include "qgraphicsmozview_p.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/embedlite/EmbedLiteMessagePump.h"
@@ -67,7 +67,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
     }
 }
 
-void QMCThreadObject::setTexSGNode(QMozViewTexSGNode* node)
+void QMCThreadObject::setSGNode(QMozViewSGNode* node)
 {
     mSGnode = node;
 }
@@ -142,6 +142,7 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 
         if (mSGnode) {
             mSGnode->newTexture(m_displayTarget->texture(), m_size);
+//            mSGnode->newTexture(m_renderTarget->texture(), m_size);
         }
         QMozContext::GetInstance()->GetApp()->PostTask(&QMCThreadObject::PostNotificationUpdate, this);
     }

@@ -19,7 +19,7 @@ class EmbedLiteMessagePump;
 class EmbedLiteRenderTarget;
 }}
 
-class QMozViewTexSGNode;
+class QMozViewSGNode;
 class QSGThreadObject;
 class QuickMozView;
 class QOffscreenSurface;
@@ -33,7 +33,7 @@ public:
     void PostInvalidateToRenderThread();
     void RenderToCurrentContext(QMatrix affine);
     QOffscreenSurface* OffscreenSurface() { return mOffGLSurface; }
-    void setTexSGNode(QMozViewTexSGNode* node);
+    void setSGNode(QMozViewSGNode* node);
     void prepareTexture();
 
 Q_SIGNALS:
@@ -61,7 +61,7 @@ private:
     QSize m_size;
     mozilla::embedlite::EmbedLiteRenderTarget* m_renderTarget;
     mozilla::embedlite::EmbedLiteRenderTarget* m_displayTarget;
-    QMozViewTexSGNode* mSGnode;
+    QMozViewSGNode* mSGnode;
 };
 
 #endif // QMCThreadObject_H
