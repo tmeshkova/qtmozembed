@@ -132,7 +132,9 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
             m_renderTarget = mView->CreateEmbedLiteRenderTarget(m_size);
         }
 
+        mProcessingMatrix = QMatrix();
         mView->RenderToCurrentContext(mProcessingMatrix, m_renderTarget);
+        glFlush();
 
         if (mSGnode) {
             mSGnode->newTexture(m_renderTarget->texture(), m_size);
