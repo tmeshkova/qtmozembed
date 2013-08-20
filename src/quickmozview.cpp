@@ -240,9 +240,7 @@ void QuickMozView::cleanup()
 
 void QuickMozView::Invalidate()
 {
-    if (mMCRenderer && mMCRenderer->OffscreenSurface()) {
-        mMCRenderer->PostInvalidateToRenderThread();
-    } else if (QThread::currentThread() != thread()) {
+    if (QThread::currentThread() != thread()) {
         Q_EMIT updateThreaded();
     } else {
         update();

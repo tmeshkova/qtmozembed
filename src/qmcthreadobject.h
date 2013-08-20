@@ -60,7 +60,6 @@ private:
     QMatrix mProcessingMatrix;
     QSize m_size;
     mozilla::embedlite::EmbedLiteRenderTarget* m_renderTarget;
-    mozilla::embedlite::EmbedLiteRenderTarget* m_displayTarget;
     QMozViewSGNode* mSGnode;
 };
 

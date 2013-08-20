@@ -93,21 +93,21 @@ public:
 
     virtual void render(const RenderState& state)
     {
-        if (!m_program || !m_texture) {
-            QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
-            mView->RenderToCurrentContext(affine);
-            return;
+        QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
+        mView->RenderToCurrentContext(affine);
+
+        if (m_program && m_texture) {
+            m_program->bind();
+            glBindTexture(GL_TEXTURE_2D, m_texture->textureId());
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, quad_vrt);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, quad_txc);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glDisableVertexAttribArray(0);
+            glDisableVertexAttribArray(1);
+            m_program->release();
         }
-        m_program->bind();
-        glBindTexture(GL_TEXTURE_2D, m_texture->textureId());
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, quad_vrt);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, quad_txc);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        m_program->release();
     }
 
     ~MozContentSGNode()

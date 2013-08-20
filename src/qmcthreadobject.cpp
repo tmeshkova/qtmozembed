@@ -27,7 +27,6 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , mLoop(NULL)
   , mOwnGLContext(false)
   , m_renderTarget(NULL)
-  , m_displayTarget(NULL)
   , mSGnode(NULL)
 {
     m_size = aGLSize;
@@ -79,7 +78,6 @@ QMCThreadObject::~QMCThreadObject()
         delete mGLContext;
     delete mOffGLSurface;
     delete m_renderTarget;
-    delete m_displayTarget;
 }
 
 void QMCThreadObject::PostInvalidateToRenderThread()
@@ -132,19 +130,13 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
         if (!m_renderTarget) {
             // Initialize the buffers and renderer
             m_renderTarget = mView->CreateEmbedLiteRenderTarget(m_size);
-            m_displayTarget = mView->CreateEmbedLiteRenderTarget(m_size);
         }
 
         mView->RenderToCurrentContext(mProcessingMatrix, m_renderTarget);
-        glFlush();
-
-        qSwap(m_renderTarget, m_displayTarget);
 
         if (mSGnode) {
-            mSGnode->newTexture(m_displayTarget->texture(), m_size);
-//            mSGnode->newTexture(m_renderTarget->texture(), m_size);
+            mSGnode->newTexture(m_renderTarget->texture(), m_size);
         }
-        QMozContext::GetInstance()->GetApp()->PostTask(&QMCThreadObject::PostNotificationUpdate, this);
     }
 
     if (mLoop) {
