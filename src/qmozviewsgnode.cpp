@@ -46,10 +46,11 @@ public:
         , m_program(0)
     {
         mView->SetIsActive(true);
+#ifdef QT_OPENGL_ES_2
         if (QThread::currentThread() != aView->thread()) {
-            m_texture = m_window->createTextureFromId(0, QSize(1, 1));
             initializeShaders();
         }
+#endif
     }
 
     void initializeShaders()
