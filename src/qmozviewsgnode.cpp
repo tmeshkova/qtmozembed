@@ -32,32 +32,8 @@ static const char *fragShader =
     "uniform sampler2D tx;\n"
     "void main()\n"
     "{\n"
-    "  gl_FragColor = texture2D (tx, tex_coord);\n"
+    "  gl_FragColor = texture2D(tx, tex_coord);\n"
     "}\n";
-
-static GLfloat quad_vrt[] =
-{
-    /* front */
-    -1.0f, -1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-};
-
-static GLfloat quad_txc[] =
-{
-    /* front */
-     0.0f,  0.0f,
-     1.0f,  1.0f,
-     0.0f,  1.0f,
-
-     0.0f,  0.0f,
-     1.0f,  0.0f,
-     1.0f,  1.0f,
-};
 
 class MozContentSGNode : public QSGRenderNode {
 public:
@@ -84,6 +60,18 @@ public:
         m_program->bindAttributeLocation("vPosition", 0);
         m_program->bindAttributeLocation("vTexCoord", 1);
         m_program->link();
+        q_quad_vrt << QVector3D(-1.0f, -1.0f,  1.0f);
+        q_quad_vrt << QVector3D(1.0f,  1.0f,  1.0f);
+        q_quad_vrt << QVector3D(-1.0f,  1.0f,  1.0f);
+        q_quad_vrt << QVector3D(-1.0f, -1.0f,  1.0f);
+        q_quad_vrt << QVector3D(1.0f, -1.0f,  1.0f);
+        q_quad_vrt << QVector3D(1.0f,  1.0f,  1.0f);
+        q_quad_txc << QVector2D(0.0f,  0.0f);
+        q_quad_txc << QVector2D(1.0f,  1.0f);
+        q_quad_txc << QVector2D(0.0f,  1.0f);
+        q_quad_txc << QVector2D(0.0f,  0.0f);
+        q_quad_txc << QVector2D(1.0f,  0.0f);
+        q_quad_txc << QVector2D(1.0f,  1.0f);
     }
 
     virtual StateFlags changedStates()
@@ -99,13 +87,14 @@ public:
         if (m_program && m_texture) {
             m_program->bind();
             glBindTexture(GL_TEXTURE_2D, m_texture->textureId());
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, quad_vrt);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, quad_txc);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glDisableVertexAttribArray(0);
-            glDisableVertexAttribArray(1);
+
+            m_program->enableAttributeArray(0);
+            m_program->enableAttributeArray(1);
+            m_program->setAttributeArray(0, q_quad_vrt.constData());
+            m_program->setAttributeArray(1, q_quad_txc.constData());
+            glDrawArrays(GL_TRIANGLES, 0, q_quad_vrt.size());
+            m_program->disableAttributeArray(0);
+            m_program->disableAttributeArray(1);
             m_program->release();
         }
     }
@@ -156,6 +145,8 @@ private:
     QSGTexture *m_texture;
     QQuickWindow *m_window;
     QOpenGLShaderProgram *m_program;
+    QVector<QVector3D> q_quad_vrt;
+    QVector<QVector2D> q_quad_txc;
 };
 
 QMozViewSGNode::QMozViewSGNode()
