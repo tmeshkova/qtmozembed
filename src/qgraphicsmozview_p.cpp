@@ -36,7 +36,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mTempTexture(NULL)
 #endif
     , mPendingTouchEvent(false)
-    , mProgress(100)
+    , mProgress(0)
     , mCanGoBack(false)
     , mCanGoForward(false)
     , mIsLoading(false)
@@ -127,8 +127,10 @@ void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCan
 
 void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal)
 {
-    mProgress = aProgress;
-    mViewIface->loadProgressChanged();
+    if (mIsLoading) {
+        mProgress = aProgress;
+        mViewIface->loadProgressChanged();
+    }
 }
 
 void QGraphicsMozViewPrivate::OnLoadStarted(const char* aLocation)
