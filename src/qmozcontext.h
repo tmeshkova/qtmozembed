@@ -68,6 +68,7 @@ public Q_SLOTS:
     void notifyFirstUIInitialized();
     void setProfile(const QString);
     void addObservers(const QStringList& aObserversList);
+    void setCompositorInSeparateThread(bool aEnabled);
 
 private:
     QMozContext(QObject* parent = 0);

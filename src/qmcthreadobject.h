@@ -61,6 +61,7 @@ private:
     QWaitCondition destroyLockCondition;
     void* mRenderTask;
     bool mIsDestroying;
+    bool mIsRendering;
 };
 
 #endif // QMCThreadObject_H

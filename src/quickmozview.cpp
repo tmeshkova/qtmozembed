@@ -150,10 +150,6 @@ void QuickMozView::sceneGraphInitialized()
 
 void QuickMozView::beforeRendering()
 {
-    if (thread() != QThread::currentThread()) {
-        d->mContext->GetApp()->SetCompositorInSeparateThread(true);
-    }
-
     if (!mSGRenderer) {
         mSGRenderer = new QSGThreadObject();
         connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));

@@ -31,6 +31,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , mLoop(NULL)
   , mRenderTask(NULL)
   , mIsDestroying(false)
+  , mIsRendering(false)
 {
     m_size = aGLSize;
     if (sgThreadObj->thread() != thread()) {
@@ -78,7 +79,7 @@ void QMCThreadObject::setSGNode(QMozViewSGNode* node)
 QMCThreadObject::~QMCThreadObject()
 {
     mIsDestroying = true;
-    if (mRenderTask && mLoop) {
+    if (mIsRendering) {
         destroyLock.lock();
         destroyLockCondition.wait(&destroyLock);
         destroyLock.unlock();
@@ -96,14 +97,17 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
 {
     mProcessingMatrix = affine;
     mutex.lock();
+    mIsRendering = true;
     if (!mLoop) {
         mRenderTask = QMozContext::GetInstance()->GetApp()->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this, 1);
     } else {
         mRenderTask = mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this, 1);
     }
-    if (mRenderTask) {
+    if (mIsRendering) {
       waitCondition.wait(&mutex);
     }
+    mIsRendering = false;
+
     mutex.unlock();
     destroyLockCondition.wakeOne();
 }
@@ -137,6 +141,8 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
             mSGnode->prepareNode();
         }
     }
+    mRenderTask = nullptr;
+    mIsRendering = false;
     waitCondition.wakeOne();
 }
 

@@ -197,6 +197,11 @@ QMozContext::QMozContext(QObject* parent)
     protectSingleton = this;
 }
 
+void QMozContext::setCompositorInSeparateThread(bool aEnabled)
+{
+    d->mApp->SetCompositorInSeparateThread(true);
+}
+
 void QMozContext::setProfile(const QString profilePath)
 {
     d->mApp->SetProfilePath(!profilePath.isEmpty() ? profilePath.toUtf8().data() : NULL);
