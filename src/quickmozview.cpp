@@ -74,7 +74,11 @@ QuickMozView::~QuickMozView()
         d->mContext->GetApp()->DestroyView(d->mView);
     }
     delete mSGRenderer;
-    delete mMCRenderer;
+    if (mMCRenderer) {
+        mMCRenderer->setSGNode(nullptr);
+        mMCRenderer->setView(nullptr);
+        delete mMCRenderer;
+    }
     delete d;
 }
 

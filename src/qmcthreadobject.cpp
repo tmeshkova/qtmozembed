@@ -28,6 +28,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , m_renderTarget(NULL)
   , mSGnode(NULL)
   , mLoop(NULL)
+  , mRenderTask(NULL)
 {
     m_size = aGLSize;
     if (sgThreadObj->thread() != thread()) {
@@ -65,6 +66,11 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
     }
 }
 
+void QMCThreadObject::setView(QuickMozView* aView)
+{
+    mView = aView;
+}
+
 void QMCThreadObject::setSGNode(QMozViewSGNode* node)
 {
     mSGnode = node;
@@ -76,6 +82,12 @@ QMCThreadObject::~QMCThreadObject()
         delete mGLContext;
     delete mOffGLSurface;
     delete m_renderTarget;
+    if (mRenderTask && mLoop) {
+        mLoop->CancelTask(mRenderTask);
+        destroyLock.lock();
+        destroyLockCondition.wait(&destroyLock);
+        destroyLock.unlock();
+    }
     delete mLoop;
 }
 
@@ -86,7 +98,10 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
         Q_EMIT workInGeckoCompositorThread();
     } else {
         mutex.lock();
-        mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this);
+        if (mRenderTask) {
+            mLoop->CancelTask(mRenderTask);
+        }
+        mRenderTask = mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this);
         waitCondition.wait(&mutex);
         mutex.unlock();
     }
@@ -95,15 +110,16 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
 void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
 {
     QMCThreadObject* me = static_cast<QMCThreadObject*>(self);
+    me->mRenderTask = nullptr;
     me->ProcessRenderInGeckoCompositorThread();
 }
 
 void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 {
-    if (!mOffGLSurface) {
+    if (!mOffGLSurface && mView) {
         mGLContext->makeCurrent(mGLSurface);
         mView->RenderToCurrentContext(mProcessingMatrix);
-    } else {
+    } else if (mView) {
         mGLContext->makeCurrent(mOffGLSurface);
         m_size = mGLSurface ? mGLSurface->size() : QSize();
         if (!m_renderTarget) {
@@ -122,6 +138,7 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 
     if (mLoop) {
         waitCondition.wakeOne();
+        destroyLockCondition.wakeOne();
     }
 }
 

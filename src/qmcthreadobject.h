@@ -32,6 +32,7 @@ public:
     ~QMCThreadObject();
     void RenderToCurrentContext(QMatrix affine);
     void setSGNode(QMozViewSGNode* node);
+    void setView(QuickMozView* aView);
     void prepareTexture();
 
 Q_SIGNALS:
@@ -56,6 +57,9 @@ private:
     mozilla::embedlite::EmbedLiteMessagePump* mLoop;
     QMutex mutex;
     QWaitCondition waitCondition;
+    QMutex destroyLock;
+    QWaitCondition destroyLockCondition;
+    void* mRenderTask;
 };
 
 #endif // QMCThreadObject_H
