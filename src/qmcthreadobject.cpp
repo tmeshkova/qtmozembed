@@ -56,11 +56,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
         }
     }
     if (aView->thread() == thread()) {
-        if (mOffGLSurface) {
-            connect(this, SIGNAL(workInGeckoCompositorThread()), this, SLOT(ProcessRenderInGeckoCompositorThread()));
-        } else {
-            connect(this, SIGNAL(workInGeckoCompositorThread()), this, SLOT(ProcessRenderInGeckoCompositorThread()), Qt::BlockingQueuedConnection);
-        }
+        connect(this, SIGNAL(workInGeckoCompositorThread()), this, SLOT(ProcessRenderInGeckoCompositorThread()), Qt::QueuedConnection);
     } else {
         mLoop = QMozContext::GetInstance()->GetApp()->CreateEmbedLiteMessagePump(NULL);
     }
@@ -95,15 +91,16 @@ QMCThreadObject::~QMCThreadObject()
 void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
 {
     mProcessingMatrix = affine;
+    mutex.lock();
     if (!mLoop) {
         Q_EMIT workInGeckoCompositorThread();
     } else {
-        mutex.lock();
         mRenderTask = mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this);
-        waitCondition.wait(&mutex);
-        mutex.unlock();
-        destroyLockCondition.wakeAll();
     }
+    waitCondition.wait(&mutex);
+    mutex.unlock();
+    destroyLockCondition.wakeAll();
+
 }
 
 void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
@@ -132,11 +129,10 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 
         if (mSGnode) {
             mSGnode->newTexture(m_renderTarget->texture(), m_size);
+            mSGnode->prepareNode();
         }
     }
-    if (mLoop) {
-        waitCondition.wakeAll();
-    }
+    waitCondition.wakeAll();
 }
 
 void QMCThreadObject::prepareTexture()
