@@ -78,15 +78,16 @@ void QMCThreadObject::setSGNode(QMozViewSGNode* node)
 
 QMCThreadObject::~QMCThreadObject()
 {
+    delete m_renderTarget;
     if (mOwnGLContext)
         delete mGLContext;
+    mGLContext = nullptr;
     delete mOffGLSurface;
-    delete m_renderTarget;
     if (mRenderTask && mLoop) {
-        mLoop->CancelTask(mRenderTask);
         destroyLock.lock();
         destroyLockCondition.wait(&destroyLock);
         destroyLock.unlock();
+        mRenderTask = nullptr;
     }
     delete mLoop;
 }
@@ -98,12 +99,10 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
         Q_EMIT workInGeckoCompositorThread();
     } else {
         mutex.lock();
-        if (mRenderTask) {
-            mLoop->CancelTask(mRenderTask);
-        }
         mRenderTask = mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this);
         waitCondition.wait(&mutex);
         mutex.unlock();
+        destroyLockCondition.wakeAll();
     }
 }
 
@@ -116,10 +115,10 @@ void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
 
 void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 {
-    if (!mOffGLSurface && mView) {
+    if (!mOffGLSurface && mView && mGLContext) {
         mGLContext->makeCurrent(mGLSurface);
         mView->RenderToCurrentContext(mProcessingMatrix);
-    } else if (mView) {
+    } else if (mView && mGLContext) {
         mGLContext->makeCurrent(mOffGLSurface);
         m_size = mGLSurface ? mGLSurface->size() : QSize();
         if (!m_renderTarget) {
@@ -135,10 +134,8 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
             mSGnode->newTexture(m_renderTarget->texture(), m_size);
         }
     }
-
     if (mLoop) {
-        waitCondition.wakeOne();
-        destroyLockCondition.wakeOne();
+        waitCondition.wakeAll();
     }
 }
 
