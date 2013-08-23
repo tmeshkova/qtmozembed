@@ -41,6 +41,8 @@ private Q_SLOTS:
     void ProcessRenderInGeckoCompositorThread();
 
 private:
+    static void doWorkInGeckoCompositorThread(void* self);
+
     QuickMozView* mView;
     QOpenGLContext* mGLContext;
     QSurface* mGLSurface;
@@ -51,6 +53,9 @@ private:
     QSize m_size;
     mozilla::embedlite::EmbedLiteRenderTarget* m_renderTarget;
     QMozViewSGNode* mSGnode;
+    mozilla::embedlite::EmbedLiteMessagePump* mLoop;
+    QMutex mutex;
+    QWaitCondition waitCondition;
 };
 
 #endif // QMCThreadObject_H
