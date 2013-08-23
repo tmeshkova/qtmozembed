@@ -95,6 +95,10 @@ QMCThreadObject::~QMCThreadObject()
 
 void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
 {
+    if (mIsDestroying) {
+        return;
+    }
+
     mProcessingMatrix = affine;
     mutex.lock();
     mIsRendering = true;
