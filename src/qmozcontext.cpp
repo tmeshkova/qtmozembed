@@ -53,7 +53,6 @@ public:
         LoadEmbedLite();
         mApp = XRE_GetEmbedLite();
         mApp->SetListener(this);
-        mApp->SetCompositorInSeparateThread(getenv("USE_GECKO_COMPOSITOR_THREAD") != 0);
         if (mAsyncContext) {
             mQtPump = new MessagePumpQt(mApp);
         }

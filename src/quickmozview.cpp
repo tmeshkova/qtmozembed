@@ -68,17 +68,16 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
 QuickMozView::~QuickMozView()
 {
-
+    if (mMCRenderer) {
+        mMCRenderer->setSGNode(nullptr);
+        mMCRenderer->setView(nullptr);
+    }
     if (d->mView) {
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
     }
     delete mSGRenderer;
-    if (mMCRenderer) {
-        mMCRenderer->setSGNode(nullptr);
-        mMCRenderer->setView(nullptr);
-        delete mMCRenderer;
-    }
+    delete mMCRenderer;
     delete d;
 }
 
@@ -151,6 +150,10 @@ void QuickMozView::sceneGraphInitialized()
 
 void QuickMozView::beforeRendering()
 {
+    if (thread() != QThread::currentThread()) {
+        d->mContext->GetApp()->SetCompositorInSeparateThread(true);
+    }
+
     if (!mSGRenderer) {
         mSGRenderer = new QSGThreadObject();
         connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));

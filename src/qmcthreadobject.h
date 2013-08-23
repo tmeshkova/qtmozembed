@@ -60,6 +60,7 @@ private:
     QMutex destroyLock;
     QWaitCondition destroyLockCondition;
     void* mRenderTask;
+    bool mIsDestroying;
 };
 
 #endif // QMCThreadObject_H

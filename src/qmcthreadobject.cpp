@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <QSurface>
+#include <QThread>
 #include <QPainter>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLPaintDevice>
@@ -29,6 +30,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , mSGnode(NULL)
   , mLoop(NULL)
   , mRenderTask(NULL)
+  , mIsDestroying(false)
 {
     m_size = aGLSize;
     if (sgThreadObj->thread() != thread()) {
@@ -39,7 +41,10 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
         mGLSurface = mSGThreadObj->context()->surface();
         if (mGLContext->create()) {
             mSGThreadObj->context()->doneCurrent();
-            if (!mGLContext->makeCurrent(mGLSurface)) {
+#if defined(GL_PROVIDER_GLX)
+            if (!mGLContext->makeCurrent(mGLSurface))
+#endif
+            {
                 mOffGLSurface = new QOffscreenSurface;
                 mOffGLSurface->setFormat(mSGThreadObj->context()->format());
                 mOffGLSurface->create();
@@ -55,9 +60,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
             }
         }
     }
-    if (aView->thread() == thread()) {
-        connect(this, SIGNAL(workInGeckoCompositorThread()), this, SLOT(ProcessRenderInGeckoCompositorThread()), Qt::QueuedConnection);
-    } else {
+    if (aView->thread() != thread()) {
         mLoop = QMozContext::GetInstance()->GetApp()->CreateEmbedLiteMessagePump(NULL);
     }
 }
@@ -74,17 +77,18 @@ void QMCThreadObject::setSGNode(QMozViewSGNode* node)
 
 QMCThreadObject::~QMCThreadObject()
 {
-    delete m_renderTarget;
-    if (mOwnGLContext)
-        delete mGLContext;
-    mGLContext = nullptr;
-    delete mOffGLSurface;
+    mIsDestroying = true;
     if (mRenderTask && mLoop) {
         destroyLock.lock();
         destroyLockCondition.wait(&destroyLock);
         destroyLock.unlock();
         mRenderTask = nullptr;
     }
+    delete m_renderTarget;
+    if (mOwnGLContext)
+        delete mGLContext;
+    mGLContext = nullptr;
+    delete mOffGLSurface;
     delete mLoop;
 }
 
@@ -93,29 +97,30 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
     mProcessingMatrix = affine;
     mutex.lock();
     if (!mLoop) {
-        Q_EMIT workInGeckoCompositorThread();
+        mRenderTask = QMozContext::GetInstance()->GetApp()->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this, 1);
     } else {
-        mRenderTask = mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this);
+        mRenderTask = mLoop->PostTask(&QMCThreadObject::doWorkInGeckoCompositorThread, this, 1);
     }
-    waitCondition.wait(&mutex);
+    if (mRenderTask) {
+      waitCondition.wait(&mutex);
+    }
     mutex.unlock();
-    destroyLockCondition.wakeAll();
-
+    destroyLockCondition.wakeOne();
 }
 
 void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
 {
     QMCThreadObject* me = static_cast<QMCThreadObject*>(self);
-    me->mRenderTask = nullptr;
     me->ProcessRenderInGeckoCompositorThread();
+    me->mRenderTask = nullptr;
 }
 
 void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 {
-    if (!mOffGLSurface && mView && mGLContext) {
+    if (!mOffGLSurface && mView && !mIsDestroying) {
         mGLContext->makeCurrent(mGLSurface);
         mView->RenderToCurrentContext(mProcessingMatrix);
-    } else if (mView && mGLContext) {
+    } else if (mView && !mIsDestroying) {
         mGLContext->makeCurrent(mOffGLSurface);
         m_size = mGLSurface ? mGLSurface->size() : QSize();
         if (!m_renderTarget) {
@@ -132,7 +137,7 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
             mSGnode->prepareNode();
         }
     }
-    waitCondition.wakeAll();
+    waitCondition.wakeOne();
 }
 
 void QMCThreadObject::prepareTexture()
