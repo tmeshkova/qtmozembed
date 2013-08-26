@@ -51,7 +51,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     Q_PROPERTY(float resolution READ resolution) \
     Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL) \
     Q_PROPERTY(QColor bgcolor READ bgcolor NOTIFY bgColorChanged FINAL) \
-    Q_PROPERTY(bool useQmlMouse READ getUseQmlMouse WRITE setUseQmlMouse)
+    Q_PROPERTY(bool useQmlMouse READ getUseQmlMouse WRITE setUseQmlMouse) \
+    Q_PROPERTY(bool dragging READ dragging NOTIFY draggingChanged FINAL)
 
 #define Q_MOZ_VIEW_PUBLIC_METHODS \
     QUrl url() const; \
@@ -70,7 +71,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     bool getUseQmlMouse(); \
     void setUseQmlMouse(bool value); \
     void forceViewActiveFocus(); \
-    void createGeckoGLContext();
+    void createGeckoGLContext(); \
+    bool dragging() const;
 
 #define Q_MOZ_VIEW_PUBLIC_SLOTS \
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl()); \
@@ -118,6 +120,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void handleDoubleTap(QPoint point, QMozReturnValue* retval); \
     void imeNotification(int state, bool open, int cause, int focusChange, const QString& type); \
     void bgColorChanged(); \
-    void useQmlMouse(bool value);
+    void useQmlMouse(bool value); \
+    void draggingChanged();
 
 #endif /* qmozview_defined_wrapper_h */
