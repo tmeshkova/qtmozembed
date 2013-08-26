@@ -102,6 +102,8 @@ public:
     bool mViewIsFocused;
     bool mHasContext;
     QSize mGLSurfaceSize;
+    bool mPressed;
+    bool mDragging;
 };
 
 #endif /* qgraphicsmozview_p_h */

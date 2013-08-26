@@ -41,6 +41,7 @@ public:
     virtual void imeNotification(int state, bool open, int cause, int focusChange, const QString& type) = 0;
     virtual void bgColorChanged() = 0;
     virtual void useQmlMouse(bool value) = 0;
+    virtual void draggingChanged() = 0;
 };
 
 template<class TMozQView>
@@ -150,6 +151,11 @@ public:
     void useQmlMouse(bool value)
     {
         Q_EMIT view.useQmlMouse(value);
+    }
+
+    void draggingChanged()
+    {
+        Q_EMIT view.draggingChanged();
     }
 
     TMozQView& view;

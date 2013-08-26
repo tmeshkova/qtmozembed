@@ -53,6 +53,8 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mViewIsFocused(false)
     , mHasContext(false)
     , mGLSurfaceSize(0,0)
+    , mPressed(false)
+    , mDragging(false)
 {
 }
 
@@ -396,9 +398,16 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     // Always accept the QTouchEvent so that we'll receive also TouchUpdate and TouchEnd events
     mPendingTouchEvent = true;
     event->setAccepted(true);
+    bool draggingChanged = false;
     if (event->type() == QEvent::TouchBegin) {
         mViewIface->forceViewActiveFocus();
         mTouchTime.restart();
+    } else if (event->type() == QEvent::TouchUpdate && !mDragging) {
+        mDragging = true;
+        draggingChanged = true;
+    } else if (event->type() == QEvent::TouchEnd) {
+        mDragging = false;
+        draggingChanged = true;
     }
 
     MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, mTouchTime.elapsed());
@@ -450,6 +459,10 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     }
     if (meventEnd.mTouches.Length()) {
         ReceiveInputEvent(meventEnd);
+    }
+
+    if (draggingChanged) {
+        mViewIface->draggingChanged();
     }
 }
 

@@ -443,6 +443,11 @@ void QuickMozView::setUseQmlMouse(bool value)
     mUseQmlMouse = value;
 }
 
+bool QuickMozView::dragging() const
+{
+    return d->mDragging;
+}
+
 void QuickMozView::loadHtml(const QString& html, const QUrl& baseUrl)
 {
     LOGT();

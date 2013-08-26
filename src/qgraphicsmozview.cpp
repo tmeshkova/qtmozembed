@@ -492,6 +492,11 @@ void QGraphicsMozView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
     else {
         QGraphicsWidget::mouseMoveEvent(e);
     }
+
+    if (d->mViewInitialized && !d->mDragging && d->mPressed) {
+        d->mDragging = true;
+        d->mViewIface->draggingChanged();
+    }
 }
 
 void QGraphicsMozView::mousePressEvent(QGraphicsSceneMouseEvent* e)
@@ -504,6 +509,8 @@ void QGraphicsMozView::mousePressEvent(QGraphicsSceneMouseEvent* e)
     else {
         QGraphicsWidget::mousePressEvent(e);
     }
+
+    d->mPressed = true;
 }
 
 void QGraphicsMozView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
@@ -515,6 +522,12 @@ void QGraphicsMozView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
     }
     else {
         QGraphicsWidget::mouseReleaseEvent(e);
+    }
+
+    d->mPressed = false;
+    if (d->mViewInitialized && d->mDragging) {
+        d->mDragging = false;
+        d->mViewIface->draggingChanged();
     }
 }
 
