@@ -1,6 +1,6 @@
 Name:       qtmozembed-qt5
 Summary:    Qt embeddings for Gecko
-Version:    1.2.3
+Version:    1.5.8
 Release:    1
 Group:      Applications/Internet
 License:    Mozilla License
@@ -45,7 +45,7 @@ This package contains QML unit tests for QtMozEmbed library
 %setup -q -n %{name}-%{version}
 
 %build
-%qmake5
+%qmake5 VERSION=%{version}
 %{__make} %{?jobs:MOZ_MAKE_FLAGS="-j%jobs"}
 
 %install
