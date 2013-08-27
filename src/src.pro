@@ -6,7 +6,19 @@ contains(QT_MAJOR_VERSION, 5) {
   TARGET = qtembedwidget
 }
 TEMPLATE = lib
-VERSION = 1.0.1
+
+isEmpty(VERSION) {
+    GIT_TAG = $$system(git describe --tags --abbrev=0)
+    GIT_VERSION = $$system(echo $$GIT_TAG | sed 's/nemo[/]//')
+    isEmpty(GIT_VERSION) {
+        # if you're trying to build this from a tarball, I'm sorry. but being
+        # able to specify the version in just one place (git tags) is a lot less
+        # error-prone and easy.
+        warning("Can't find a valid git tag version, got: $$GIT_TAG")
+        GIT_VERSION = 0.0.0
+    }
+    !isEmpty(GIT_VERSION): VERSION = $$GIT_VERSION
+}
 
 SOURCES += qmozcontext.cpp \
            qmessagepump.cpp \
