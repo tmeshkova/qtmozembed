@@ -45,9 +45,9 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY navigationHistoryChanged FINAL) \
     Q_PROPERTY(int loadProgress READ loadProgress NOTIFY loadProgressChanged) \
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged FINAL) \
-    Q_PROPERTY(QRect contentRect READ contentRect NOTIFY viewAreaChanged FINAL) \
-    Q_PROPERTY(QSize scrollableSize READ scrollableSize) \
-    Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset) \
+    Q_PROPERTY(QRectF contentRect READ contentRect NOTIFY viewAreaChanged FINAL) \
+    Q_PROPERTY(QSizeF scrollableSize READ scrollableSize FINAL) \
+    Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset NOTIFY scrollableOffsetChanged FINAL) \
     Q_PROPERTY(float resolution READ resolution) \
     Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL) \
     Q_PROPERTY(QColor bgcolor READ bgcolor NOTIFY bgColorChanged FINAL) \
@@ -62,8 +62,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     bool canGoBack() const; \
     bool canGoForward() const; \
     bool loading() const; \
-    QRect contentRect() const; \
-    QSize scrollableSize() const; \
+    QRectF contentRect() const; \
+    QSizeF scrollableSize() const; \
     QPointF scrollableOffset() const; \
     float resolution() const; \
     bool isPainted() const; \
@@ -115,6 +115,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void firstPaint(int offx, int offy); \
     void contentLoaded(QString docuri); \
     void viewAreaChanged(); \
+    void scrollableOffsetChanged(); \
     void handleLongTap(QPoint point, QMozReturnValue* retval); \
     void handleSingleTap(QPoint point, QMozReturnValue* retval); \
     void handleDoubleTap(QPoint point, QMozReturnValue* retval); \

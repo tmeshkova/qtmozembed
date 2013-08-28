@@ -403,12 +403,12 @@ bool QuickMozView::loading() const
     return d->mIsLoading;
 }
 
-QRect QuickMozView::contentRect() const
+QRectF QuickMozView::contentRect() const
 {
     return d->mContentRect;
 }
 
-QSize QuickMozView::scrollableSize() const
+QSizeF QuickMozView::scrollableSize() const
 {
     return d->mScrollableSize;
 }

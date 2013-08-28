@@ -277,12 +277,12 @@ float QGraphicsMozView::resolution() const
     return d->mContentResolution;
 }
 
-QRect QGraphicsMozView::contentRect() const
+QRectF QGraphicsMozView::contentRect() const
 {
     return d->mContentRect;
 }
 
-QSize QGraphicsMozView::scrollableSize() const
+QSizeF QGraphicsMozView::scrollableSize() const
 {
     return d->mScrollableSize;
 }

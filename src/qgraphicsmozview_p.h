@@ -92,8 +92,8 @@ public:
     bool mLastIsGoodRotation;
     bool mIsPasswordField;
     bool mGraphicsViewAssigned;
-    QRect mContentRect;
-    QSize mScrollableSize;
+    QRectF mContentRect;
+    QSizeF mScrollableSize;
     QPointF mScrollableOffset;
     float mContentResolution;
     bool mIsPainted;

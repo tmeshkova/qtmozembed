@@ -35,6 +35,7 @@ public:
     virtual void firstPaint(int offx, int offy) = 0;
     virtual void contentLoaded(QString docuri) = 0;
     virtual void viewAreaChanged() = 0;
+    virtual void scrollableOffsetChanged() = 0;
     virtual void handleLongTap(QPoint point, QMozReturnValue* retval) = 0;
     virtual void handleSingleTap(QPoint point, QMozReturnValue* retval) = 0;
     virtual void handleDoubleTap(QPoint point, QMozReturnValue* retval) = 0;
@@ -123,6 +124,10 @@ public:
     void viewAreaChanged()
     {
         Q_EMIT view.viewAreaChanged();
+    }
+    void scrollableOffsetChanged()
+    {
+        Q_EMIT view.scrollableOffsetChanged();
     }
     void handleLongTap(QPoint point, QMozReturnValue* retval)
     {

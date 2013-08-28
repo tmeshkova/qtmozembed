@@ -43,8 +43,8 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mLastIsGoodRotation(true)
     , mIsPasswordField(false)
     , mGraphicsViewAssigned(false)
-    , mContentRect(0,0,0,0)
-    , mScrollableSize(0,0)
+    , mContentRect(0.0, 0.0, 0.0, 0.0)
+    , mScrollableSize(0.0, 0.0)
     , mScrollableOffset(0,0)
     , mContentResolution(1.0)
     , mIsPainted(false)
@@ -357,17 +357,26 @@ void QGraphicsMozViewPrivate::SetPageRect(const gfxRect& aCssPageRect)
 
 bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize)
 {
-    mContentRect = QRect(aContentRect.x, aContentRect.y, aContentRect.width, aContentRect.height);
-    mScrollableSize = QSize(aScrollableSize.width, aScrollableSize.height);
-    mViewIface->viewAreaChanged();
+    if (mContentRect.x() != aContentRect.x || mContentRect.y() != aContentRect.y ||
+            mContentRect.width() != aContentRect.width ||
+            mContentRect.height() != aContentRect.height) {
+        mContentRect.setRect(aContentRect.x, aContentRect.y, aContentRect.width, aContentRect.height);
+        mViewIface->viewAreaChanged();
+    }
+    mScrollableSize.setWidth(aScrollableSize.width);
+    mScrollableSize.setHeight(aScrollableSize.height);
     return false;
 }
 
 bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const float aResolution)
 {
-    mScrollableOffset = QPointF(aPosition.x, aPosition.y);
-    mContentResolution = aResolution;
-    mViewIface->viewAreaChanged();
+    if (mScrollableOffset.x() != aPosition.x || mScrollableOffset.y() != aPosition.y ||
+            mContentResolution != aResolution) {
+        mScrollableOffset.setX(aPosition.x);
+        mScrollableOffset.setY(aPosition.y);
+        mContentResolution = aResolution;
+        mViewIface->scrollableOffsetChanged();
+    }
     return false;
 }
 
