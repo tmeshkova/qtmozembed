@@ -1,6 +1,6 @@
 Name:       qtmozembed-qt5
 Summary:    Qt embeddings for Gecko
-Version:    1.5.8
+Version:    1.5.11
 Release:    1
 Group:      Applications/Internet
 License:    Mozilla License

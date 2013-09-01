@@ -43,6 +43,8 @@ public:
     virtual ~QMozContext();
 
     mozilla::embedlite::EmbedLiteApp* GetApp();
+    void setPixelRatio(float ratio);
+    float pixelRatio() const;
 
     static QMozContext* GetInstance();
 

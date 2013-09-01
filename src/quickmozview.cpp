@@ -420,7 +420,7 @@ QPointF QuickMozView::scrollableOffset() const
 
 float QuickMozView::resolution() const
 {
-    return d->mContentResolution;
+    return d->mContext->pixelRatio();
 }
 
 bool QuickMozView::isPainted() const
@@ -447,6 +447,17 @@ bool QuickMozView::dragging() const
 {
     return d->mDragging;
 }
+
+qreal QuickMozView::contentWidth() const
+{
+    return d->mScrollableSize.width();
+}
+
+qreal QuickMozView::contentHeight() const
+{
+    return d->mScrollableSize.height();
+}
+
 
 void QuickMozView::loadHtml(const QString& html, const QUrl& baseUrl)
 {

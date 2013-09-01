@@ -46,6 +46,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     Q_PROPERTY(int loadProgress READ loadProgress NOTIFY loadProgressChanged) \
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged FINAL) \
     Q_PROPERTY(QRectF contentRect READ contentRect NOTIFY viewAreaChanged FINAL) \
+    Q_PROPERTY(qreal contentWidth READ contentWidth NOTIFY contentWidthChanged FINAL) \
+    Q_PROPERTY(qreal contentHeight READ contentHeight NOTIFY contentHeightChanged FINAL) \
     Q_PROPERTY(QSizeF scrollableSize READ scrollableSize FINAL) \
     Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset NOTIFY scrollableOffsetChanged FINAL) \
     Q_PROPERTY(float resolution READ resolution) \
@@ -63,6 +65,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     bool canGoForward() const; \
     bool loading() const; \
     QRectF contentRect() const; \
+    qreal contentWidth() const; \
+    qreal contentHeight() const; \
     QSizeF scrollableSize() const; \
     QPointF scrollableOffset() const; \
     float resolution() const; \
@@ -122,6 +126,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void imeNotification(int state, bool open, int cause, int focusChange, const QString& type); \
     void bgColorChanged(); \
     void useQmlMouse(bool value); \
-    void draggingChanged();
+    void draggingChanged(); \
+    void contentWidthChanged(); \
+    void contentHeightChanged();
 
 #endif /* qmozview_defined_wrapper_h */

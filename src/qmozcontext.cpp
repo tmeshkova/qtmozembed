@@ -42,6 +42,7 @@ public:
     : q(qq)
     , mApp(NULL)
     , mInitialized(false)
+    , mPixelRatio(1.0)
     , mThread(new QThread())
     , mEmbedStarted(false)
     , mQtPump(NULL)
@@ -181,6 +182,7 @@ private:
     QMozContext* q;
     EmbedLiteApp* mApp;
     bool mInitialized;
+    float mPixelRatio;
     friend class QMozContext;
     QThread* mThread;
     bool mEmbedStarted;
@@ -307,6 +309,17 @@ EmbedLiteApp*
 QMozContext::GetApp()
 {
     return d->mApp;
+}
+
+void QMozContext::setPixelRatio(float ratio)
+{
+    d->mPixelRatio = ratio;
+    setPref(QString("layout.css.devPixelsPerPx"), QString("%1").arg(ratio));
+}
+
+float QMozContext::pixelRatio() const
+{
+    return d->mPixelRatio;
 }
 
 void QMozContext::stopEmbedding()

@@ -46,7 +46,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mContentRect(0.0, 0.0, 0.0, 0.0)
     , mScrollableSize(0.0, 0.0)
     , mScrollableOffset(0,0)
-    , mContentResolution(1.0)
+    , mContentResolution(0.0)
     , mIsPainted(false)
     , mInputMethodHints(0)
     , mIsInputFieldFocused(false)
@@ -66,6 +66,35 @@ QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
 void QGraphicsMozViewPrivate::CompositorCreated()
 {
     mViewIface->createGeckoGLContext();
+}
+
+void QGraphicsMozViewPrivate::UpdateContentSize(unsigned int aWidth, unsigned int aHeight)
+{
+    // Get mContentResolution at startup via context's pixelRatio
+    if (mContentResolution == 0.0) {
+        mContentResolution = mContext->pixelRatio();
+    }
+
+    bool widthChanged = false;
+    bool heightChanged = false;
+    // Emit changes only after both values have been updated.
+    if (mScrollableSize.width() != aWidth * mContentResolution) {
+        mScrollableSize.setWidth(aWidth * mContentResolution);
+        widthChanged = true;
+    }
+
+    if (mScrollableSize.height() != aHeight * mContentResolution) {
+        mScrollableSize.setHeight(aHeight * mContentResolution);
+        heightChanged = true;
+    }
+
+    if (widthChanged) {
+        mViewIface->contentWidthChanged();
+    }
+
+    if (heightChanged) {
+        mViewIface->contentHeightChanged();
+    }
 }
 
 void QGraphicsMozViewPrivate::UpdateViewSize()
@@ -324,7 +353,7 @@ void QGraphicsMozViewPrivate::GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOp
 
 void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
 {
-    LOGT();
+    UpdateContentSize(aWidth, aHeight);
 }
 
 void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
@@ -357,26 +386,32 @@ void QGraphicsMozViewPrivate::SetPageRect(const gfxRect& aCssPageRect)
 
 bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize)
 {
-    if (mContentRect.x() != aContentRect.x || mContentRect.y() != aContentRect.y ||
-            mContentRect.width() != aContentRect.width ||
-            mContentRect.height() != aContentRect.height) {
-        mContentRect.setRect(aContentRect.x, aContentRect.y, aContentRect.width, aContentRect.height);
+    // Get mContentResolution at startup via context's pixelRatio
+    if (mContentResolution == 0.0) {
+        mContentResolution = mContext->pixelRatio();
+    }
+
+    if (mContentRect.x() != aContentRect.x * mContentResolution || mContentRect.y() != aContentRect.y * mContentResolution ||
+            mContentRect.width() != aContentRect.width * mContentResolution ||
+            mContentRect.height() != aContentRect.height * mContentResolution) {
+        mContentRect.setRect(aContentRect.x * mContentResolution, aContentRect.y * mContentResolution,
+                             aContentRect.width * mContentResolution, aContentRect.height * mContentResolution);
         mViewIface->viewAreaChanged();
     }
-    mScrollableSize.setWidth(aScrollableSize.width);
-    mScrollableSize.setHeight(aScrollableSize.height);
+
+    UpdateContentSize(aScrollableSize.width, aScrollableSize.height);
     return false;
 }
 
 bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const float aResolution)
 {
-    if (mScrollableOffset.x() != aPosition.x || mScrollableOffset.y() != aPosition.y ||
-            mContentResolution != aResolution) {
-        mScrollableOffset.setX(aPosition.x);
-        mScrollableOffset.setY(aPosition.y);
-        mContentResolution = aResolution;
+    mContentResolution = aResolution;
+    if (mScrollableOffset.x() != aPosition.x * mContentResolution || mScrollableOffset.y() != aPosition.y * mContentResolution) {
+        mScrollableOffset.setX(aPosition.x * mContentResolution);
+        mScrollableOffset.setY(aPosition.y * mContentResolution);
         mViewIface->scrollableOffsetChanged();
     }
+
     return false;
 }
 
