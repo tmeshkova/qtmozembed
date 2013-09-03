@@ -34,6 +34,8 @@ public:
     virtual void securityChanged(QString status, uint state) = 0;
     virtual void firstPaint(int offx, int offy) = 0;
     virtual void contentLoaded(QString docuri) = 0;
+    virtual void contentWidthChanged() = 0;
+    virtual void contentHeightChanged() = 0;
     virtual void viewAreaChanged() = 0;
     virtual void scrollableOffsetChanged() = 0;
     virtual void handleLongTap(QPoint point, QMozReturnValue* retval) = 0;
@@ -161,6 +163,16 @@ public:
     void draggingChanged()
     {
         Q_EMIT view.draggingChanged();
+    }
+
+    void contentWidthChanged()
+    {
+        Q_EMIT view.contentWidthChanged();
+    }
+
+    void contentHeightChanged()
+    {
+        Q_EMIT view.contentHeightChanged();
     }
 
     TMozQView& view;

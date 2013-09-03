@@ -70,6 +70,8 @@ public:
     virtual void SetIsFocused(bool aIsFocused);
     virtual void CompositorCreated();
 
+    void UpdateContentSize(unsigned int aWidth, unsigned int aHeight);
+
     IMozQViewIface* mViewIface;
     QMozContext* mContext;
     mozilla::embedlite::EmbedLiteView* mView;
