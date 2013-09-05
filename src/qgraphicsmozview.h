@@ -30,8 +30,8 @@ class QGraphicsMozView : public QGraphicsWidget
     Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY navigationHistoryChanged FINAL)
     Q_PROPERTY(int loadProgress READ loadProgress NOTIFY loadProgressChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged FINAL)
-    Q_PROPERTY(QRect contentRect READ contentRect NOTIFY viewAreaChanged FINAL)
-    Q_PROPERTY(QSize scrollableSize READ scrollableSize)
+    Q_PROPERTY(QRectF contentRect READ contentRect NOTIFY viewAreaChanged FINAL)
+    Q_PROPERTY(QSizeF scrollableSize READ scrollableSize)
     Q_PROPERTY(QPointF scrollableOffset READ scrollableOffset)
     Q_PROPERTY(float resolution READ resolution)
     Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL)
@@ -93,6 +93,10 @@ Q_SIGNALS:
     void useQmlMouse(bool value);
     void updateThreaded();
     void requestGLContextQGV(bool& hasContext, QSize& viewPortSize);
+    void contentWidthChanged();
+    void contentHeightChanged();
+    void scrollableOffsetChanged();
+    void draggingChanged();
 
 protected:
     virtual void setGeometry(const QRectF& rect);
