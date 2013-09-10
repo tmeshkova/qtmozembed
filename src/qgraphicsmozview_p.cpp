@@ -479,7 +479,8 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
                                                                  1.0f));
                 break;
             }
-            case Qt::TouchPointMoved: {
+            case Qt::TouchPointMoved:
+            case Qt::TouchPointStationary: {
                 meventMove.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                   nspt,
                                                                   mozilla::ScreenSize(1, 1),
@@ -501,6 +502,9 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         ReceiveInputEvent(meventStart);
     }
     if (meventMove.mTouches.Length()) {
+        if (meventStart.mTouches.Length()) {
+            meventMove.mTouches.AppendElements(meventStart.mTouches);
+        }
         ReceiveInputEvent(meventMove);
     }
     if (meventEnd.mTouches.Length()) {
