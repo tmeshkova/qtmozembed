@@ -71,6 +71,7 @@ public:
     virtual void CompositorCreated();
 
     void UpdateContentSize(unsigned int aWidth, unsigned int aHeight);
+    void TestFlickingMode(QTouchEvent *event);
 
     IMozQViewIface* mViewIface;
     QMozContext* mContext;
@@ -82,6 +83,12 @@ public:
     QSGTexture* mTempTexture;
 #endif
     QSize mSize;
+    qint64 mLastTimestamp;
+    qint64 mElapsedTouchTime;
+    qint64 mLastStationaryTimestamp;
+    QPointF mLastPos;
+    QPointF mLastStationaryPos;
+    bool mCanFlick;
     QTime mTouchTime;
     bool mPendingTouchEvent;
     QTime mPanningTime;

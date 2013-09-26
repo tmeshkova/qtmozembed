@@ -23,6 +23,10 @@
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "qmozembedlog.h"
 
+#ifndef MOZVIEW_FLICK_THRESHOLD
+#define MOZVIEW_FLICK_THRESHOLD 200
+#endif
+
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
@@ -35,6 +39,10 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     , mTempTexture(NULL)
 #endif
+    , mLastTimestamp(0)
+    , mElapsedTouchTime(0)
+    , mLastStationaryTimestamp(0)
+    , mCanFlick(false)
     , mPendingTouchEvent(false)
     , mProgress(0)
     , mCanGoBack(false)
@@ -95,6 +103,44 @@ void QGraphicsMozViewPrivate::UpdateContentSize(unsigned int aWidth, unsigned in
     if (heightChanged) {
         mViewIface->contentHeightChanged();
     }
+}
+
+void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
+{
+    QPointF touchPoint = event->touchPoints().size() == 1 ? event->touchPoints().at(0).pos() : QPointF();
+    // Only for single press point
+    if (!touchPoint.isNull()) {
+        if (event->type() == QEvent::TouchBegin) {
+            mLastTimestamp = mLastStationaryTimestamp = event->timestamp();
+            mCanFlick = true;
+        } else if (event->type() == QEvent::TouchUpdate && !mLastPos.isNull()) {
+            QRectF pressArea = event->touchPoints().at(0).rect();
+            qreal touchHorizontalThreshold = pressArea.width() * 2;
+            qreal touchVerticalThreshold = pressArea.height() * 2;
+            if (!mLastStationaryPos.isNull() && (qAbs(mLastStationaryPos.x() - touchPoint.x()) > touchHorizontalThreshold
+                                             || qAbs(mLastStationaryPos.y() - touchPoint.y()) > touchVerticalThreshold)) {
+                // Threshold exceeded. Reset stationary position and time.
+                mLastStationaryTimestamp = event->timestamp();
+                mLastStationaryPos = touchPoint;
+            } else if (qAbs(mLastPos.x() - touchPoint.x()) <= touchHorizontalThreshold && qAbs(mLastPos.y() - touchPoint.y()) <= touchVerticalThreshold) {
+                // Handle stationary position when panning stops and continues. Eventually mCanFlick is based on timestamps between events, see touch end block.
+                if (mCanFlick) {
+                    mLastStationaryTimestamp = event->timestamp();
+                    mLastStationaryPos = touchPoint;
+                }
+                mCanFlick = false;
+            }
+            else {
+                mCanFlick = true;
+            }
+            mLastTimestamp = event->timestamp();
+        } else if (event->type() == QEvent::TouchEnd) {
+            mCanFlick =(qint64(event->timestamp() - mLastTimestamp) < MOZVIEW_FLICK_THRESHOLD) &&
+                    (qint64(event->timestamp() - mLastStationaryTimestamp) < MOZVIEW_FLICK_THRESHOLD);
+            mLastStationaryPos = QPointF();
+        }
+    }
+    mLastPos = touchPoint;
 }
 
 void QGraphicsMozViewPrivate::UpdateViewSize()
@@ -445,20 +491,27 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     mPendingTouchEvent = true;
     event->setAccepted(true);
     bool draggingChanged = false;
+
     if (event->type() == QEvent::TouchBegin) {
         mViewIface->forceViewActiveFocus();
         mTouchTime.restart();
-    } else if (event->type() == QEvent::TouchUpdate && !mDragging) {
-        mDragging = true;
-        draggingChanged = true;
+        mElapsedTouchTime = mTouchTime.elapsed();
+    } else if (event->type() == QEvent::TouchUpdate) {
+        if (!mDragging) {
+            mDragging = true;
+            draggingChanged = true;
+        }
+        mElapsedTouchTime = mTouchTime.elapsed();
     } else if (event->type() == QEvent::TouchEnd) {
         mDragging = false;
         draggingChanged = true;
     }
 
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, mTouchTime.elapsed());
-    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, mTouchTime.elapsed());
-    MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_END, mTouchTime.elapsed());
+    TestFlickingMode(event);
+
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, mElapsedTouchTime);
+    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, mElapsedTouchTime);
+    MultiTouchInput meventEnd(mCanFlick ? MultiTouchInput::MULTITOUCH_END : MultiTouchInput::MULTITOUCH_CANCEL, mElapsedTouchTime);
     for (int i = 0; i < event->touchPoints().size(); ++i) {
         const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
         mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
@@ -468,7 +521,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
                                                                    nspt,
                                                                    mozilla::ScreenSize(1, 1),
                                                                    180.0f,
-                                                                   1.0f));
+                                                                   pt.pressure()));
                 break;
             }
             case Qt::TouchPointReleased: {
@@ -476,7 +529,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
                                                                  nspt,
                                                                  mozilla::ScreenSize(1, 1),
                                                                  180.0f,
-                                                                 1.0f));
+                                                                 pt.pressure()));
                 break;
             }
             case Qt::TouchPointMoved:
@@ -485,13 +538,14 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
                                                                   nspt,
                                                                   mozilla::ScreenSize(1, 1),
                                                                   180.0f,
-                                                                  1.0f));
+                                                                  pt.pressure()));
                 break;
             }
             default:
                 break;
         }
     }
+
     if (meventStart.mTouches.Length()) {
         // We should append previous touches to start event in order
         // to make Gecko recognize it as new added touches to existing session
