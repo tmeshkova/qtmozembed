@@ -16,6 +16,8 @@
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QSGSimpleTextureNode>
 #endif
+#include "qmozhorizontalscrolldecorator.h"
+#include "qmozverticalscrolldecorator.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "qmozview_templated_wrapper.h"
 #include "qmozview_defined_wrapper.h"
@@ -82,7 +84,8 @@ public:
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     QSGTexture* mTempTexture;
 #endif
-    QSize mSize;
+    bool mEnabled;
+    QSizeF mSize;
     qint64 mLastTimestamp;
     qint64 mElapsedTouchTime;
     qint64 mLastStationaryTimestamp;
@@ -104,6 +107,9 @@ public:
     QRectF mContentRect;
     QSizeF mScrollableSize;
     QPointF mScrollableOffset;
+    // Non visual
+    QMozVerticalScrollDecorator mVerticalScrollDecorator;
+    QMozHorizontalScrollDecorator mHorizontalScrollDecorator;
     float mContentResolution;
     bool mIsPainted;
     Qt::InputMethodHints mInputMethodHints;

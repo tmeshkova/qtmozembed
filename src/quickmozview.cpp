@@ -26,6 +26,8 @@
 #include <QSGSimpleTextureNode>
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
+#include "qmozhorizontalscrolldecorator.h"
+#include "qmozverticalscrolldecorator.h"
 #include "qmozviewsgnode.h"
 #include "qsgthreadobject.h"
 #include "qmcthreadobject.h"
@@ -59,6 +61,8 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
     connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
+    connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
+    updateEnabled();
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
@@ -103,6 +107,11 @@ QuickMozView::onInitialized()
     }
 }
 
+void QuickMozView::updateEnabled()
+{
+    d->mEnabled = QQuickItem::isEnabled();
+}
+
 void QuickMozView::createGeckoGLContext()
 {
     if (!mMCRenderer && mSGRenderer) {
@@ -139,7 +148,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
 
 void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
-    d->mSize = newGeometry.size().toSize();
+    d->mSize = newGeometry.size();
     d->UpdateViewSize();
     QQuickItem::geometryChanged(newGeometry, oldGeometry);
 }
@@ -446,6 +455,16 @@ void QuickMozView::setUseQmlMouse(bool value)
 bool QuickMozView::dragging() const
 {
     return d->mDragging;
+}
+
+QMozVerticalScrollDecorator* QuickMozView::verticalScrollDecorator() const
+{
+    return &d->mVerticalScrollDecorator;
+}
+
+QMozHorizontalScrollDecorator* QuickMozView::horizontalScrollDecorator() const
+{
+    return &d->mHorizontalScrollDecorator;
 }
 
 qreal QuickMozView::contentWidth() const

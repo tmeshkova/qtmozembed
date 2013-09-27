@@ -21,12 +21,16 @@ isEmpty(VERSION) {
 }
 
 SOURCES += qmozcontext.cpp \
+           qmozhorizontalscrolldecorator.cpp \
+           qmozverticalscrolldecorator.cpp \
            qmessagepump.cpp \
            EmbedQtKeyUtils.cpp \
            qgraphicsmozview_p.cpp \
            geckoworker.cpp
 
 HEADERS += qmozcontext.h \
+           qmozhorizontalscrolldecorator.h \
+           qmozverticalscrolldecorator.h \
            qmessagepump.h \
            EmbedQtKeyUtils.h \
            geckoworker.h \
