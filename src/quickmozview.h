@@ -76,6 +76,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void onInitialized();
+    void updateEnabled();
 
 private:
     QGraphicsMozViewPrivate* d;

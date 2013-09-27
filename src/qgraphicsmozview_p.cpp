@@ -39,6 +39,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     , mTempTexture(NULL)
 #endif
+    , mEnabled(true)
     , mLastTimestamp(0)
     , mElapsedTouchTime(0)
     , mLastStationaryTimestamp(0)
@@ -456,6 +457,22 @@ bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const floa
         mScrollableOffset.setX(aPosition.x * mContentResolution);
         mScrollableOffset.setY(aPosition.y * mContentResolution);
         mViewIface->scrollableOffsetChanged();
+
+        if (mEnabled) {
+            // Update vertical scroll decorator
+            qreal ySizeRatio = mContentRect.height() / mScrollableSize.height();
+            qreal tmpValue = mSize.height() * ySizeRatio;
+            mVerticalScrollDecorator.setHeight(tmpValue);
+            tmpValue = mScrollableOffset.y() * ySizeRatio;
+            mVerticalScrollDecorator.setY(tmpValue);
+
+            // Update horizontal scroll decorator
+            qreal xSizeRatio = mContentRect.width() / mScrollableSize.width();
+            tmpValue = mSize.width() * xSizeRatio;
+            mHorizontalScrollDecorator.setWidth(tmpValue);
+            tmpValue = mScrollableOffset.x() * xSizeRatio;
+            mHorizontalScrollDecorator.setX(tmpValue);
+        }
     }
 
     return false;

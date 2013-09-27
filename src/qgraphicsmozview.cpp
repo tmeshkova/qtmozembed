@@ -191,7 +191,7 @@ void QGraphicsMozView::setGeometry(const QRectF& rect)
 
     // NOTE: call geometry() as setGeometry ensures that
     // the geometry is within legal bounds (minimumSize, maximumSize)
-    d->mSize = geometry().size().toSize();
+    d->mSize = geometry().size();
     Q_EMIT requestGLContext(d->mHasContext, d->mGLSurfaceSize);
     d->UpdateViewSize();
 }

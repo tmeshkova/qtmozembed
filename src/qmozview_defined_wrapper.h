@@ -3,6 +3,9 @@
 
 #include <QVariant>
 
+class QMozVerticalScrollDecorator;
+class QMozHorizontalScrollDecorator;
+
 class QMozReturnValue : public QObject
 {
     Q_OBJECT
@@ -54,7 +57,9 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     Q_PROPERTY(bool painted READ isPainted NOTIFY firstPaint FINAL) \
     Q_PROPERTY(QColor bgcolor READ bgcolor NOTIFY bgColorChanged FINAL) \
     Q_PROPERTY(bool useQmlMouse READ getUseQmlMouse WRITE setUseQmlMouse) \
-    Q_PROPERTY(bool dragging READ dragging NOTIFY draggingChanged FINAL)
+    Q_PROPERTY(bool dragging READ dragging NOTIFY draggingChanged FINAL) \
+    Q_PROPERTY(QMozVerticalScrollDecorator* verticalScrollDecorator READ verticalScrollDecorator FINAL) \
+    Q_PROPERTY(QMozHorizontalScrollDecorator* horizontalScrollDecorator READ horizontalScrollDecorator FINAL)
 
 #define Q_MOZ_VIEW_PUBLIC_METHODS \
     QUrl url() const; \
@@ -76,7 +81,9 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void setUseQmlMouse(bool value); \
     void forceViewActiveFocus(); \
     void createGeckoGLContext(); \
-    bool dragging() const;
+    bool dragging() const; \
+    QMozVerticalScrollDecorator* verticalScrollDecorator() const; \
+    QMozHorizontalScrollDecorator* horizontalScrollDecorator() const;
 
 #define Q_MOZ_VIEW_PUBLIC_SLOTS \
     void loadHtml(const QString& html, const QUrl& baseUrl = QUrl()); \
