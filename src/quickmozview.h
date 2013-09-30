@@ -35,6 +35,7 @@ public:
     Q_MOZ_VIEW_PUBLIC_METHODS
     void RenderToCurrentContext(QMatrix affine, mozilla::embedlite::EmbedLiteRenderTarget* renderTarget = 0);
     mozilla::embedlite::EmbedLiteRenderTarget* CreateEmbedLiteRenderTarget(QSize size);
+    void startMoveMonitoring();
 
 private:
     QObject* getChild() { return this; }
@@ -66,6 +67,7 @@ protected:
     virtual void focusInEvent(QFocusEvent*);
     virtual void focusOutEvent(QFocusEvent*);
     virtual void touchEvent(QTouchEvent*);
+    virtual void timerEvent(QTimerEvent*);
 
 public Q_SLOTS:
     void beforeRendering();
@@ -85,6 +87,9 @@ private:
     bool mUseQmlMouse;
     QSGThreadObject* mSGRenderer;
     QMCThreadObject* mMCRenderer;
+    int mTimerId;
+    qreal mOffsetX;
+    qreal mOffsetY;
 };
 
 #endif // QuickMozView_H

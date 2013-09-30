@@ -36,6 +36,10 @@
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
+#ifndef MOZVIEW_FLICK_STOP_TIMEOUT
+#define MOZVIEW_FLICK_STOP_TIMEOUT 500
+#endif
+
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
@@ -43,6 +47,9 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mUseQmlMouse(false)
   , mSGRenderer(NULL)
   , mMCRenderer(NULL)
+  , mTimerId(0)
+  , mOffsetX(0.0)
+  , mOffsetY(0.0)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -198,6 +205,11 @@ mozilla::embedlite::EmbedLiteRenderTarget*
 QuickMozView::CreateEmbedLiteRenderTarget(QSize size)
 {
     return d->mView->CreateEmbedLiteRenderTarget(size.width(), size.height());
+}
+
+void QuickMozView::startMoveMonitoring()
+{
+    mTimerId = startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
 }
 
 QSGNode*
@@ -457,6 +469,11 @@ bool QuickMozView::dragging() const
     return d->mDragging;
 }
 
+bool QuickMozView::moving() const
+{
+    return d->mMoving;
+}
+
 QMozVerticalScrollDecorator* QuickMozView::verticalScrollDecorator() const
 {
     return &d->mVerticalScrollDecorator;
@@ -465,6 +482,45 @@ QMozVerticalScrollDecorator* QuickMozView::verticalScrollDecorator() const
 QMozHorizontalScrollDecorator* QuickMozView::horizontalScrollDecorator() const
 {
     return &d->mHorizontalScrollDecorator;
+}
+
+bool QuickMozView::chromeGestureEnabled() const
+{
+    return d->mChromeGestureEnabled;
+}
+
+void QuickMozView::setChromeGestureEnabled(bool value)
+{
+    if (value != d->mChromeGestureEnabled) {
+        d->mChromeGestureEnabled = value;
+        Q_EMIT chromeGestureEnabledChanged();
+    }
+}
+
+qreal QuickMozView::chromeGestureThreshold() const
+{
+    return d->mChromeGestureThreshold;
+}
+
+void QuickMozView::setChromeGestureThreshold(qreal value)
+{
+    if (value != d->mChromeGestureThreshold) {
+        d->mChromeGestureThreshold = value;
+        Q_EMIT chromeGestureThresholdChanged();
+    }
+}
+
+bool QuickMozView::chrome() const
+{
+    return d->mChrome;
+}
+
+void QuickMozView::setChrome(bool value)
+{
+    if (value != d->mChrome) {
+        d->mChrome = value;
+        Q_EMIT chromeChanged();
+    }
 }
 
 qreal QuickMozView::contentWidth() const
@@ -709,5 +765,21 @@ void QuickMozView::touchEvent(QTouchEvent *event)
         d->touchEvent(event);
     } else {
         QQuickItem::touchEvent(event);
+    }
+}
+
+void QuickMozView::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == mTimerId) {
+        qreal offsetY = d->mScrollableOffset.y();
+        qreal offsetX = d->mScrollableOffset.x();
+        if (offsetX == mOffsetX && offsetY == mOffsetY) {
+            d->mMoving = false;
+            d->mViewIface->movingChanged();
+            killTimer(mTimerId);
+            mTimerId = 0;
+        }
+        mOffsetX = offsetX;
+        mOffsetY = offsetY;
     }
 }

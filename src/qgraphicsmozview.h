@@ -41,6 +41,7 @@ class QGraphicsMozView : public QGraphicsWidget
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
     virtual ~QGraphicsMozView();
+    void startMoveMonitoring();
 
     Q_MOZ_VIEW_PUBLIC_METHODS
 

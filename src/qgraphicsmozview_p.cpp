@@ -40,6 +40,12 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mTempTexture(NULL)
 #endif
     , mEnabled(true)
+    , mChromeGestureEnabled(true)
+    , mChromeGestureThreshold(0.0)
+    , mChrome(true)
+    , mMoveDelta(0.0)
+    , mDragStartY(0)
+    , mMoving(false)
     , mLastTimestamp(0)
     , mElapsedTouchTime(0)
     , mLastStationaryTimestamp(0)
@@ -444,6 +450,33 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
         mContentRect.setRect(aContentRect.x * mContentResolution, aContentRect.y * mContentResolution,
                              aContentRect.width * mContentResolution, aContentRect.height * mContentResolution);
         mViewIface->viewAreaChanged();
+        // chrome, chromeGestureEnabled, and chromeGestureThreshold can be used
+        // to control chrome/chromeless mode.
+        // When chromeGestureEnabled is false, no actions are taken
+        // When chromeGestureThreshold is true, chrome is set false when chromeGestrureThreshold is exceeded (pan/flick)
+        // and set to true when flicking/panning the same amount to the the opposite direction.
+        // This do not have relationship to HTML5 fullscreen API.
+        if (mEnabled && mChromeGestureEnabled) {
+            qreal offset = mScrollableOffset.y();
+            qreal currentDelta = offset - mDragStartY;
+
+            if (qAbs(currentDelta) < mMoveDelta) {
+                mDragStartY = offset;
+            }
+
+            if (currentDelta > mChromeGestureThreshold) {
+                if (mChrome) {
+                    mChrome = false;
+                    mViewIface->chromeChanged();
+                }
+            } else if (currentDelta < -mChromeGestureThreshold) {
+                if (!mChrome) {
+                    mChrome = true;
+                    mViewIface->chromeChanged();
+                }
+            }
+            mMoveDelta = qAbs(currentDelta);
+        }
     }
 
     UpdateContentSize(aScrollableSize.width, aScrollableSize.height);
@@ -516,6 +549,8 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     } else if (event->type() == QEvent::TouchUpdate) {
         if (!mDragging) {
             mDragging = true;
+            mDragStartY = mScrollableOffset.y();
+            mMoveDelta = 0;
             draggingChanged = true;
         }
         mElapsedTouchTime = mTouchTime.elapsed();
@@ -585,6 +620,15 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     if (draggingChanged) {
         mViewIface->draggingChanged();
     }
+
+    if (mMoving != (mDragging || mCanFlick)) {
+        mMoving = (mDragging || mCanFlick);
+        mViewIface->movingChanged();
+    }
+
+     if (event->type() == QEvent::TouchEnd && mCanFlick) {
+        mViewIface->startMoveMonitoring();
+     }
 }
 
 void QGraphicsMozViewPrivate::ReceiveInputEvent(const InputData& event)

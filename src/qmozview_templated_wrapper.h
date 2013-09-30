@@ -20,6 +20,7 @@ public:
     virtual void forceViewActiveFocus() = 0;
     virtual void createGeckoGLContext() = 0;
     virtual void requestGLContext(bool& hasContext, QSize& viewPortSize) = 0;
+    virtual void startMoveMonitoring() = 0;
     // Signals
     virtual void viewInitialized() = 0;
     virtual void urlChanged() = 0;
@@ -38,6 +39,7 @@ public:
     virtual void contentHeightChanged() = 0;
     virtual void viewAreaChanged() = 0;
     virtual void scrollableOffsetChanged() = 0;
+    virtual void chromeChanged() = 0;
     virtual void handleLongTap(QPoint point, QMozReturnValue* retval) = 0;
     virtual void handleSingleTap(QPoint point, QMozReturnValue* retval) = 0;
     virtual void handleDoubleTap(QPoint point, QMozReturnValue* retval) = 0;
@@ -45,6 +47,7 @@ public:
     virtual void bgColorChanged() = 0;
     virtual void useQmlMouse(bool value) = 0;
     virtual void draggingChanged() = 0;
+    virtual void movingChanged() = 0;
 };
 
 template<class TMozQView>
@@ -70,6 +73,9 @@ public:
     void createGeckoGLContext()
     {
         view.createGeckoGLContext();
+    }
+    void startMoveMonitoring() {
+        view.startMoveMonitoring();
     }
     void viewInitialized()
     {
@@ -131,6 +137,10 @@ public:
     {
         Q_EMIT view.scrollableOffsetChanged();
     }
+    void chromeChanged()
+    {
+        Q_EMIT view.chromeChanged();
+    }
     void handleLongTap(QPoint point, QMozReturnValue* retval)
     {
         Q_EMIT view.handleLongTap(point, retval);
@@ -163,6 +173,11 @@ public:
     void draggingChanged()
     {
         Q_EMIT view.draggingChanged();
+    }
+
+    void movingChanged()
+    {
+        Q_EMIT view.movingChanged();
     }
 
     void contentWidthChanged()
