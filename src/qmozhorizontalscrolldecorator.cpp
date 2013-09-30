@@ -8,8 +8,8 @@
 
 QMozHorizontalScrollDecorator::QMozHorizontalScrollDecorator(QObject *parent)
     : QObject(parent)
-    , mX(0.0)
-    , mWidth(0.0)
+    , mX(0)
+    , mWidth(0)
 {
 }
 
@@ -17,7 +17,7 @@ QMozHorizontalScrollDecorator::~QMozHorizontalScrollDecorator()
 {
 }
 
-qreal QMozHorizontalScrollDecorator::x() const
+int QMozHorizontalScrollDecorator::x() const
 {
     return mX;
 }
@@ -27,13 +27,15 @@ void QMozHorizontalScrollDecorator::setX(qreal x)
     if (qIsNull(x))
         return;
 
-    if (x != mX) {
-        mX = x;
+
+    int tmpX = x;
+    if (tmpX != mX) {
+        mX = tmpX;
         Q_EMIT xChanged();
     }
 }
 
-qreal QMozHorizontalScrollDecorator::width() const
+int QMozHorizontalScrollDecorator::width() const
 {
     return mWidth;
 }
@@ -43,9 +45,9 @@ void QMozHorizontalScrollDecorator::setWidth(qreal width)
     if (qIsNull(width))
         return;
 
-    // Fuzzy compare?, maybe worth checking against small threshold.
-    if (width != mWidth) {
-        mWidth = width;
+    int tmpWidth = width;
+    if (tmpWidth != mWidth) {
+        mWidth = tmpWidth;
         Q_EMIT widthChanged();
     }
 }

@@ -11,17 +11,17 @@
 class QMozHorizontalScrollDecorator : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(qreal x READ x NOTIFY xChanged FINAL)
-    Q_PROPERTY(qreal width READ width NOTIFY widthChanged FINAL)
+    Q_PROPERTY(int x READ x NOTIFY xChanged FINAL)
+    Q_PROPERTY(int width READ width NOTIFY widthChanged FINAL)
 
 public:
     QMozHorizontalScrollDecorator(QObject *parent = 0);
     virtual ~QMozHorizontalScrollDecorator();
 
-    qreal x() const;
+    int x() const;
     void setX(qreal x);
 
-    qreal width() const;
+    int width() const;
     void setWidth(qreal width);
 
 Q_SIGNALS:
@@ -29,8 +29,8 @@ Q_SIGNALS:
     void widthChanged();
 
 private:
-    qreal mX;
-    qreal mWidth;
+    int mX;
+    int mWidth;
 };
 
 #endif
