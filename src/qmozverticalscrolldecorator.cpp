@@ -8,8 +8,8 @@
 
 QMozVerticalScrollDecorator::QMozVerticalScrollDecorator(QObject *parent)
     : QObject(parent)
-    , mY(0.0)
-    , mHeight(0.0)
+    , mY(0)
+    , mHeight(0)
 {
 }
 
@@ -17,7 +17,7 @@ QMozVerticalScrollDecorator::~QMozVerticalScrollDecorator()
 {
 }
 
-qreal QMozVerticalScrollDecorator::y() const
+int QMozVerticalScrollDecorator::y() const
 {
     return mY;
 }
@@ -27,13 +27,14 @@ void QMozVerticalScrollDecorator::setY(qreal y)
     if (qIsNull(y))
         return;
 
-    if (y != mY) {
-        mY = y;
+    int tmpY = y;
+    if (tmpY != mY) {
+        mY = tmpY;
         Q_EMIT yChanged();
     }
 }
 
-qreal QMozVerticalScrollDecorator::height() const
+int QMozVerticalScrollDecorator::height() const
 {
     return mHeight;
 }
@@ -43,9 +44,9 @@ void QMozVerticalScrollDecorator::setHeight(qreal height)
     if (qIsNull(height))
         return;
 
-    // Fuzzy compare?, maybe worth checking against small threshold.
-    if (height != mHeight) {
-        mHeight = height;
+    int tmpHeight = height;
+    if (tmpHeight != mHeight) {
+        mHeight = tmpHeight;
         Q_EMIT heightChanged();
     }
 }

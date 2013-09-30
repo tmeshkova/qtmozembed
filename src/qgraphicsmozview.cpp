@@ -80,6 +80,13 @@ QGraphicsMozView::~QGraphicsMozView()
     delete d;
 }
 
+void QGraphicsMozView::startMoveMonitoring()
+{
+    // TODO : Add implementation for monitoring moving property.
+    // See QuickMozView startMoveMonitoring and timerEvent(QTimerEvent *event)
+    LOGT("NOT IMPLEMENTED");
+}
+
 void
 QGraphicsMozView::onInitialized()
 {

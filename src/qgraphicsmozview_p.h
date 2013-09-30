@@ -85,6 +85,12 @@ public:
     QSGTexture* mTempTexture;
 #endif
     bool mEnabled;
+    bool mChromeGestureEnabled;
+    qreal mChromeGestureThreshold;
+    bool mChrome;
+    qreal mMoveDelta;
+    qreal mDragStartY;
+    bool mMoving;
     QSizeF mSize;
     qint64 mLastTimestamp;
     qint64 mElapsedTouchTime;
@@ -119,6 +125,7 @@ public:
     QSize mGLSurfaceSize;
     bool mPressed;
     bool mDragging;
+    bool mFlicking;
 };
 
 #endif /* qgraphicsmozview_p_h */

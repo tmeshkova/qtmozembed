@@ -11,17 +11,17 @@
 class QMozVerticalScrollDecorator : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(qreal y READ y NOTIFY yChanged FINAL)
-    Q_PROPERTY(qreal height READ height NOTIFY heightChanged FINAL)
+    Q_PROPERTY(int y READ y NOTIFY yChanged FINAL)
+    Q_PROPERTY(int height READ height NOTIFY heightChanged FINAL)
 
 public:
     QMozVerticalScrollDecorator(QObject *parent = 0);
     virtual ~QMozVerticalScrollDecorator();
 
-    qreal y() const;
+    int y() const;
     void setY(qreal y);
 
-    qreal height() const;
+    int height() const;
     void setHeight(qreal height);
 
 Q_SIGNALS:
@@ -29,8 +29,8 @@ Q_SIGNALS:
     void heightChanged();
 
 private:
-    qreal mY;
-    qreal mHeight;
+    int mY;
+    int mHeight;
 };
 
 #endif

@@ -25,6 +25,7 @@ public:
     QDeclarativeMozView(QDeclarativeItem *parent = 0);
 
     virtual ~QDeclarativeMozView();
+    void startMoveMonitoring();
 
 private:
     QObject* getChild() const;
