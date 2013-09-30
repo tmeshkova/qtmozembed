@@ -70,6 +70,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mGLSurfaceSize(0,0)
     , mPressed(false)
     , mDragging(false)
+    , mFlicking(false)
 {
 }
 

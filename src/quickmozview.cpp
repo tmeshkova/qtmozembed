@@ -210,6 +210,7 @@ QuickMozView::CreateEmbedLiteRenderTarget(QSize size)
 void QuickMozView::startMoveMonitoring()
 {
     mTimerId = startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
+    d->mFlicking = true;
 }
 
 QSGNode*
@@ -775,6 +776,7 @@ void QuickMozView::timerEvent(QTimerEvent *event)
         qreal offsetX = d->mScrollableOffset.x();
         if (offsetX == mOffsetX && offsetY == mOffsetY) {
             d->mMoving = false;
+            d->mFlicking = false;
             d->mViewIface->movingChanged();
             killTimer(mTimerId);
             mTimerId = 0;

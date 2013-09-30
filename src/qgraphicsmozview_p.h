@@ -125,6 +125,7 @@ public:
     QSize mGLSurfaceSize;
     bool mPressed;
     bool mDragging;
+    bool mFlicking;
 };
 
 #endif /* qgraphicsmozview_p_h */
