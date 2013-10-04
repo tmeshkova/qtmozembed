@@ -21,11 +21,14 @@
 #include "qmozcontext.h"
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
+#include "mozilla/gfx/Tools.h"
 #include "qmozembedlog.h"
 
 #ifndef MOZVIEW_FLICK_THRESHOLD
 #define MOZVIEW_FLICK_THRESHOLD 200
 #endif
+
+#define SCROLL_EPSILON 0.001
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -486,10 +489,15 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
 
 bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const float aResolution)
 {
+    float posX(aPosition.x * mContentResolution);
+    float posY(aPosition.y * mContentResolution);
+
     mContentResolution = aResolution;
-    if (mScrollableOffset.x() != aPosition.x * mContentResolution || mScrollableOffset.y() != aPosition.y * mContentResolution) {
-        mScrollableOffset.setX(aPosition.x * mContentResolution);
-        mScrollableOffset.setY(aPosition.y * mContentResolution);
+    if (!gfx::FuzzyEqual(mScrollableOffset.x(), posX, SCROLL_EPSILON) ||
+        !gfx::FuzzyEqual(mScrollableOffset.y(), posY, SCROLL_EPSILON)) {
+
+        mScrollableOffset.setX(posX);
+        mScrollableOffset.setY(posY);
         mViewIface->scrollableOffsetChanged();
 
         if (mEnabled) {
