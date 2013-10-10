@@ -489,10 +489,10 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
 
 bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const float aResolution)
 {
+    mContentResolution = aResolution;
     float posX(aPosition.x * mContentResolution);
     float posY(aPosition.y * mContentResolution);
 
-    mContentResolution = aResolution;
     if (!gfx::FuzzyEqual(mScrollableOffset.x(), posX, SCROLL_EPSILON) ||
         !gfx::FuzzyEqual(mScrollableOffset.y(), posY, SCROLL_EPSILON)) {
 
