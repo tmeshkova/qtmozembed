@@ -24,10 +24,6 @@ int QMozHorizontalScrollDecorator::x() const
 
 void QMozHorizontalScrollDecorator::setX(qreal x)
 {
-    if (qIsNull(x))
-        return;
-
-
     int tmpX = x;
     if (tmpX != mX) {
         mX = tmpX;

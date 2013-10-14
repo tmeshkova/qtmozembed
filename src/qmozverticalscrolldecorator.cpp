@@ -24,9 +24,6 @@ int QMozVerticalScrollDecorator::y() const
 
 void QMozVerticalScrollDecorator::setY(qreal y)
 {
-    if (qIsNull(y))
-        return;
-
     int tmpY = y;
     if (tmpY != mY) {
         mY = tmpY;
