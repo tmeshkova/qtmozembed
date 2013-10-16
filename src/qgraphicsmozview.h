@@ -98,6 +98,8 @@ Q_SIGNALS:
     void contentHeightChanged();
     void scrollableOffsetChanged();
     void draggingChanged();
+    void movingChanged();
+    void chromeChanged();
 
 protected:
     virtual void setGeometry(const QRectF& rect);
