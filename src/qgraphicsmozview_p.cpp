@@ -570,9 +570,11 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
 
     TestFlickingMode(event);
 
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, mElapsedTouchTime);
-    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, mElapsedTouchTime);
-    MultiTouchInput meventEnd(mCanFlick ? MultiTouchInput::MULTITOUCH_END : MultiTouchInput::MULTITOUCH_CANCEL, mElapsedTouchTime);
+    qint64 timeStamp = event->timestamp();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp);
+    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp);
+    MultiTouchInput meventEnd(mCanFlick ? MultiTouchInput::MULTITOUCH_END :
+                              MultiTouchInput::MULTITOUCH_CANCEL, timeStamp);
     for (int i = 0; i < event->touchPoints().size(); ++i) {
         const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
         mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
