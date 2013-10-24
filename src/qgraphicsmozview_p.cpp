@@ -50,7 +50,6 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mDragStartY(0)
     , mMoving(false)
     , mLastTimestamp(0)
-    , mElapsedTouchTime(0)
     , mLastStationaryTimestamp(0)
     , mCanFlick(false)
     , mPendingTouchEvent(false)
@@ -553,8 +552,6 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
 
     if (event->type() == QEvent::TouchBegin) {
         mViewIface->forceViewActiveFocus();
-        mTouchTime.restart();
-        mElapsedTouchTime = mTouchTime.elapsed();
     } else if (event->type() == QEvent::TouchUpdate) {
         if (!mDragging) {
             mDragging = true;
@@ -562,7 +559,6 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             mMoveDelta = 0;
             draggingChanged = true;
         }
-        mElapsedTouchTime = mTouchTime.elapsed();
     } else if (event->type() == QEvent::TouchEnd) {
         mDragging = false;
         draggingChanged = true;

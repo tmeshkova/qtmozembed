@@ -93,14 +93,11 @@ public:
     bool mMoving;
     QSizeF mSize;
     qint64 mLastTimestamp;
-    qint64 mElapsedTouchTime;
     qint64 mLastStationaryTimestamp;
     QPointF mLastPos;
     QPointF mLastStationaryPos;
     bool mCanFlick;
-    QTime mTouchTime;
     bool mPendingTouchEvent;
-    QTime mPanningTime;
     QString mLocation;
     QString mTitle;
     int mProgress;
