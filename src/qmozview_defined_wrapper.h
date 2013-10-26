@@ -59,6 +59,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     Q_PROPERTY(bool useQmlMouse READ getUseQmlMouse WRITE setUseQmlMouse) \
     Q_PROPERTY(bool dragging READ dragging NOTIFY draggingChanged FINAL) \
     Q_PROPERTY(bool moving READ moving NOTIFY movingChanged FINAL) \
+    Q_PROPERTY(bool pinching READ pinching NOTIFY pinchingChanged FINAL) \
     Q_PROPERTY(QMozVerticalScrollDecorator* verticalScrollDecorator READ verticalScrollDecorator FINAL) \
     Q_PROPERTY(QMozHorizontalScrollDecorator* horizontalScrollDecorator READ horizontalScrollDecorator FINAL) \
     Q_PROPERTY(bool chrome READ chrome WRITE setChrome NOTIFY chromeChanged FINAL) \
@@ -87,6 +88,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void createGeckoGLContext(); \
     bool dragging() const; \
     bool moving() const; \
+    bool pinching() const; \
     QMozVerticalScrollDecorator* verticalScrollDecorator() const; \
     QMozHorizontalScrollDecorator* horizontalScrollDecorator() const; \
     bool chromeGestureEnabled() const; \
@@ -146,6 +148,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void useQmlMouse(bool value); \
     void draggingChanged(); \
     void movingChanged(); \
+    void pinchingChanged(); \
     void contentWidthChanged(); \
     void contentHeightChanged(); \
     void chromeGestureEnabledChanged(); \

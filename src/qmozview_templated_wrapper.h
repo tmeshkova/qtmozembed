@@ -48,6 +48,7 @@ public:
     virtual void useQmlMouse(bool value) = 0;
     virtual void draggingChanged() = 0;
     virtual void movingChanged() = 0;
+    virtual void pinchingChanged() = 0;
 };
 
 template<class TMozQView>
@@ -178,6 +179,11 @@ public:
     void movingChanged()
     {
         Q_EMIT view.movingChanged();
+    }
+
+    void pinchingChanged()
+    {
+        Q_EMIT view.pinchingChanged();
     }
 
     void contentWidthChanged()

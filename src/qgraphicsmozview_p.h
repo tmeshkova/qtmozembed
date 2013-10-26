@@ -91,6 +91,7 @@ public:
     qreal mMoveDelta;
     qreal mDragStartY;
     bool mMoving;
+    bool mPinching;
     QSizeF mSize;
     qint64 mLastTimestamp;
     qint64 mLastStationaryTimestamp;
