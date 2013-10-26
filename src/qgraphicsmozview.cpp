@@ -332,6 +332,10 @@ QColor QGraphicsMozView::bgcolor() const
     return d->mBgColor;
 }
 
+bool QGraphicsMozView::pinching() const{
+    return d->mPinching;
+}
+
 void QGraphicsMozView::loadHtml(const QString& html, const QUrl& baseUrl)
 {
     LOGT();

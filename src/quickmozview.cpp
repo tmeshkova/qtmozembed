@@ -475,6 +475,10 @@ bool QuickMozView::moving() const
     return d->mMoving;
 }
 
+bool QuickMozView::pinching() const{
+    return d->mPinching;
+}
+
 QMozVerticalScrollDecorator* QuickMozView::verticalScrollDecorator() const
 {
     return &d->mVerticalScrollDecorator;
