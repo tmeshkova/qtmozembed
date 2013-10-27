@@ -202,13 +202,16 @@ bool QGraphicsMozViewPrivate::Invalidate()
 
 void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)
 {
-    mLocation = QString(aLocation);
     if (mCanGoBack != aCanGoBack || mCanGoForward != aCanGoForward) {
         mCanGoBack = aCanGoBack;
         mCanGoForward = aCanGoForward;
         mViewIface->navigationHistoryChanged();
     }
-    mViewIface->urlChanged();
+
+    if (mLocation != aLocation) {
+        mLocation = QString(aLocation);
+        mViewIface->urlChanged();
+    }
 }
 
 void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal)
