@@ -202,13 +202,16 @@ bool QGraphicsMozViewPrivate::Invalidate()
 
 void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)
 {
-    mLocation = QString(aLocation);
     if (mCanGoBack != aCanGoBack || mCanGoForward != aCanGoForward) {
         mCanGoBack = aCanGoBack;
         mCanGoForward = aCanGoForward;
         mViewIface->navigationHistoryChanged();
     }
-    mViewIface->urlChanged();
+
+    if (mLocation != aLocation) {
+        mLocation = QString(aLocation);
+        mViewIface->urlChanged();
+    }
 }
 
 void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal)
@@ -221,8 +224,13 @@ void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTota
 
 void QGraphicsMozViewPrivate::OnLoadStarted(const char* aLocation)
 {
+    if (mIsPainted) {
+        mIsPainted = false;
+        mViewIface->firstPaint(-1, -1);
+    }
+
     if (mLocation != aLocation) {
-        mLocation = aLocation;
+        mLocation = QString(aLocation);
         mViewIface->urlChanged();
     }
     if (!mIsLoading) {
