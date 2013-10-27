@@ -224,8 +224,13 @@ void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTota
 
 void QGraphicsMozViewPrivate::OnLoadStarted(const char* aLocation)
 {
+    if (mIsPainted) {
+        mIsPainted = false;
+        mViewIface->firstPaint(-1, -1);
+    }
+
     if (mLocation != aLocation) {
-        mLocation = aLocation;
+        mLocation = QString(aLocation);
         mViewIface->urlChanged();
     }
     if (!mIsLoading) {
