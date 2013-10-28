@@ -418,7 +418,8 @@ void QGraphicsMozViewPrivate::GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOp
 
 void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
 {
-    UpdateContentSize(aWidth, aHeight);
+    Q_UNUSED(aWidth)
+    Q_UNUSED(aHeight)
 }
 
 void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
