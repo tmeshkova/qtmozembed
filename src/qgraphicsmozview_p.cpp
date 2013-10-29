@@ -172,6 +172,19 @@ void QGraphicsMozViewPrivate::HandleTouchEnd(bool &draggingChanged, bool &pinchi
     }
 }
 
+void QGraphicsMozViewPrivate::ResetState()
+{
+    // Invalid initial drag start Y.
+    mDragStartY = -1;
+    mMoveDelta = 0;
+
+    mFlicking = false;
+    if (mMoving) {
+        mMoving = false;
+        mViewIface->movingChanged();
+    }
+}
+
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
     if (!mViewInitialized) {
@@ -487,7 +500,7 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
         // When chromeGestureThreshold is true, chrome is set false when chromeGestrureThreshold is exceeded (pan/flick)
         // and set to true when flicking/panning the same amount to the the opposite direction.
         // This do not have relationship to HTML5 fullscreen API.
-        if (mEnabled && mChromeGestureEnabled) {
+        if (mEnabled && mChromeGestureEnabled && mDragStartY >= 0) {
             qreal offset = mScrollableOffset.y();
             qreal currentDelta = offset - mDragStartY;
 
@@ -587,8 +600,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             mPinching = true;
             pinchingChanged = true;
         }
-        mDragStartY = 0;
-        mMoveDelta = 0;
+        ResetState();
     } else if (event->type() == QEvent::TouchUpdate) {
         if (!mDragging) {
             mDragging = true;
