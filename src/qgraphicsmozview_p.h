@@ -74,6 +74,7 @@ public:
 
     void UpdateContentSize(unsigned int aWidth, unsigned int aHeight);
     void TestFlickingMode(QTouchEvent *event);
+    void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
 
     IMozQViewIface* mViewIface;
     QMozContext* mContext;

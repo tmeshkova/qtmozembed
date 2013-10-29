@@ -154,6 +154,24 @@ void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
     mLastPos = touchPoint;
 }
 
+void QGraphicsMozViewPrivate::HandleTouchEnd(bool &draggingChanged, bool &pinchingChanged)
+{
+    if (mDragging) {
+        mDragging = false;
+        draggingChanged = true;
+    }
+
+    // Currently change from 2> fingers to 1 finger does not
+    // allow moving content. Hence, keep pinching enabled
+    // also when there is one finger left when releasing
+    // fingers and only stop pinching when touch ends.
+    // You can continue pinching by adding second finger.
+    if (mPinching) {
+        mPinching = false;
+        pinchingChanged = true;
+    }
+}
+
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
     if (!mViewInitialized) {
@@ -560,6 +578,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     event->setAccepted(true);
     bool draggingChanged = false;
     bool pinchingChanged = false;
+    bool testFlick = true;
     int touchPointsCount = event->touchPoints().size();
 
     if (event->type() == QEvent::TouchBegin) {
@@ -568,6 +587,8 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             mPinching = true;
             pinchingChanged = true;
         }
+        mDragStartY = 0;
+        mMoveDelta = 0;
     } else if (event->type() == QEvent::TouchUpdate) {
         if (!mDragging) {
             mDragging = true;
@@ -581,20 +602,16 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             pinchingChanged = true;
         }
     } else if (event->type() == QEvent::TouchEnd) {
-        mDragging = false;
-        draggingChanged = true;
-
-        // Currently change from 2> fingers to 1 finger does not
-        // allow moving content. Hence, keep pinching enabled
-        // also when there is one finger left when releasing
-        // fingers. You can continue pinching by adding second finger.
-        if (mPinching) {
-            mPinching = false;
-            pinchingChanged = true;
-        }
+        HandleTouchEnd(draggingChanged, pinchingChanged);
+    } else if (event->type() == QEvent::TouchCancel) {
+        HandleTouchEnd(draggingChanged, pinchingChanged);
+        testFlick = false;
+        mCanFlick = false;
     }
 
-    TestFlickingMode(event);
+    if (testFlick) {
+        TestFlickingMode(event);
+    }
 
     qint64 timeStamp = event->timestamp();
     MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp);
