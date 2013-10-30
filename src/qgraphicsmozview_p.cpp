@@ -630,11 +630,29 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp);
     MultiTouchInput meventEnd(mCanFlick ? MultiTouchInput::MULTITOUCH_END :
                               MultiTouchInput::MULTITOUCH_CANCEL, timeStamp);
+
+    // Add active touch point to cancelled touch sequence.
+    if (event->type() == QEvent::TouchCancel && touchPointsCount == 0) {
+        QMapIterator<int, QPointF> i(mActiveTouchPoints);
+        while (i.hasNext()) {
+            i.next();
+            QPointF pos = i.value();
+            meventEnd.mTouches.AppendElement(SingleTouchData(i.key(),
+                                                             mozilla::ScreenIntPoint(pos.x(), pos.y()),
+                                                             mozilla::ScreenSize(1, 1),
+                                                             180.0f,
+                                                             0));
+        }
+        // All touch point should be cleared but let's clear active touch points anyways.
+        mActiveTouchPoints.clear();
+    }
+
     for (int i = 0; i < touchPointsCount; ++i) {
         const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
         mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
         switch (pt.state()) {
             case Qt::TouchPointPressed: {
+                mActiveTouchPoints.insert(pt.id(), pt.pos());
                 meventStart.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                    nspt,
                                                                    mozilla::ScreenSize(1, 1),
@@ -643,6 +661,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
                 break;
             }
             case Qt::TouchPointReleased: {
+                mActiveTouchPoints.remove(pt.id());
                 meventEnd.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                  nspt,
                                                                  mozilla::ScreenSize(1, 1),
@@ -652,6 +671,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             }
             case Qt::TouchPointMoved:
             case Qt::TouchPointStationary: {
+                mActiveTouchPoints.insert(pt.id(), pt.pos());
                 meventMove.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                   nspt,
                                                                   mozilla::ScreenSize(1, 1),

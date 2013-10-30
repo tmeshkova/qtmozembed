@@ -13,6 +13,7 @@
 #include <QTime>
 #include <QString>
 #include <QPointF>
+#include <QMap>
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QSGSimpleTextureNode>
 #endif
@@ -99,6 +100,7 @@ public:
     qint64 mLastStationaryTimestamp;
     QPointF mLastPos;
     QPointF mLastStationaryPos;
+    QMap<int, QPointF> mActiveTouchPoints;
     bool mCanFlick;
     bool mPendingTouchEvent;
     QString mLocation;
