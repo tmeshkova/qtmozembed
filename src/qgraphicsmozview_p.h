@@ -13,6 +13,7 @@
 #include <QTime>
 #include <QString>
 #include <QPointF>
+#include <QMap>
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QSGSimpleTextureNode>
 #endif
@@ -74,6 +75,8 @@ public:
 
     void UpdateContentSize(unsigned int aWidth, unsigned int aHeight);
     void TestFlickingMode(QTouchEvent *event);
+    void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
+    void ResetState();
 
     IMozQViewIface* mViewIface;
     QMozContext* mContext;
@@ -97,6 +100,7 @@ public:
     qint64 mLastStationaryTimestamp;
     QPointF mLastPos;
     QPointF mLastStationaryPos;
+    QMap<int, QPointF> mActiveTouchPoints;
     bool mCanFlick;
     bool mPendingTouchEvent;
     QString mLocation;

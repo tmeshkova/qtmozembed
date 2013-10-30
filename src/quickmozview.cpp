@@ -783,9 +783,7 @@ void QuickMozView::timerEvent(QTimerEvent *event)
         qreal offsetY = d->mScrollableOffset.y();
         qreal offsetX = d->mScrollableOffset.x();
         if (offsetX == mOffsetX && offsetY == mOffsetY) {
-            d->mMoving = false;
-            d->mFlicking = false;
-            d->mViewIface->movingChanged();
+            d->ResetState();
             killTimer(mTimerId);
             mTimerId = 0;
         }

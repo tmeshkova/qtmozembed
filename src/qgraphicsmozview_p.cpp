@@ -154,6 +154,37 @@ void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
     mLastPos = touchPoint;
 }
 
+void QGraphicsMozViewPrivate::HandleTouchEnd(bool &draggingChanged, bool &pinchingChanged)
+{
+    if (mDragging) {
+        mDragging = false;
+        draggingChanged = true;
+    }
+
+    // Currently change from 2> fingers to 1 finger does not
+    // allow moving content. Hence, keep pinching enabled
+    // also when there is one finger left when releasing
+    // fingers and only stop pinching when touch ends.
+    // You can continue pinching by adding second finger.
+    if (mPinching) {
+        mPinching = false;
+        pinchingChanged = true;
+    }
+}
+
+void QGraphicsMozViewPrivate::ResetState()
+{
+    // Invalid initial drag start Y.
+    mDragStartY = -1;
+    mMoveDelta = 0;
+
+    mFlicking = false;
+    if (mMoving) {
+        mMoving = false;
+        mViewIface->movingChanged();
+    }
+}
+
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
     if (!mViewInitialized) {
@@ -469,7 +500,7 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
         // When chromeGestureThreshold is true, chrome is set false when chromeGestrureThreshold is exceeded (pan/flick)
         // and set to true when flicking/panning the same amount to the the opposite direction.
         // This do not have relationship to HTML5 fullscreen API.
-        if (mEnabled && mChromeGestureEnabled) {
+        if (mEnabled && mChromeGestureEnabled && mDragStartY >= 0) {
             qreal offset = mScrollableOffset.y();
             qreal currentDelta = offset - mDragStartY;
 
@@ -560,6 +591,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     event->setAccepted(true);
     bool draggingChanged = false;
     bool pinchingChanged = false;
+    bool testFlick = true;
     int touchPointsCount = event->touchPoints().size();
 
     if (event->type() == QEvent::TouchBegin) {
@@ -568,6 +600,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             mPinching = true;
             pinchingChanged = true;
         }
+        ResetState();
     } else if (event->type() == QEvent::TouchUpdate) {
         if (!mDragging) {
             mDragging = true;
@@ -581,31 +614,45 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             pinchingChanged = true;
         }
     } else if (event->type() == QEvent::TouchEnd) {
-        mDragging = false;
-        draggingChanged = true;
-
-        // Currently change from 2> fingers to 1 finger does not
-        // allow moving content. Hence, keep pinching enabled
-        // also when there is one finger left when releasing
-        // fingers. You can continue pinching by adding second finger.
-        if (mPinching) {
-            mPinching = false;
-            pinchingChanged = true;
-        }
+        HandleTouchEnd(draggingChanged, pinchingChanged);
+    } else if (event->type() == QEvent::TouchCancel) {
+        HandleTouchEnd(draggingChanged, pinchingChanged);
+        testFlick = false;
+        mCanFlick = false;
     }
 
-    TestFlickingMode(event);
+    if (testFlick) {
+        TestFlickingMode(event);
+    }
 
     qint64 timeStamp = event->timestamp();
     MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp);
     MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp);
     MultiTouchInput meventEnd(mCanFlick ? MultiTouchInput::MULTITOUCH_END :
                               MultiTouchInput::MULTITOUCH_CANCEL, timeStamp);
+
+    // Add active touch point to cancelled touch sequence.
+    if (event->type() == QEvent::TouchCancel && touchPointsCount == 0) {
+        QMapIterator<int, QPointF> i(mActiveTouchPoints);
+        while (i.hasNext()) {
+            i.next();
+            QPointF pos = i.value();
+            meventEnd.mTouches.AppendElement(SingleTouchData(i.key(),
+                                                             mozilla::ScreenIntPoint(pos.x(), pos.y()),
+                                                             mozilla::ScreenSize(1, 1),
+                                                             180.0f,
+                                                             0));
+        }
+        // All touch point should be cleared but let's clear active touch points anyways.
+        mActiveTouchPoints.clear();
+    }
+
     for (int i = 0; i < touchPointsCount; ++i) {
         const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
         mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
         switch (pt.state()) {
             case Qt::TouchPointPressed: {
+                mActiveTouchPoints.insert(pt.id(), pt.pos());
                 meventStart.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                    nspt,
                                                                    mozilla::ScreenSize(1, 1),
@@ -614,6 +661,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
                 break;
             }
             case Qt::TouchPointReleased: {
+                mActiveTouchPoints.remove(pt.id());
                 meventEnd.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                  nspt,
                                                                  mozilla::ScreenSize(1, 1),
@@ -623,6 +671,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             }
             case Qt::TouchPointMoved:
             case Qt::TouchPointStationary: {
+                mActiveTouchPoints.insert(pt.id(), pt.pos());
                 meventMove.mTouches.AppendElement(SingleTouchData(pt.id(),
                                                                   nspt,
                                                                   mozilla::ScreenSize(1, 1),
