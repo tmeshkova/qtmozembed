@@ -100,6 +100,7 @@ Q_SIGNALS:
     void draggingChanged();
     void movingChanged();
     void chromeChanged();
+    void pinchingChanged();
 
 protected:
     virtual void setGeometry(const QRectF& rect);
