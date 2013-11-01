@@ -329,9 +329,9 @@ void QuickMozView::keyPressEvent(QKeyEvent* event)
     int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
     int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
     int32_t charCode = 0;
-    if (event->text().length() && event->text()[0].isPrint()) {
+    if (event->text().length()) {
         charCode = (int32_t)event->text()[0].unicode();
-        if (getenv("USE_TEXT_EVENTS")) {
+        if (event->text()[0].isPrint() && getenv("USE_TEXT_EVENTS")) {
             return;
         }
     }
@@ -346,9 +346,9 @@ void QuickMozView::keyReleaseEvent(QKeyEvent* event)
     int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
     int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
     int32_t charCode = 0;
-    if (event->text().length() && event->text()[0].isPrint()) {
+    if (event->text().length()) {
         charCode = (int32_t)event->text()[0].unicode();
-        if (getenv("USE_TEXT_EVENTS")) {
+        if (event->text()[0].isPrint() && getenv("USE_TEXT_EVENTS")) {
             d->mView->SendTextEvent(event->text().toUtf8().data(), "");
             return;
         }
