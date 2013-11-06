@@ -130,4 +130,6 @@ public:
     bool mFlicking;
 };
 
+qint64 current_timestamp(QTouchEvent*);
+
 #endif /* qgraphicsmozview_p_h */

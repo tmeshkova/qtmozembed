@@ -23,6 +23,7 @@
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/gfx/Tools.h"
 #include "qmozembedlog.h"
+#include <sys/time.h>
 
 #ifndef MOZVIEW_FLICK_THRESHOLD
 #define MOZVIEW_FLICK_THRESHOLD 200
@@ -32,6 +33,19 @@
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
+
+qint64 current_timestamp(QTouchEvent* aEvent)
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    if (aEvent) {
+        return aEvent->timestamp();
+    }
+#endif
+    struct timeval te;
+    gettimeofday(&te, NULL);
+    qint64 milliseconds = te.tv_sec*1000LL + te.tv_usec/1000;
+    return milliseconds;
+}
 
 QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     : mViewIface(aViewIface)
@@ -122,7 +136,7 @@ void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
     // Only for single press point
     if (!touchPoint.isNull()) {
         if (event->type() == QEvent::TouchBegin) {
-            mLastTimestamp = mLastStationaryTimestamp = event->timestamp();
+            mLastTimestamp = mLastStationaryTimestamp = current_timestamp(event);
             mCanFlick = true;
         } else if (event->type() == QEvent::TouchUpdate && !mLastPos.isNull()) {
             QRectF pressArea = event->touchPoints().at(0).rect();
@@ -131,12 +145,12 @@ void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
             if (!mLastStationaryPos.isNull() && (qAbs(mLastStationaryPos.x() - touchPoint.x()) > touchHorizontalThreshold
                                              || qAbs(mLastStationaryPos.y() - touchPoint.y()) > touchVerticalThreshold)) {
                 // Threshold exceeded. Reset stationary position and time.
-                mLastStationaryTimestamp = event->timestamp();
+                mLastStationaryTimestamp = current_timestamp(event);
                 mLastStationaryPos = touchPoint;
             } else if (qAbs(mLastPos.x() - touchPoint.x()) <= touchHorizontalThreshold && qAbs(mLastPos.y() - touchPoint.y()) <= touchVerticalThreshold) {
                 // Handle stationary position when panning stops and continues. Eventually mCanFlick is based on timestamps between events, see touch end block.
                 if (mCanFlick) {
-                    mLastStationaryTimestamp = event->timestamp();
+                    mLastStationaryTimestamp = current_timestamp(event);
                     mLastStationaryPos = touchPoint;
                 }
                 mCanFlick = false;
@@ -144,10 +158,10 @@ void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
             else {
                 mCanFlick = true;
             }
-            mLastTimestamp = event->timestamp();
+            mLastTimestamp = current_timestamp(event);
         } else if (event->type() == QEvent::TouchEnd) {
-            mCanFlick =(qint64(event->timestamp() - mLastTimestamp) < MOZVIEW_FLICK_THRESHOLD) &&
-                    (qint64(event->timestamp() - mLastStationaryTimestamp) < MOZVIEW_FLICK_THRESHOLD);
+            mCanFlick =(qint64(current_timestamp(event) - mLastTimestamp) < MOZVIEW_FLICK_THRESHOLD) &&
+                    (qint64(current_timestamp(event) - mLastStationaryTimestamp) < MOZVIEW_FLICK_THRESHOLD);
             mLastStationaryPos = QPointF();
         }
     }
@@ -615,22 +629,25 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         }
     } else if (event->type() == QEvent::TouchEnd) {
         HandleTouchEnd(draggingChanged, pinchingChanged);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     } else if (event->type() == QEvent::TouchCancel) {
         HandleTouchEnd(draggingChanged, pinchingChanged);
         testFlick = false;
         mCanFlick = false;
+#endif
     }
 
     if (testFlick) {
         TestFlickingMode(event);
     }
 
-    qint64 timeStamp = event->timestamp();
+    qint64 timeStamp = current_timestamp(event);
     MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp);
     MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp);
     MultiTouchInput meventEnd(mCanFlick ? MultiTouchInput::MULTITOUCH_END :
                               MultiTouchInput::MULTITOUCH_CANCEL, timeStamp);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     // Add active touch point to cancelled touch sequence.
     if (event->type() == QEvent::TouchCancel && touchPointsCount == 0) {
         QMapIterator<int, QPointF> i(mActiveTouchPoints);
@@ -646,6 +663,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         // All touch point should be cleared but let's clear active touch points anyways.
         mActiveTouchPoints.clear();
     }
+#endif
 
     for (int i = 0; i < touchPointsCount; ++i) {
         const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
