@@ -1,0 +1,7 @@
+embedlite-components for Fremantle
+-------------------------------
+
+You need to install maemo-optify and maemo-sdk-dev, although not mentioned in debian/control.
+
+ -- Marcin Mielniczuk <marmistrz@inboxalias.com>  Fri, 22 Nov 2013 19:12:30 +0100
+
