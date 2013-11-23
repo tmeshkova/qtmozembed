@@ -60,6 +60,7 @@ clean:
 	-rm -rf $(CURDIR)/pkgconfig
 	-rm -f $(CURDIR)/configure-stamp
 	-rm -rf $(DEST_OBJ_DIR)
+	[ ! -f Makefile ] || $(MAKE) distclean
 	rm -f Makefile
 	dh_clean
 
