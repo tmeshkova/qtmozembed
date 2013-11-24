@@ -93,10 +93,10 @@ binary-arch: build install
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
+	dh_md5sums
 ifneq (,$(findstring Maemo 5,$(shell cat /etc/issue)))
 	maemo-optify
 endif
-	dh_md5sums
 	dh_builddeb
 
 binary: binary-indep binary-arch
