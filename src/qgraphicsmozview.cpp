@@ -424,7 +424,7 @@ void QGraphicsMozView::setUseQmlMouse(bool value)
 void QGraphicsMozView::recvMouseMove(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE, current_timestamp(nullptr));
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE, current_timestamp(nullptr), 0);
         event.mTouches.AppendElement(SingleTouchData(0,
                                      mozilla::ScreenIntPoint(posX, posY),
                                      mozilla::ScreenSize(1, 1),
@@ -438,7 +438,7 @@ void QGraphicsMozView::recvMousePress(int posX, int posY)
 {
     forceViewActiveFocus();
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, current_timestamp(nullptr));
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_START, current_timestamp(nullptr), 0);
         event.mTouches.AppendElement(SingleTouchData(0,
                                      mozilla::ScreenIntPoint(posX, posY),
                                      mozilla::ScreenSize(1, 1),
@@ -451,7 +451,7 @@ void QGraphicsMozView::recvMousePress(int posX, int posY)
 void QGraphicsMozView::recvMouseRelease(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        MultiTouchInput event(MultiTouchInput::MULTITOUCH_END, current_timestamp(nullptr));
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_END, current_timestamp(nullptr), 0);
         event.mTouches.AppendElement(SingleTouchData(0,
                                      mozilla::ScreenIntPoint(posX, posY),
                                      mozilla::ScreenSize(1, 1),
@@ -601,7 +601,7 @@ void
 QGraphicsMozView::synthTouchBegin(const QVariant& touches)
 {
     QList<QVariant> list = touches.toList();
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, current_timestamp(nullptr));
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, current_timestamp(nullptr), 0);
     int ptId = 0;
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
@@ -621,7 +621,7 @@ void
 QGraphicsMozView::synthTouchMove(const QVariant& touches)
 {
     QList<QVariant> list = touches.toList();
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_MOVE, current_timestamp(nullptr));
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_MOVE, current_timestamp(nullptr), 0);
     int ptId = 0;
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
@@ -641,7 +641,7 @@ void
 QGraphicsMozView::synthTouchEnd(const QVariant& touches)
 {
     QList<QVariant> list = touches.toList();
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_END, current_timestamp(nullptr));
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_END, current_timestamp(nullptr), 0);
     int ptId = 0;
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
