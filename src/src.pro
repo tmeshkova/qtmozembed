@@ -29,6 +29,7 @@ SOURCES += qmozcontext.cpp \
            geckoworker.cpp
 
 HEADERS += qmozcontext.h \
+           qmozviewcreator.h \
            qmozhorizontalscrolldecorator.h \
            qmozverticalscrolldecorator.h \
            qmessagepump.h \

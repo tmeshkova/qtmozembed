@@ -17,24 +17,7 @@ namespace mozilla {
 namespace embedlite {
 class EmbedLiteApp;
 }}
-
-class QNewWindowResponse : public QObject {
-    Q_OBJECT
-    Q_PROPERTY(quint32 windowID READ getNewWindowID WRITE setNewWindowID FINAL)
-
-public:
-    QNewWindowResponse(QObject* parent = 0) : QObject(parent) {}
-    QNewWindowResponse(const QNewWindowResponse& aMsg) : QObject(NULL) { mNewWindowID = aMsg.mNewWindowID; }
-    virtual ~QNewWindowResponse() {}
-
-    quint32 getNewWindowID() const { return mNewWindowID; }
-    void setNewWindowID(const quint32& newWindowID) { mNewWindowID = newWindowID; }
-
-private:
-    quint32 mNewWindowID;
-};
-
-Q_DECLARE_METATYPE(QNewWindowResponse)
+class QMozViewCreator;
 
 class QMozContext : public QObject
 {
@@ -50,7 +33,7 @@ public:
 
 Q_SIGNALS:
     void onInitialized();
-    void newWindowRequested(const QString& url, const unsigned& parentId, QNewWindowResponse* newWinResponse);
+    void newWindowRequested(const QString& url);
     void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
@@ -59,7 +42,6 @@ public Q_SLOTS:
     bool isAccelerated();
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
-    quint32 newWindow(const QString& url, const quint32& parentId = 0);
     void sendObserve(const QString& aTopic, const QString& string);
     void sendObserve(const QString& aTopic, const QVariant& variant);
     // running this without delay specified will execute Gecko/Qt nested main loop
@@ -71,9 +53,11 @@ public Q_SLOTS:
     void setProfile(const QString);
     void addObservers(const QStringList& aObserversList);
     void setCompositorInSeparateThread(bool aEnabled);
+    void setViewCreator(QMozViewCreator* viewCreator);
 
 private:
     QMozContext(QObject* parent = 0);
+    quint32 createView(const QString& url, const quint32& parentId = 0);
 
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
