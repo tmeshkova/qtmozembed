@@ -6,7 +6,6 @@
 
 #define LOG_COMPONENT "QMozContext"
 
-#include <QTimer>
 #include <QVariant>
 #include <QThread>
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
@@ -25,6 +24,7 @@
 #include "qmozcontext.h"
 #include "geckoworker.h"
 #include "qmessagepump.h"
+#include "qmozviewcreator.h"
 
 #include "nsDebug.h"
 #include "mozilla/embedlite/EmbedLiteMessagePump.h"
@@ -46,9 +46,9 @@ public:
     , mThread(new QThread())
     , mEmbedStarted(false)
     , mQtPump(NULL)
+    , mViewCreator(NULL)
     , mAsyncContext(getenv("USE_ASYNC"))
     {
-        qmlRegisterType<QNewWindowResponse>("QtMozilla", 1, 0, "QNewWindowResponse");
         LOGT("Create new Context: %p, parent:%p", (void*)this, (void*)qq);
         setenv("BUILD_GRE_HOME", BUILD_GRE_HOME, 1);
         LoadEmbedLite();
@@ -171,8 +171,8 @@ public:
     virtual uint32_t CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView)
     {
         LOGT("QtMozEmbedContext new Window requested: parent:%p", (void*)aParentView);
-        uint32_t retval = QMozContext::GetInstance()->newWindow(QString(uri), aParentView ? aParentView->GetUniqueID() : 0);
-        return retval;
+        uint32_t viewId = QMozContext::GetInstance()->createView(QString(uri), aParentView ? aParentView->GetUniqueID() : 0);
+        return viewId;
     }
 
     EmbedLiteMessagePump* EmbedLoop() { return mQtPump->EmbedLoop(); }
@@ -189,6 +189,7 @@ private:
     EmbedLiteMessagePump* mEventLoopPrivate;
     MessagePumpQt* mQtPump;
     bool mAsyncContext;
+    QMozViewCreator *mViewCreator;
 };
 
 QMozContext::QMozContext(QObject* parent)
@@ -328,11 +329,10 @@ void QMozContext::stopEmbedding()
 }
 
 quint32
-QMozContext::newWindow(const QString& url, const quint32& parentId)
+QMozContext::createView(const QString& url, const quint32& parentId)
 {
-    QNewWindowResponse response;
-    Q_EMIT newWindowRequested(url, parentId, &response);
-    return response.getNewWindowID();
+    Q_EMIT newWindowRequested(url);
+    return d->mViewCreator ? d->mViewCreator->createView(url, parentId) : 0;
 }
 
 void
@@ -394,4 +394,9 @@ QMozContext::notifyFirstUIInitialized()
         d->mApp->SendObserve("final-ui-startup", NULL);
         sCalledOnce = true;
     }
+}
+
+void QMozContext::setViewCreator(QMozViewCreator* viewCreator)
+{
+    d->mViewCreator = viewCreator;
 }
