@@ -54,10 +54,10 @@ public Q_SLOTS:
     void addObservers(const QStringList& aObserversList);
     void setCompositorInSeparateThread(bool aEnabled);
     void setViewCreator(QMozViewCreator* viewCreator);
+    quint32 createView(const QString& url, const quint32& parentId = 0);
 
 private:
     QMozContext(QObject* parent = 0);
-    quint32 createView(const QString& url, const quint32& parentId = 0);
 
     QMozContextPrivate* d;
     friend class QMozContextPrivate;
