@@ -164,7 +164,6 @@ public:
                 mApp->SetCharPref("general.useragent.override", customUA);
             }
         }
-        mApp->SetBoolPref("layout.build_layers_for_scrollable_views", getenv("USE_SCROLL_VIEWS") != 0);
     }
     bool IsInitialized() { return mApp && mInitialized; }
 
