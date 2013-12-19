@@ -34,34 +34,8 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , mIsRendering(false)
 {
     m_size = aGLSize;
-    if (sgThreadObj->thread() != thread()) {
-        mOwnGLContext = true;
-        mGLContext = new QOpenGLContext;
-        mGLContext->setFormat(mSGThreadObj->context()->format());
-        mGLContext->setShareContext(mSGThreadObj->context());
-        mGLSurface = mSGThreadObj->context()->surface();
-        if (mGLContext->create()) {
-            mSGThreadObj->context()->doneCurrent();
-#if defined(GL_PROVIDER_GLX)
-            if (!mGLContext->makeCurrent(mGLSurface))
-#endif
-            {
-                mOffGLSurface = new QOffscreenSurface;
-                mOffGLSurface->setFormat(mSGThreadObj->context()->format());
-                mOffGLSurface->create();
-                mGLContext->makeCurrent(mOffGLSurface);
-            }
-        }
-    } else {
-        mGLContext = mSGThreadObj->context();
-        if (mGLContext) {
-            mGLSurface = mSGThreadObj->context()->surface();
-            if (mGLSurface) {
-                mGLContext->makeCurrent(mGLSurface);
-            }
-        }
-    }
     if (aView->thread() != thread()) {
+        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
         mLoop = QMozContext::GetInstance()->GetApp()->CreateEmbedLiteMessagePump(NULL);
     }
 }
@@ -99,6 +73,7 @@ void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
         return;
     }
 
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     mProcessingMatrix = affine;
     mutex.lock();
     mIsRendering = true;
@@ -126,12 +101,16 @@ void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
 void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 {
     if (!mOffGLSurface && mView && !mIsDestroying) {
-        mGLContext->makeCurrent(mGLSurface);
+        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+//        mGLContext->makeCurrent(mGLSurface);
         mView->RenderToCurrentContext(mProcessingMatrix);
+        Q_EMIT compositorHasTexture();
     } else if (mView && !mIsDestroying) {
+        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
         mGLContext->makeCurrent(mOffGLSurface);
         m_size = mGLSurface ? mGLSurface->size() : QSize();
         if (!m_renderTarget) {
+            // printf(">>>>>>Func:%s::%d ><>><<<<<<<<<<<<<<<<<<<<<<<<,\n", __PRETTY_FUNCTION__, __LINE__);
             // Initialize the buffers and renderer
             m_renderTarget = mView->CreateEmbedLiteRenderTarget(m_size);
         }
@@ -141,6 +120,7 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
         glFlush();
 
         if (mSGnode) {
+            // printf(">>>>>>Func:%s::%d ><>><<<<<<<<<<<<<<<<<<<<<<<<, newTex:%i\n", __PRETTY_FUNCTION__, __LINE__, m_renderTarget->texture());
             mSGnode->newTexture(m_renderTarget->texture(), m_size);
             mSGnode->prepareNode();
         }
@@ -152,7 +132,22 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 
 void QMCThreadObject::prepareTexture()
 {
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     if (mSGnode) {
         mSGnode->prepareNode();
+    }
+}
+
+void QMCThreadObject::renderNext()
+{
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+}
+
+void QMCThreadObject::checkIfHasTexture()
+{
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    int textureID = 0, width = 0, height = 0;
+    if (mView->GetPendingTexture(mSGThreadObj->GetTargetContextWrapper(), &textureID, &width, &height)) {
+      Q_EMIT textureReady(textureID, QSize(width, height));
     }
 }

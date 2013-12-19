@@ -21,13 +21,17 @@ public Q_SLOTS:
     void setupCurrentGLContext();
     void makeContextCurrent();
     QOpenGLContext* context() { return mGLContext; }
+    void onWrapRenderThreadGLContext();
+    void* GetTargetContextWrapper() { return mContextWrapper; }
 
 Q_SIGNALS:
     void updateGLContextInfo(bool hasContext, QSize viewPortSize);
+    void onRenderThreadReady();
 
 private:
     QOpenGLContext* mGLContext;
     QSurface* mGLSurface;
+    void* mContextWrapper;
 };
 
 #endif // QSGThreadObject_H

@@ -36,19 +36,27 @@ public:
     void RenderToCurrentContext(QMatrix affine, mozilla::embedlite::EmbedLiteRenderTarget* renderTarget = 0);
     mozilla::embedlite::EmbedLiteRenderTarget* CreateEmbedLiteRenderTarget(QSize size);
     void startMoveMonitoring();
+    bool GetPendingTexture(void* aContextWrapper, int* textureID, int* width, int* height);
 
 private:
     QObject* getChild() { return this; }
 
 public Q_SLOTS:
-
+    void onRenderThreadReady();
     Q_MOZ_VIEW_PUBLIC_SLOTS
     void SetIsActive(bool aIsActive);
+    void renderNext();
+    void updateInThread();
+    void updateInThread2();
+
 
 Q_SIGNALS:
     void childChanged();
     void setIsActive(bool);
     void updateThreaded();
+    void updateThreadedReal();
+    void wrapRenderThreadGLContext();
+    void textureReady(int id, const QSize &size);
 
     Q_MOZ_VIEW_SIGNALS
 
@@ -90,6 +98,7 @@ private:
     int mTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
+    bool mIsInProcess;
 };
 
 #endif // QuickMozView_H

@@ -181,3 +181,54 @@ QMozViewSGNode::prepareNode()
 {
     m_contentsNode->prepareNode();
 }
+
+MozTextureNode::MozTextureNode(QuickMozView* aView)
+  : m_id(0)
+  , m_size(0, 0)
+  , m_texture(0)
+  , m_view(aView)
+  , mIsConnected(false)
+{
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    // Our texture node must have a texture, so use the default 0 texture.
+    m_texture = m_view->window()->createTextureFromId(0, QSize(1, 1));
+    setTexture(m_texture);
+    setFiltering(QSGTexture::Linear);
+}
+
+void
+MozTextureNode::newTexture(int id, const QSize &size)
+{
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    m_mutex.lock();
+    m_id = id;
+    m_size = size;
+    m_mutex.unlock();
+
+    // We cannot call QQuickWindow::update directly here, as this is only allowed
+    // from the rendering thread or GUI thread.
+    Q_EMIT pendingNewTexture();
+}
+
+// Before the scene graph starts to render, we update to the pending texture
+void
+MozTextureNode::prepareNode()
+{
+    m_mutex.lock();
+    int newId = m_id;
+    QSize size = m_size;
+    m_id = 0;
+    m_mutex.unlock();
+    if (newId) {
+        // printf(">>>>>>Func:%s::%d Thr:%p use New Created Texture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+        delete m_texture;
+        m_texture = m_view->window()->createTextureFromId(newId, size);
+        setTexture(m_texture);
+
+        // This will notify the rendering thread that the texture is now being rendered
+        // and it can start rendering to the other one.
+        Q_EMIT textureInUse();
+    } else {
+        // printf(">>>>>>Func:%s::%d Thr:%p no new texture been posted\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    }
+}

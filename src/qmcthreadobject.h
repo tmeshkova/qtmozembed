@@ -34,12 +34,16 @@ public:
     void setSGNode(QMozViewSGNode* node);
     void setView(QuickMozView* aView);
     void prepareTexture();
+    void checkIfHasTexture();
 
 Q_SIGNALS:
     void workInGeckoCompositorThread();
+    void textureReady(int id, const QSize &size);
+    void compositorHasTexture();
 
-private Q_SLOTS:
+public Q_SLOTS:
     void ProcessRenderInGeckoCompositorThread();
+    void renderNext();
 
 private:
     static void doWorkInGeckoCompositorThread(void* self);

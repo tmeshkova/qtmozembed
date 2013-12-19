@@ -205,6 +205,12 @@ void QMozContext::setCompositorInSeparateThread(bool aEnabled)
     d->mApp->SetCompositorInSeparateThread(true);
 }
 
+mozilla::embedlite::EmbedLiteContextWrapper*
+QMozContext::createEmbedLiteContextWrapper()
+{
+    return d->mApp ? d->mApp->CreateEmbedLiteContextWrapper() : nullptr;
+}
+
 void QMozContext::setProfile(const QString profilePath)
 {
     d->mApp->SetProfilePath(!profilePath.isEmpty() ? profilePath.toUtf8().data() : NULL);
