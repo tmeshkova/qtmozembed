@@ -11,11 +11,6 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include "qmozview_defined_wrapper.h"
 
-namespace mozilla {
-namespace embedlite {
-class EmbedLiteRenderTarget;
-}}
-
 class QGraphicsMozViewPrivate;
 class QSGThreadObject;
 class QMCThreadObject;
@@ -33,8 +28,7 @@ public:
     ~QuickMozView();
 
     Q_MOZ_VIEW_PUBLIC_METHODS
-    void RenderToCurrentContext(QMatrix affine, mozilla::embedlite::EmbedLiteRenderTarget* renderTarget = 0);
-    mozilla::embedlite::EmbedLiteRenderTarget* CreateEmbedLiteRenderTarget(QSize size);
+    void RenderToCurrentContext();
     void startMoveMonitoring();
     bool GetPendingTexture(void* aContextWrapper, int* textureID, int* width, int* height);
 
@@ -42,17 +36,15 @@ private:
     QObject* getChild() { return this; }
 
 public Q_SLOTS:
-    void onRenderThreadReady();
     Q_MOZ_VIEW_PUBLIC_SLOTS
     void SetIsActive(bool aIsActive);
-    void renderNext();
+    void onRenderThreadReady();
 
 Q_SIGNALS:
     void childChanged();
     void setIsActive(bool);
-    void embedLiteCompositeAvailable();
     void wrapRenderThreadGLContext();
-    void textureReady(int id, const QSize &size);
+    void dispatchItemUpdate();
 
     Q_MOZ_VIEW_SIGNALS
 

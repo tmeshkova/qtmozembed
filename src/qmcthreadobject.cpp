@@ -7,20 +7,11 @@
 #include "qmcthreadobject.h"
 #include "qsgthreadobject.h"
 #include "quickmozview.h"
-#include <assert.h>
 
 QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj)
   : mView(aView)
   , mSGThreadObj(sgThreadObj)
 {
-}
-
-void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
-{
-    assert(QThread::currentThread() == thread());
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    mView->RenderToCurrentContext(mProcessingMatrix);
-    Q_EMIT compositorHasTexture();
 }
 
 void QMCThreadObject::checkIfHasTexture()

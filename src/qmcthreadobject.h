@@ -22,10 +22,6 @@ public:
 
 Q_SIGNALS:
     void textureReady(int id, const QSize &size);
-    void compositorHasTexture();
-
-public Q_SLOTS:
-    void ProcessRenderInGeckoCompositorThread();
 
 private:
     QuickMozView* mView;

@@ -244,6 +244,11 @@ bool QGraphicsMozViewPrivate::Invalidate()
     return mViewIface->Invalidate();
 }
 
+void QGraphicsMozViewPrivate::CompositingFinished()
+{
+    mViewIface->CompositingFinished();
+}
+
 void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)
 {
     if (mCanGoBack != aCanGoBack || mCanGoForward != aCanGoForward) {

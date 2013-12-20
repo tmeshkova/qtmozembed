@@ -36,6 +36,8 @@ public:
     bool isConnected() { return mIsConnected; }
     void setIsConnected(bool aIsConnected) { mIsConnected = aIsConnected; }
 
+    bool hasValidTexture() { return m_texture && m_texture->textureId() != 0; }
+
 Q_SIGNALS:
     void textureInUse();
     void pendingNewTexture();

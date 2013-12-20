@@ -41,6 +41,7 @@ public:
     virtual void ViewInitialized();
     virtual void SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
     virtual bool Invalidate();
+    virtual void CompositingFinished();
     virtual void OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward);
     virtual void OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal);
     virtual void OnLoadStarted(const char* aLocation);

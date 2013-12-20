@@ -25,7 +25,6 @@ MozTextureNode::MozTextureNode(QuickMozView* aView)
 void
 MozTextureNode::newTexture(int id, const QSize &size)
 {
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     m_mutex.lock();
     m_id = id;
     m_size = size;
@@ -33,6 +32,7 @@ MozTextureNode::newTexture(int id, const QSize &size)
 
     // We cannot call QQuickWindow::update directly here, as this is only allowed
     // from the rendering thread or GUI thread.
+    printf(">>>>>>Func:%s::%d Thr:%p id:%i emit pendingNewTexture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), id);
     Q_EMIT pendingNewTexture();
 }
 

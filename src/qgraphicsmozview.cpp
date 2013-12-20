@@ -163,6 +163,11 @@ QGraphicsMozView::Invalidate()
 }
 
 void
+QGraphicsMozView::CompositingFinished()
+{
+}
+
+void
 QGraphicsMozView::OnUpdateThreaded()
 {
     update();

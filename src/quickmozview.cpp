@@ -11,7 +11,6 @@
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
-#include "mozilla/embedlite/EmbedLiteRenderTarget.h"
 #include "mozilla/embedlite/EmbedLiteContextWrapper.h"
 
 #include <QTimer>
@@ -69,6 +68,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
+    connect(this, SIGNAL(dispatchItemUpdate()), this, SLOT(update()));
     updateEnabled();
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
@@ -103,7 +103,6 @@ QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
      printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-//    onRenderThreadReady();
     Q_EMIT wrapRenderThreadGLContext();
     update();
      printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
@@ -131,8 +130,6 @@ void QuickMozView::createGeckoGLContext()
     if (!mMCRenderer && mSGRenderer) {
          printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
         mMCRenderer = new QMCThreadObject(this, mSGRenderer);
-        connect(mMCRenderer , SIGNAL(compositorHasTexture()), this, SLOT(renderNext()), Qt::QueuedConnection);
-        connect(this, SIGNAL(embedLiteCompositeAvailable()), mMCRenderer, SLOT(ProcessRenderInGeckoCompositorThread()));
     }
 }
 
@@ -198,24 +195,14 @@ void QuickMozView::beforeRendering()
     }
 }
 
-void QuickMozView::RenderToCurrentContext(QMatrix affine, EmbedLiteRenderTarget* renderTarget)
+void QuickMozView::RenderToCurrentContext()
 {
+    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
     d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
-    d->mView->RenderGL(renderTarget);
-}
-
-mozilla::embedlite::EmbedLiteRenderTarget*
-QuickMozView::CreateEmbedLiteRenderTarget(QSize size)
-{
-    return d->mView->CreateEmbedLiteRenderTarget(size.width(), size.height());
-}
-
-void QuickMozView::startMoveMonitoring()
-{
-    mTimerId = startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
-    d->mFlicking = true;
+    d->mView->RenderGL(NULL);
 }
 
 QSGNode*
@@ -241,12 +228,13 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     }
     if (!n->isConnected() && mMCRenderer)
     {
-
         connect(mMCRenderer, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
-        connect(n, SIGNAL(pendingNewTexture()), this, SLOT(renderNext()), Qt::QueuedConnection);
+        connect(n, SIGNAL(pendingNewTexture()), this, SLOT(update()), Qt::QueuedConnection);
         connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
-        connect(n, SIGNAL(textureInUse()), this, SLOT(renderNext()), Qt::QueuedConnection);
+        connect(n, SIGNAL(textureInUse()), this, SLOT(update()), Qt::QueuedConnection);
         n->setIsConnected(true);
+    }
+    if (!n->hasValidTexture()) {
         mMCRenderer->checkIfHasTexture();
     }
     n->setRect(boundingRect());
@@ -260,21 +248,31 @@ bool QuickMozView::GetPendingTexture(void* aContextWrapper, int* textureID, int*
     return d->mView->GetPendingTexture(aContextWrapper, textureID, width, height);
 }
 
-void QuickMozView::renderNext()
+bool QuickMozView::Invalidate()
 {
     printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    update();
+//    RenderToCurrentContext();
+    QMatrix affine;
+    gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
+    d->mView->SetGLViewTransform(matr);
+    d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
+    return false;
+}
+
+void QuickMozView::CompositingFinished()
+{
+    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    Q_EMIT dispatchItemUpdate();
 }
 
 void QuickMozView::cleanup()
 {
 }
 
-bool QuickMozView::Invalidate()
+void QuickMozView::startMoveMonitoring()
 {
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    Q_EMIT embedLiteCompositeAvailable();
-    return true;
+    mTimerId = startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
+    d->mFlicking = true;
 }
 
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)
