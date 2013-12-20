@@ -30,7 +30,7 @@ public:
     Q_MOZ_VIEW_PUBLIC_METHODS
     void RenderToCurrentContext();
     void startMoveMonitoring();
-    bool GetPendingTexture(void* aContextWrapper, int* textureID, int* width, int* height);
+    void RefreshNodeTexture();
 
 private:
     QObject* getChild() { return this; }
@@ -45,6 +45,7 @@ Q_SIGNALS:
     void setIsActive(bool);
     void wrapRenderThreadGLContext();
     void dispatchItemUpdate();
+    void textureReady(int id, const QSize &size);
 
     Q_MOZ_VIEW_SIGNALS
 

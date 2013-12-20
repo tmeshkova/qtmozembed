@@ -50,11 +50,5 @@ MozTextureNode::prepareNode()
         delete m_texture;
         m_texture = m_view->window()->createTextureFromId(newId, size);
         setTexture(m_texture);
-
-        // This will notify the rendering thread that the texture is now being rendered
-        // and it can start rendering to the other one.
-        Q_EMIT textureInUse();
-    } else {
-        printf(">>>>>>Func:%s::%d Thr:%p no new texture been posted\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     }
 }

@@ -5,20 +5,9 @@
 
 #include <QThread>
 #include "qmcthreadobject.h"
-#include "qsgthreadobject.h"
 #include "quickmozview.h"
 
-QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj)
+QMCThreadObject::QMCThreadObject(QuickMozView* aView)
   : mView(aView)
-  , mSGThreadObj(sgThreadObj)
 {
-}
-
-void QMCThreadObject::checkIfHasTexture()
-{
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    int textureID = 0, width = 0, height = 0;
-    if (mView->GetPendingTexture(mSGThreadObj->GetTargetContextWrapper(), &textureID, &width, &height)) {
-      Q_EMIT textureReady(textureID, QSize(width, height));
-    }
 }

@@ -39,7 +39,6 @@ public:
     bool hasValidTexture() { return m_texture && m_texture->textureId() != 0; }
 
 Q_SIGNALS:
-    void textureInUse();
     void pendingNewTexture();
 
 public Q_SLOTS:

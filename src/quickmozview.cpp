@@ -11,7 +11,7 @@
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
-#include "mozilla/embedlite/EmbedLiteContextWrapper.h"
+#include "mozilla/embedlite/EmbedLiteRenderTarget.h"
 
 #include <QTimer>
 #include <QThread>
@@ -127,10 +127,9 @@ void QuickMozView::updateEnabled()
 
 void QuickMozView::createGeckoGLContext()
 {
-    if (!mMCRenderer && mSGRenderer) {
-         printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        mMCRenderer = new QMCThreadObject(this, mSGRenderer);
-    }
+    delete mMCRenderer;
+    mMCRenderer = new QMCThreadObject(this);
+    printf(">>>>>>Func:%s::%d curT:%p, mcRenderThread:%p, this:-?thread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), mMCRenderer->thread(), thread());
 }
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
@@ -169,18 +168,17 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void QuickMozView::sceneGraphInitialized()
 {
+    printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
+    mSGRenderer = new QSGThreadObject();
+    connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
+    connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
+    connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
+    mSGRenderer->setupCurrentGLContext();
 }
 
 void QuickMozView::beforeRendering()
 {
-    if (!mSGRenderer) {
-        mSGRenderer = new QSGThreadObject();
-        connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
-        connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
-        connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
-        mSGRenderer->setupCurrentGLContext();
-    }
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
 
     if (!d->mGraphicsViewAssigned) {
         d->UpdateViewSize();
@@ -193,6 +191,11 @@ void QuickMozView::beforeRendering()
             d->mContext->setIsAccelerated(false);
         }
     }
+
+    if (d->mViewInitialized) {
+       printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+       RefreshNodeTexture();
+    }
 }
 
 void QuickMozView::RenderToCurrentContext()
@@ -202,56 +205,34 @@ void QuickMozView::RenderToCurrentContext()
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
     d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
-    d->mView->RenderGL(NULL);
+    d->mView->RenderGL();
 }
 
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
-    if (!d->mViewInitialized)
-        return oldNode;
-
-     printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    mozilla::embedlite::EmbedLiteContextWrapper* wrap = static_cast<mozilla::embedlite::EmbedLiteContextWrapper*>(mSGRenderer->GetTargetContextWrapper());
-    if (wrap) {
-        wrap->EnsureInitialized();
-    }
-
-    if (d->mView && mSGRenderer) {
-        mSGRenderer->makeContextCurrent();
-        d->mView->PrepareTexture(mSGRenderer->GetTargetContextWrapper());
-    }
-
     MozTextureNode *n = static_cast<MozTextureNode*>(oldNode);
     if (!n) {
         n = new MozTextureNode(this);
-    }
-    if (!n->isConnected() && mMCRenderer)
-    {
-        connect(mMCRenderer, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
-        connect(n, SIGNAL(pendingNewTexture()), this, SLOT(update()), Qt::QueuedConnection);
+        connect(this, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
         connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
-        connect(n, SIGNAL(textureInUse()), this, SLOT(update()), Qt::QueuedConnection);
-        n->setIsConnected(true);
-    }
-    if (!n->hasValidTexture()) {
-        mMCRenderer->checkIfHasTexture();
     }
     n->setRect(boundingRect());
     n->markDirty(QSGNode::DirtyMaterial);
     return n;
 }
 
-bool QuickMozView::GetPendingTexture(void* aContextWrapper, int* textureID, int* width, int* height)
+void QuickMozView::RefreshNodeTexture()
 {
-     printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    return d->mView->GetPendingTexture(aContextWrapper, textureID, width, height);
+    int texId = 0, width = 0, height = 0;
+    if (d->mView->GetPendingTexture(mSGRenderer->GetTargetContextWrapper(), &texId, &width, &height)) {
+       Q_EMIT textureReady(texId, QSize(width, height));
+    }
 }
 
 bool QuickMozView::Invalidate()
 {
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-//    RenderToCurrentContext();
+    printf(">>>>>>Func:%s::%d Thr:%p offThread Rendering set params and proceed compositing\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);

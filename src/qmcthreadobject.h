@@ -16,17 +16,11 @@ class QMCThreadObject : public QObject
 {
     Q_OBJECT
 public:
-    QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj);
+    QMCThreadObject(QuickMozView* aView);
     virtual ~QMCThreadObject() {}
-    void checkIfHasTexture();
-
-Q_SIGNALS:
-    void textureReady(int id, const QSize &size);
 
 private:
     QuickMozView* mView;
-    QSGThreadObject* mSGThreadObj;
-    QMatrix mProcessingMatrix;
 };
 
 #endif // QMCThreadObject_H
