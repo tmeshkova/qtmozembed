@@ -7,62 +7,30 @@
 #define QMCThreadObject_H
 
 #include <QObject>
-#include <QSize>
 #include <QMatrix>
-#include <QtGui/QOpenGLContext>
-#include <QtCore/QMutex>
-#include <QtCore/QWaitCondition>
-
-namespace mozilla {
-namespace embedlite {
-class EmbedLiteMessagePump;
-class EmbedLiteRenderTarget;
-}}
 
 class QSGThreadObject;
 class QuickMozView;
-class QOffscreenSurface;
-class QOpenGLFramebufferObject;
+
 class QMCThreadObject : public QObject
 {
     Q_OBJECT
 public:
-    QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj, QSize aGLSize);
-    ~QMCThreadObject();
-    void RenderToCurrentContext(QMatrix affine);
-    void setView(QuickMozView* aView);
-    void prepareTexture();
+    QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj);
+    virtual ~QMCThreadObject() {}
     void checkIfHasTexture();
 
 Q_SIGNALS:
-    void workInGeckoCompositorThread();
     void textureReady(int id, const QSize &size);
     void compositorHasTexture();
 
 public Q_SLOTS:
     void ProcessRenderInGeckoCompositorThread();
-    void renderNext();
 
 private:
-    static void doWorkInGeckoCompositorThread(void* self);
-
     QuickMozView* mView;
-    QOpenGLContext* mGLContext;
-    QSurface* mGLSurface;
-    QOffscreenSurface* mOffGLSurface;
     QSGThreadObject* mSGThreadObj;
-    bool mOwnGLContext;
     QMatrix mProcessingMatrix;
-    QSize m_size;
-    mozilla::embedlite::EmbedLiteRenderTarget* m_renderTarget;
-    mozilla::embedlite::EmbedLiteMessagePump* mLoop;
-    QMutex mutex;
-    QWaitCondition waitCondition;
-    QMutex destroyLock;
-    QWaitCondition destroyLockCondition;
-    void* mRenderTask;
-    bool mIsDestroying;
-    bool mIsRendering;
 };
 
 #endif // QMCThreadObject_H

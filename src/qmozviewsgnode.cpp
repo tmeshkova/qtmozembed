@@ -6,6 +6,7 @@
 #include "qmozviewsgnode.h"
 #include "quickmozview.h"
 #include <QQuickWindow>
+#include <QThread>
 
 MozTextureNode::MozTextureNode(QuickMozView* aView)
   : m_id(0)
@@ -14,7 +15,7 @@ MozTextureNode::MozTextureNode(QuickMozView* aView)
   , m_view(aView)
   , mIsConnected(false)
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     // Our texture node must have a texture, so use the default 0 texture.
     m_texture = m_view->window()->createTextureFromId(0, QSize(1, 1));
     setTexture(m_texture);
@@ -24,7 +25,7 @@ MozTextureNode::MozTextureNode(QuickMozView* aView)
 void
 MozTextureNode::newTexture(int id, const QSize &size)
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     m_mutex.lock();
     m_id = id;
     m_size = size;
@@ -45,7 +46,7 @@ MozTextureNode::prepareNode()
     m_id = 0;
     m_mutex.unlock();
     if (newId) {
-        // printf(">>>>>>Func:%s::%d Thr:%p use New Created Texture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+        printf(">>>>>>Func:%s::%d Thr:%p use New Created Texture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
         delete m_texture;
         m_texture = m_view->window()->createTextureFromId(newId, size);
         setTexture(m_texture);
@@ -54,6 +55,6 @@ MozTextureNode::prepareNode()
         // and it can start rendering to the other one.
         Q_EMIT textureInUse();
     } else {
-        // printf(">>>>>>Func:%s::%d Thr:%p no new texture been posted\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+        printf(">>>>>>Func:%s::%d Thr:%p no new texture been posted\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     }
 }

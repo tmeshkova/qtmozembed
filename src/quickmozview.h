@@ -46,15 +46,11 @@ public Q_SLOTS:
     Q_MOZ_VIEW_PUBLIC_SLOTS
     void SetIsActive(bool aIsActive);
     void renderNext();
-    void updateInThread();
-    void updateInThread2();
-
 
 Q_SIGNALS:
     void childChanged();
     void setIsActive(bool);
-    void updateThreaded();
-    void updateThreadedReal();
+    void embedLiteCompositeAvailable();
     void wrapRenderThreadGLContext();
     void textureReady(int id, const QSize &size);
 
@@ -98,7 +94,6 @@ private:
     int mTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
-    bool mIsInProcess;
 };
 
 #endif // QuickMozView_H

@@ -151,7 +151,7 @@ QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, 
     }
 }
 
-void
+bool
 QGraphicsMozView::Invalidate()
 {
     if (QThread::currentThread() != thread()) {
@@ -159,6 +159,7 @@ QGraphicsMozView::Invalidate()
     } else {
         update();
     }
+    return true;
 }
 
 void

@@ -51,7 +51,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mTimerId(0)
   , mOffsetX(0.0)
   , mOffsetY(0.0)
-  , mIsInProcess(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -69,8 +68,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
-    connect(this, SIGNAL(updateThreaded()), this, SLOT(updateInThread()));
-    connect(this, SIGNAL(updateThreadedReal()), this, SLOT(updateInThread2()));
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
     updateEnabled();
     if (!d->mContext->initialized()) {
@@ -82,15 +79,12 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
 QuickMozView::~QuickMozView()
 {
-    if (mMCRenderer) {
-        mMCRenderer->setView(nullptr);
-    }
+    delete mMCRenderer;
     if (d->mView) {
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
     }
     delete mSGRenderer;
-    delete mMCRenderer;
     delete d;
 }
 
@@ -108,17 +102,17 @@ void
 QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
-    // printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
 //    onRenderThreadReady();
     Q_EMIT wrapRenderThreadGLContext();
     update();
-    // printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
+     printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
 }
 
 void
 QuickMozView::onRenderThreadReady()
 {
-    // printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
@@ -135,9 +129,10 @@ void QuickMozView::updateEnabled()
 void QuickMozView::createGeckoGLContext()
 {
     if (!mMCRenderer && mSGRenderer) {
-        // printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        mMCRenderer = new QMCThreadObject(this, mSGRenderer, d->mGLSurfaceSize);
+         printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+        mMCRenderer = new QMCThreadObject(this, mSGRenderer);
         connect(mMCRenderer , SIGNAL(compositorHasTexture()), this, SLOT(renderNext()), Qt::QueuedConnection);
+        connect(this, SIGNAL(embedLiteCompositeAvailable()), mMCRenderer, SLOT(ProcessRenderInGeckoCompositorThread()));
     }
 }
 
@@ -188,7 +183,7 @@ void QuickMozView::beforeRendering()
         connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
         mSGRenderer->setupCurrentGLContext();
     }
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
 
     if (!d->mGraphicsViewAssigned) {
         d->UpdateViewSize();
@@ -201,26 +196,10 @@ void QuickMozView::beforeRendering()
             d->mContext->setIsAccelerated(false);
         }
     }
-
-    mIsInProcess = true;
-    // printf(">>>>>>Func:%s::%d Thr:%p START CHECK\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    if (mMCRenderer) {
-//        mMCRenderer->prepareTexture();
-//        mMCRenderer->checkIfHasTexture();
-    }
-    mIsInProcess = false;
-    // printf(">>>>>>Func:%s::%d Thr:%p END CHECK\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
 }
 
 void QuickMozView::RenderToCurrentContext(QMatrix affine, EmbedLiteRenderTarget* renderTarget)
 {
-    if (mMCRenderer && mMCRenderer->thread() != QThread::currentThread()) {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        mMCRenderer->RenderToCurrentContext(affine);
-        return;
-    } else {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    }
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
     d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
@@ -245,7 +224,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     if (!d->mViewInitialized)
         return oldNode;
 
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     mozilla::embedlite::EmbedLiteContextWrapper* wrap = static_cast<mozilla::embedlite::EmbedLiteContextWrapper*>(mSGRenderer->GetTargetContextWrapper());
     if (wrap) {
         wrap->EnsureInitialized();
@@ -270,7 +249,6 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         n->setIsConnected(true);
         mMCRenderer->checkIfHasTexture();
     }
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     n->setRect(boundingRect());
     n->markDirty(QSGNode::DirtyMaterial);
     return n;
@@ -278,50 +256,25 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
 bool QuickMozView::GetPendingTexture(void* aContextWrapper, int* textureID, int* width, int* height)
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     return d->mView->GetPendingTexture(aContextWrapper, textureID, width, height);
-}
-
-void QuickMozView::updateInThread()
-{
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    mMCRenderer->RenderToCurrentContext(QMatrix());
-}
-
-void QuickMozView::updateInThread2()
-{
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    update();
 }
 
 void QuickMozView::renderNext()
 {
-//    if (mIsInProcess) {
-//        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-//        return;
-//    }
-    if (QThread::currentThread() != thread()) {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        Q_EMIT updateThreadedReal();
-    } else {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        updateInThread2();
-    }
+    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    update();
 }
 
 void QuickMozView::cleanup()
 {
 }
 
-void QuickMozView::Invalidate()
+bool QuickMozView::Invalidate()
 {
-    if (QThread::currentThread() != thread()) {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        Q_EMIT updateThreaded();
-    } else {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        updateInThread();
-    }
+    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    Q_EMIT embedLiteCompositeAvailable();
+    return true;
 }
 
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)
