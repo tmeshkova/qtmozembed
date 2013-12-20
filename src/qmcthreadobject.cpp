@@ -13,7 +13,6 @@
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
 #include "quickmozview.h"
-#include "qmozviewsgnode.h"
 #include "qgraphicsmozview_p.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/embedlite/EmbedLiteMessagePump.h"
@@ -27,7 +26,6 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , mSGThreadObj(sgThreadObj)
   , mOwnGLContext(false)
   , m_renderTarget(NULL)
-  , mSGnode(NULL)
   , mLoop(NULL)
   , mRenderTask(NULL)
   , mIsDestroying(false)
@@ -43,11 +41,6 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
 void QMCThreadObject::setView(QuickMozView* aView)
 {
     mView = aView;
-}
-
-void QMCThreadObject::setSGNode(QMozViewSGNode* node)
-{
-    mSGnode = node;
 }
 
 QMCThreadObject::~QMCThreadObject()
@@ -100,47 +93,12 @@ void QMCThreadObject::doWorkInGeckoCompositorThread(void* self)
 
 void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 {
-    if (!mOffGLSurface && mView && !mIsDestroying) {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-//        mGLContext->makeCurrent(mGLSurface);
-        mView->RenderToCurrentContext(mProcessingMatrix);
-        Q_EMIT compositorHasTexture();
-    } else if (mView && !mIsDestroying) {
-        // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        mGLContext->makeCurrent(mOffGLSurface);
-        m_size = mGLSurface ? mGLSurface->size() : QSize();
-        if (!m_renderTarget) {
-            // printf(">>>>>>Func:%s::%d ><>><<<<<<<<<<<<<<<<<<<<<<<<,\n", __PRETTY_FUNCTION__, __LINE__);
-            // Initialize the buffers and renderer
-            m_renderTarget = mView->CreateEmbedLiteRenderTarget(m_size);
-        }
+    mView->RenderToCurrentContext(mProcessingMatrix);
+    Q_EMIT compositorHasTexture();
 
-        mProcessingMatrix = QMatrix();
-        mView->RenderToCurrentContext(mProcessingMatrix, m_renderTarget);
-        glFlush();
-
-        if (mSGnode) {
-            // printf(">>>>>>Func:%s::%d ><>><<<<<<<<<<<<<<<<<<<<<<<<, newTex:%i\n", __PRETTY_FUNCTION__, __LINE__, m_renderTarget->texture());
-            mSGnode->newTexture(m_renderTarget->texture(), m_size);
-            mSGnode->prepareNode();
-        }
-    }
     mRenderTask = nullptr;
     mIsRendering = false;
     waitCondition.wakeOne();
-}
-
-void QMCThreadObject::prepareTexture()
-{
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    if (mSGnode) {
-        mSGnode->prepareNode();
-    }
-}
-
-void QMCThreadObject::renderNext()
-{
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
 }
 
 void QMCThreadObject::checkIfHasTexture()

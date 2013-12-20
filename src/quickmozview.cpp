@@ -83,7 +83,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 QuickMozView::~QuickMozView()
 {
     if (mMCRenderer) {
-        mMCRenderer->setSGNode(nullptr);
         mMCRenderer->setView(nullptr);
     }
     if (d->mView) {
