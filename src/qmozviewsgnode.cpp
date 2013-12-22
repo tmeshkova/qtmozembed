@@ -15,7 +15,7 @@ MozTextureNode::MozTextureNode(QuickMozView* aView)
   , m_view(aView)
   , mIsConnected(false)
 {
-     printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     // Our texture node must have a texture, so use the default 0 texture.
     m_texture = m_view->window()->createTextureFromId(0, QSize(1, 1));
     setTexture(m_texture);
@@ -32,7 +32,7 @@ MozTextureNode::newTexture(int id, const QSize &size)
 
     // We cannot call QQuickWindow::update directly here, as this is only allowed
     // from the rendering thread or GUI thread.
-    printf(">>>>>>Func:%s::%d Thr:%p id:%i emit pendingNewTexture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), id);
+    // printf(">>>>>>Func:%s::%d Thr:%p id:%i emit pendingNewTexture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), id);
     Q_EMIT pendingNewTexture();
 }
 
@@ -46,7 +46,7 @@ MozTextureNode::prepareNode()
     m_id = 0;
     m_mutex.unlock();
     if (newId) {
-        printf(">>>>>>Func:%s::%d Thr:%p use New Created Texture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+        // printf(">>>>>>Func:%s::%d Thr:%p use New Created Texture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
         delete m_texture;
         m_texture = m_view->window()->createTextureFromId(newId, size);
         setTexture(m_texture);

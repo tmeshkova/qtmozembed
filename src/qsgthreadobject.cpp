@@ -18,7 +18,7 @@ QSGThreadObject::QSGThreadObject()
 void
 QSGThreadObject::onWrapRenderThreadGLContext()
 {
-     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     // printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     mRenderTarget = QMozContext::GetInstance()->createEmbedLiteRenderTarget();
     Q_EMIT onRenderThreadReady();
 }
@@ -26,7 +26,7 @@ QSGThreadObject::onWrapRenderThreadGLContext()
 void
 QSGThreadObject::setupCurrentGLContext()
 {
-     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     // printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     mGLContext = QOpenGLContext::currentContext();
     mGLSurface = mGLContext->surface();
     Q_EMIT updateGLContextInfo(mGLContext && mGLSurface, mGLSurface ? mGLSurface->size() : QSize());

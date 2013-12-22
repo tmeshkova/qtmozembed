@@ -102,16 +102,16 @@ void
 QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
-     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+//     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     Q_EMIT wrapRenderThreadGLContext();
     update();
-     printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
+//     printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
 }
 
 void
 QuickMozView::onRenderThreadReady()
 {
-     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+     // printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
@@ -129,7 +129,7 @@ void QuickMozView::createGeckoGLContext()
 {
     delete mMCRenderer;
     mMCRenderer = new QMCThreadObject(this);
-    printf(">>>>>>Func:%s::%d curT:%p, mcRenderThread:%p, this:-?thread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), mMCRenderer->thread(), thread());
+    // printf(">>>>>>Func:%s::%d curT:%p, mcRenderThread:%p, this:-?thread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), mMCRenderer->thread(), thread());
 }
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
@@ -168,7 +168,7 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void QuickMozView::sceneGraphInitialized()
 {
-    printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
+    // printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
     mSGRenderer = new QSGThreadObject();
     connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
     connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
@@ -178,7 +178,7 @@ void QuickMozView::sceneGraphInitialized()
 
 void QuickMozView::beforeRendering()
 {
-    printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
+    // printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
 
     if (!d->mGraphicsViewAssigned) {
         d->UpdateViewSize();
@@ -193,14 +193,14 @@ void QuickMozView::beforeRendering()
     }
 
     if (d->mViewInitialized) {
-       printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+       // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
        RefreshNodeTexture();
     }
 }
 
 void QuickMozView::RenderToCurrentContext()
 {
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
@@ -232,7 +232,7 @@ void QuickMozView::RefreshNodeTexture()
 
 bool QuickMozView::Invalidate()
 {
-    printf(">>>>>>Func:%s::%d Thr:%p offThread Rendering set params and proceed compositing\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    // printf(">>>>>>Func:%s::%d Thr:%p offThread Rendering set params and proceed compositing\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
@@ -242,7 +242,7 @@ bool QuickMozView::Invalidate()
 
 void QuickMozView::CompositingFinished()
 {
-    printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     Q_EMIT dispatchItemUpdate();
 }
 
