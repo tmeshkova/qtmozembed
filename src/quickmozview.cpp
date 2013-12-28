@@ -29,9 +29,11 @@
 #include "qmozhorizontalscrolldecorator.h"
 #include "qmozverticalscrolldecorator.h"
 #include "qmoztexturenode.h"
-#include "qmozviewsgnode.h"
 #include "qsgthreadobject.h"
 #include "assert.h"
+#ifndef NO_PRIVATE_API
+#include "qmozviewsgnode.h"
+#endif
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -167,9 +169,13 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void QuickMozView::sceneGraphInitialized()
 {
+#ifndef NO_PRIVATE_API
     if (thread() == QThread::currentThread()) {
         mInThreadRendering = true;
-    } else {
+    }
+    else
+#endif
+    {
         mSGRenderer = new QSGThreadObject();
         connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
         connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
@@ -197,6 +203,7 @@ void QuickMozView::RenderToCurrentContext()
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
+#ifndef NO_PRIVATE_API
     if (mInThreadRendering) {
         if (!d->mViewInitialized) {
             return oldNode;
@@ -208,10 +215,12 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
         if (!n)
             n = new QMozViewSGNode;
+
         n->setRenderer(d, this);
-//        n->markDirty(QSGNode::DirtyMaterial);
+
         return n;
     }
+#endif
 
     MozTextureNode *n = static_cast<MozTextureNode*>(oldNode);
     if (!n) {

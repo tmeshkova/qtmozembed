@@ -5,14 +5,9 @@
 
 #include "qmozviewsgnode.h"
 
-#include <QThread>
-#include <QtGui/QPolygonF>
-#include <QtQuick/QQuickItem>
-#include <QtQuick/QQuickWindow>
-#include <QtQuick/QSGSimpleRectNode>
 #include <private/qsgrendernode_p.h>
-#include "qgraphicsmozview_p.h"
 #include "quickmozview.h"
+#include "qgraphicsmozview_p.h"
 #include <assert.h>
 
 class MozContentSGNode : public QSGRenderNode {
