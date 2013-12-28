@@ -51,7 +51,9 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mTimerId(0)
   , mOffsetX(0.0)
   , mOffsetY(0.0)
+#ifndef NO_PRIVATE_API
   , mInThreadRendering(false)
+#endif
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -103,9 +105,13 @@ void
 QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
+#ifndef NO_PRIVATE_API
     if (mInThreadRendering) {
         onRenderThreadReady();
-    } else {
+    }
+    else
+#endif
+    {
         d->mContext->setCompositorInSeparateThread(true);
         Q_EMIT wrapRenderThreadGLContext();
         update();
@@ -135,7 +141,10 @@ void QuickMozView::createGeckoGLContext()
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    hasContext = d->mHasContext && mInThreadRendering;
+    hasContext = d->mHasContext;
+#ifndef NO_PRIVATE_API
+    hasContext = hasContext && mInThreadRendering;
+#endif
     viewPortSize = d->mGLSurfaceSize;
 }
 
@@ -186,7 +195,13 @@ void QuickMozView::sceneGraphInitialized()
 
 void QuickMozView::beforeRendering()
 {
-    if (d->mViewInitialized && !mInThreadRendering) {
+    if (!d->mViewInitialized)
+        return;
+
+#ifndef NO_PRIVATE_API
+    if (!mInThreadRendering)
+#endif
+    {
         RefreshNodeTexture();
     }
 }
@@ -243,10 +258,12 @@ void QuickMozView::RefreshNodeTexture()
 
 bool QuickMozView::Invalidate()
 {
+#ifndef NO_PRIVATE_API
     if (mInThreadRendering) {
         update();
         return true;
     }
+#endif
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
@@ -256,7 +273,10 @@ bool QuickMozView::Invalidate()
 
 void QuickMozView::CompositingFinished()
 {
-    if (!mInThreadRendering) {
+#ifndef NO_PRIVATE_API
+    if (!mInThreadRendering)
+#endif
+    {
         Q_EMIT dispatchItemUpdate();
     }
 }

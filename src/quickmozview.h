@@ -85,7 +85,9 @@ private:
     int mTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
+#ifndef NO_PRIVATE_API
     bool mInThreadRendering;
+#endif
 };
 
 #endif // QuickMozView_H
