@@ -8,11 +8,6 @@
 
 #include <QtQuick/QSGNode>
 
-//QT_BEGIN_NAMESPACE
-//class QQuickItem;
-//class QSGSimpleRectNode;
-//QT_END_NAMESPACE
-//
 class MozContentSGNode;
 class QGraphicsMozViewPrivate;
 class QuickMozView;

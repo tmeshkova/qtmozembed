@@ -6,20 +6,11 @@
 #ifndef qmoztexturenode_h
 #define qmoztexturenode_h
 
-#include <QtQuick/QSGTransformNode>
 #include <QtQuick/QSGSimpleTextureNode>
 #include <QObject>
 #include <QMutex>
 
-QT_BEGIN_NAMESPACE
-class QQuickItem;
-class QSGSimpleRectNode;
-QT_END_NAMESPACE
-
-class MozContentSGNode;
-class QGraphicsMozViewPrivate;
 class QuickMozView;
-
 
 class MozTextureNode : public QObject, public QSGSimpleTextureNode
 {
