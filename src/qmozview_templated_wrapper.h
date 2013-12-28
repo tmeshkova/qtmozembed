@@ -15,8 +15,7 @@ class IMozQViewIface
 public:
     virtual ~IMozQViewIface() {}
     // Methods
-    virtual bool Invalidate() = 0;
-    virtual void CompositingFinished() = 0;
+    virtual void Invalidate() = 0;
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
     virtual void forceViewActiveFocus() = 0;
     virtual void createGeckoGLContext() = 0;
@@ -58,14 +57,9 @@ class IMozQView : public IMozQViewIface
 public:
     IMozQView(TMozQView& aView) : view(aView) {}
 
-    bool Invalidate()
+    void Invalidate()
     {
-        return view.Invalidate();
-    }
-
-    void CompositingFinished()
-    {
-        view.CompositingFinished();
+        view.Invalidate();
     }
 
     void setInputMethodHints(Qt::InputMethodHints hints)

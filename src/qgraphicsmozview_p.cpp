@@ -241,12 +241,8 @@ void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b
 
 bool QGraphicsMozViewPrivate::Invalidate()
 {
-    return mViewIface->Invalidate();
-}
-
-void QGraphicsMozViewPrivate::CompositingFinished()
-{
-    mViewIface->CompositingFinished();
+    mViewIface->Invalidate();
+    return true;
 }
 
 void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)

@@ -38,14 +38,8 @@ HEADERS += qmozcontext.h \
            qmozview_defined_wrapper.h
 
 !contains(QT_MAJOR_VERSION, 4) {
-  SOURCES += quickmozview.cpp qmoztexturenode.cpp qsgthreadobject.cpp
-  HEADERS += quickmozview.h qmoztexturenode.h qsgthreadobject.h
-  !isEmpty(NO_PRIVATE_API) {
-    DEFINES += NO_PRIVATE_API
-  } else {
-    SOURCES += qmozviewsgnode.cpp
-    HEADERS += qmozviewsgnode.h
-  }
+  SOURCES += quickmozview.cpp qmozviewsgnode.cpp qsgthreadobject.cpp qmcthreadobject.cpp
+  HEADERS += quickmozview.h qmozviewsgnode.h qsgthreadobject.h qmcthreadobject.h
 }
 contains(QT_MAJOR_VERSION, 4) {
   SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
@@ -76,10 +70,7 @@ contains(QT_MAJOR_VERSION, 4) {
   QT += opengl
   PKGCONFIG += QJson
 } else {
-  QT += quick qml
-  isEmpty(NO_PRIVATE_API) {
-    QT += quick-private
-  }
+  QT += quick qml quick-private
   !isEmpty(BUILD_QT5QUICK1) {
     QT += declarative widgets opengl
   }

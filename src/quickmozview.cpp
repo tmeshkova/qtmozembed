@@ -28,12 +28,10 @@
 #include "EmbedQtKeyUtils.h"
 #include "qmozhorizontalscrolldecorator.h"
 #include "qmozverticalscrolldecorator.h"
-#include "qmoztexturenode.h"
-#include "qsgthreadobject.h"
-#include "assert.h"
-#ifndef NO_PRIVATE_API
 #include "qmozviewsgnode.h"
-#endif
+#include "qsgthreadobject.h"
+#include "qmcthreadobject.h"
+#include "assert.h"
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -48,12 +46,10 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mParentID(0)
   , mUseQmlMouse(false)
   , mSGRenderer(NULL)
+  , mMCRenderer(NULL)
   , mTimerId(0)
   , mOffsetX(0.0)
   , mOffsetY(0.0)
-#ifndef NO_PRIVATE_API
-  , mInThreadRendering(false)
-#endif
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -71,8 +67,8 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
+    connect(this, SIGNAL(updateThreaded()), this, SLOT(update()));
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
-    connect(this, SIGNAL(dispatchItemUpdate()), this, SLOT(update()));
     updateEnabled();
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
@@ -83,11 +79,16 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
 QuickMozView::~QuickMozView()
 {
+    if (mMCRenderer) {
+        mMCRenderer->setSGNode(nullptr);
+        mMCRenderer->setView(nullptr);
+    }
     if (d->mView) {
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
     }
     delete mSGRenderer;
+    delete mMCRenderer;
     delete d;
 }
 
@@ -105,22 +106,6 @@ void
 QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
-#ifndef NO_PRIVATE_API
-    if (mInThreadRendering) {
-        onRenderThreadReady();
-    }
-    else
-#endif
-    {
-        d->mContext->setCompositorInSeparateThread(true);
-        Q_EMIT wrapRenderThreadGLContext();
-        update();
-    }
-}
-
-void
-QuickMozView::onRenderThreadReady()
-{
     if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
@@ -136,22 +121,21 @@ void QuickMozView::updateEnabled()
 
 void QuickMozView::createGeckoGLContext()
 {
-#warning "Unused method, destroy?"
+    if (!mMCRenderer && mSGRenderer) {
+        mMCRenderer = new QMCThreadObject(this, mSGRenderer, d->mGLSurfaceSize);
+    }
 }
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
     hasContext = d->mHasContext;
-#ifndef NO_PRIVATE_API
-    hasContext = hasContext && mInThreadRendering;
-#endif
     viewPortSize = d->mGLSurfaceSize;
 }
 
-void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
+void QuickMozView::updateGLContextInfo(bool hasContext, QSize viewPortSize)
 {
-    d->mHasContext = true;
-    d->mGLSurfaceSize = ctx->surface()->size();
+    d->mHasContext = hasContext;
+    d->mGLSurfaceSize = viewPortSize;
     QRectF r(0, 0, d->mGLSurfaceSize.width(), d->mGLSurfaceSize.height());
     r = mapRectToScene(r);
     d->mGLSurfaceSize = r.size().toSize();
@@ -178,117 +162,114 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void QuickMozView::sceneGraphInitialized()
 {
-#ifndef NO_PRIVATE_API
-    if (thread() == QThread::currentThread()) {
-        mInThreadRendering = true;
-    }
-    else
-#endif
-    {
-        mSGRenderer = new QSGThreadObject();
-        connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
-        connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
-    }
-
-    updateGLContextInfo(QOpenGLContext::currentContext());
 }
 
 void QuickMozView::beforeRendering()
 {
-    if (!d->mViewInitialized)
-        return;
-
-#ifndef NO_PRIVATE_API
-    if (!mInThreadRendering)
-#endif
-    {
-        RefreshNodeTexture();
+    if (!mSGRenderer) {
+        mSGRenderer = new QSGThreadObject();
+        connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
+        mSGRenderer->setupCurrentGLContext();
     }
-}
 
-void QuickMozView::RenderToCurrentContext()
-{
-    QMatrix affine;
-    gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
-    d->mView->SetGLViewTransform(matr);
-    d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
-    d->mView->RenderGL();
-}
-
-QSGNode*
-QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
-{
-#ifndef NO_PRIVATE_API
-    if (mInThreadRendering) {
-        if (!d->mViewInitialized) {
-            return oldNode;
+    if (!d->mGraphicsViewAssigned) {
+        d->UpdateViewSize();
+        d->mGraphicsViewAssigned = true;
+        // Disable for future gl context in case if we did not get it yet
+        if (d->mViewInitialized &&
+            d->mContext->GetApp()->IsAccelerated() &&
+            !QOpenGLContext::currentContext()) {
+            LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
+            d->mContext->setIsAccelerated(false);
         }
-        QMozViewSGNode* n = static_cast<QMozViewSGNode*>(oldNode);
-
-        const QWindow* window = this->window();
-        assert(window);
-
-        if (!n)
-            n = new QMozViewSGNode;
-
-        n->setRenderer(d, this);
-
-        return n;
     }
-#endif
 
-    MozTextureNode *n = static_cast<MozTextureNode*>(oldNode);
-    if (!n) {
-        n = new MozTextureNode(this);
-        connect(this, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
-        connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
-    }
-    n->setRect(boundingRect());
-    n->markDirty(QSGNode::DirtyMaterial);
-    return n;
-}
-
-void QuickMozView::RefreshNodeTexture()
-{
-    int texId = 0, width = 0, height = 0;
-    if (d->mView->GetPendingTexture(mSGRenderer->GetTargetContextWrapper(), &texId, &width, &height)) {
-       Q_EMIT textureReady(texId, QSize(width, height));
+    if (mMCRenderer) {
+        mMCRenderer->prepareTexture();
     }
 }
 
-bool QuickMozView::Invalidate()
+void QuickMozView::RenderToCurrentContext(QMatrix affine, EmbedLiteRenderTarget* renderTarget)
 {
-#ifndef NO_PRIVATE_API
-    if (mInThreadRendering) {
-        update();
-        return true;
+    if (mMCRenderer && mMCRenderer->thread() != QThread::currentThread()) {
+        mMCRenderer->RenderToCurrentContext(affine);
+        return;
     }
-#endif
-    QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
     d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
-    return false;
+    d->mView->RenderGL(renderTarget);
 }
 
-void QuickMozView::CompositingFinished()
+mozilla::embedlite::EmbedLiteRenderTarget*
+QuickMozView::CreateEmbedLiteRenderTarget(QSize size)
 {
-#ifndef NO_PRIVATE_API
-    if (!mInThreadRendering)
-#endif
-    {
-        Q_EMIT dispatchItemUpdate();
-    }
-}
-
-void QuickMozView::cleanup()
-{
+    return d->mView->CreateEmbedLiteRenderTarget(size.width(), size.height());
 }
 
 void QuickMozView::startMoveMonitoring()
 {
     mTimerId = startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
     d->mFlicking = true;
+}
+
+QSGNode*
+QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
+{
+    if (!d->mViewInitialized)
+        return oldNode;
+
+    if (!d->mContext->GetApp()->IsAccelerated()) {
+        QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode*>(oldNode);
+        if (!n) {
+            n = new QSGSimpleTextureNode();
+        }
+        QRect r(boundingRect().toRect());
+        if (d->mTempBufferImage.isNull() || d->mTempBufferImage.width() != r.width() || d->mTempBufferImage.height() != r.height()) {
+            d->mTempBufferImage = QImage(r.size(), QImage::Format_RGB32);
+        }
+        if (mMCRenderer && mMCRenderer->thread() != QThread::currentThread()) {
+            printf("FIXME: Cannot perform SW rendering across threads\n");
+            d->mTempBufferImage.fill(Qt::white);
+        } else {
+            d->mView->RenderToImage(d->mTempBufferImage.bits(), d->mTempBufferImage.width(),
+                                    d->mTempBufferImage.height(), d->mTempBufferImage.bytesPerLine(),
+                                    d->mTempBufferImage.depth());
+        }
+
+        if (d->mTempTexture)
+            delete d->mTempTexture;
+        d->mTempTexture = window()->createTextureFromImage(d->mTempBufferImage);
+        n->setTexture(d->mTempTexture);
+        n->setRect(boundingRect());
+        return n;
+    }
+
+    QMozViewSGNode* node = static_cast<QMozViewSGNode*>(oldNode);
+
+    if (!node) {
+        node = new QMozViewSGNode;
+        if (mMCRenderer) {
+            mMCRenderer->setSGNode(node);
+        }
+    }
+
+    node->setRenderer(this);
+    node->markDirty(QSGNode::DirtyMaterial);
+    return node;
+}
+
+void QuickMozView::cleanup()
+{
+}
+
+void QuickMozView::Invalidate()
+{
+    if (QThread::currentThread() != thread()) {
+        Q_EMIT updateThreaded();
+    } else {
+        update();
+    }
 }
 
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)

@@ -3,19 +3,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <QThread>
 #include <QSurface>
 #include "qsgthreadobject.h"
-#include "qmozcontext.h"
 
 QSGThreadObject::QSGThreadObject()
-  : mRenderTarget(0)
+  : mGLContext(0)
+  , mGLSurface(0)
 {
 }
 
 void
-QSGThreadObject::onWrapRenderThreadGLContext()
+QSGThreadObject::setupCurrentGLContext()
 {
-    mRenderTarget = QMozContext::GetInstance()->createEmbedLiteRenderTarget();
-    Q_EMIT onRenderThreadReady();
+    mGLContext = QOpenGLContext::currentContext();
+    mGLSurface = mGLContext->surface();
+    Q_EMIT updateGLContextInfo(mGLContext && mGLSurface, mGLSurface ? mGLSurface->size() : QSize());
+}
+
+void
+QSGThreadObject::makeContextCurrent()
+{
+    mGLContext->makeCurrent(mGLSurface);
 }

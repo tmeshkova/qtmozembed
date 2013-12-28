@@ -16,7 +16,6 @@ class QMozContextPrivate;
 namespace mozilla {
 namespace embedlite {
 class EmbedLiteApp;
-class EmbedLiteRenderTarget;
 }}
 class QMozViewCreator;
 
@@ -56,7 +55,6 @@ public Q_SLOTS:
     void setCompositorInSeparateThread(bool aEnabled);
     void setViewCreator(QMozViewCreator* viewCreator);
     quint32 createView(const QString& url, const quint32& parentId = 0);
-    mozilla::embedlite::EmbedLiteRenderTarget* createEmbedLiteRenderTarget();
 
 private:
     QMozContext(QObject* parent = 0);
