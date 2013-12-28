@@ -13,7 +13,6 @@
 
 class QGraphicsMozViewPrivate;
 class QSGThreadObject;
-class QMCThreadObject;
 
 class QuickMozView : public QQuickItem
 {
@@ -71,7 +70,7 @@ public Q_SLOTS:
     void sceneGraphInitialized();
     void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
-    void updateGLContextInfo(bool hasContext, QSize viewPortSize);
+    void updateGLContextInfo(QOpenGLContext*);
 
 private Q_SLOTS:
     void onInitialized();
@@ -83,10 +82,10 @@ private:
     unsigned mParentID;
     bool mUseQmlMouse;
     QSGThreadObject* mSGRenderer;
-    QMCThreadObject* mMCRenderer;
     int mTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
+    bool mInThreadRendering;
 };
 
 #endif // QuickMozView_H

@@ -38,8 +38,10 @@ HEADERS += qmozcontext.h \
            qmozview_defined_wrapper.h
 
 !contains(QT_MAJOR_VERSION, 4) {
-  SOURCES += quickmozview.cpp qmozviewsgnode.cpp qsgthreadobject.cpp qmcthreadobject.cpp
-  HEADERS += quickmozview.h qmozviewsgnode.h qsgthreadobject.h qmcthreadobject.h
+  SOURCES += quickmozview.cpp qmoztexturenode.cpp qsgthreadobject.cpp
+  HEADERS += quickmozview.h qmoztexturenode.h qsgthreadobject.h
+  SOURCES += qmozviewsgnode.cpp
+  HEADERS += qmozviewsgnode.h
 }
 contains(QT_MAJOR_VERSION, 4) {
   SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp

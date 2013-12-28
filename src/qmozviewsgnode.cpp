@@ -4,51 +4,73 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "qmozviewsgnode.h"
-#include "quickmozview.h"
-#include <QQuickWindow>
+
 #include <QThread>
+#include <QtGui/QPolygonF>
+#include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickWindow>
+#include <QtQuick/QSGSimpleRectNode>
+#include <private/qsgrendernode_p.h>
+#include "qgraphicsmozview_p.h"
+#include "quickmozview.h"
+#include <assert.h>
 
-MozTextureNode::MozTextureNode(QuickMozView* aView)
-  : m_id(0)
-  , m_size(0, 0)
-  , m_texture(0)
-  , m_view(aView)
-  , mIsConnected(false)
-{
-     // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    // Our texture node must have a texture, so use the default 0 texture.
-    m_texture = m_view->window()->createTextureFromId(0, QSize(1, 1));
-    setTexture(m_texture);
-    setFiltering(QSGTexture::Linear);
-}
-
-void
-MozTextureNode::newTexture(int id, const QSize &size)
-{
-    m_mutex.lock();
-    m_id = id;
-    m_size = size;
-    m_mutex.unlock();
-
-    // We cannot call QQuickWindow::update directly here, as this is only allowed
-    // from the rendering thread or GUI thread.
-    // printf(">>>>>>Func:%s::%d Thr:%p id:%i emit pendingNewTexture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), id);
-    Q_EMIT pendingNewTexture();
-}
-
-// Before the scene graph starts to render, we update to the pending texture
-void
-MozTextureNode::prepareNode()
-{
-    m_mutex.lock();
-    int newId = m_id;
-    QSize size = m_size;
-    m_id = 0;
-    m_mutex.unlock();
-    if (newId) {
-        // printf(">>>>>>Func:%s::%d Thr:%p use New Created Texture\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-        delete m_texture;
-        m_texture = m_view->window()->createTextureFromId(newId, size);
-        setTexture(m_texture);
+class MozContentSGNode : public QSGRenderNode {
+public:
+    MozContentSGNode(QGraphicsMozViewPrivate* aPrivate, QuickMozView* aView)
+        : mPrivate(aPrivate), mView(aView)
+    {
+        mView->SetIsActive(true);
     }
+
+    virtual StateFlags changedStates()
+    {
+        return StateFlags(StencilState) | ColorState | BlendState;
+    }
+
+    virtual void render(const RenderState& state)
+    {
+        QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
+        gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
+        mPrivate->mView->SetGLViewTransform(matr);
+        mPrivate->mView->SetViewClipping(0, 0, mPrivate->mSize.width(), mPrivate->mSize.height());
+        mPrivate->mView->RenderGL();
+    }
+
+    ~MozContentSGNode()
+    {
+    }
+
+    const QMozViewSGNode* pageNode() const
+    {
+        const QMozViewSGNode* parent = static_cast<QMozViewSGNode*>(this->parent());
+        assert(parent);
+        return parent;
+    }
+
+    QGraphicsMozViewPrivate* getPrivate() { return mPrivate; }
+
+private:
+    QGraphicsMozViewPrivate* mPrivate;
+    QuickMozView* mView;
+};
+
+QMozViewSGNode::QMozViewSGNode()
+    : m_contentsNode(0)
+{
+}
+
+void QMozViewSGNode::setRenderer(QGraphicsMozViewPrivate* aPrivate, QuickMozView* aView)
+{
+    if (m_contentsNode && m_contentsNode->getPrivate() == aPrivate) {
+        return;
+    }
+
+    if (m_contentsNode) {
+        removeChildNode(m_contentsNode);
+        delete m_contentsNode;
+    }
+    m_contentsNode = new MozContentSGNode(aPrivate, aView);
+    // This sets the parent node of the content to QMozViewSGNode.
+    appendChildNode(m_contentsNode);
 }

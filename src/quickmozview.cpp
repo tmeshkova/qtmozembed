@@ -28,9 +28,9 @@
 #include "EmbedQtKeyUtils.h"
 #include "qmozhorizontalscrolldecorator.h"
 #include "qmozverticalscrolldecorator.h"
+#include "qmoztexturenode.h"
 #include "qmozviewsgnode.h"
 #include "qsgthreadobject.h"
-#include "qmcthreadobject.h"
 #include "assert.h"
 
 using namespace mozilla;
@@ -46,10 +46,10 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mParentID(0)
   , mUseQmlMouse(false)
   , mSGRenderer(NULL)
-  , mMCRenderer(NULL)
   , mTimerId(0)
   , mOffsetX(0.0)
   , mOffsetY(0.0)
+  , mInThreadRendering(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -79,7 +79,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
 QuickMozView::~QuickMozView()
 {
-    delete mMCRenderer;
     if (d->mView) {
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
@@ -102,16 +101,18 @@ void
 QuickMozView::onInitialized()
 {
     LOGT("QuickMozView");
-//     printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    Q_EMIT wrapRenderThreadGLContext();
-    update();
-//     printf(">>>>>>Func:%s::%d\n", __PRETTY_FUNCTION__, __LINE__);
+    if (mInThreadRendering) {
+        onRenderThreadReady();
+    } else {
+        d->mContext->setCompositorInSeparateThread(true);
+        Q_EMIT wrapRenderThreadGLContext();
+        update();
+    }
 }
 
 void
 QuickMozView::onRenderThreadReady()
 {
-     // printf(">>>>>>Func:%s::%d curT:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
@@ -127,21 +128,19 @@ void QuickMozView::updateEnabled()
 
 void QuickMozView::createGeckoGLContext()
 {
-    delete mMCRenderer;
-    mMCRenderer = new QMCThreadObject(this);
-    // printf(">>>>>>Func:%s::%d curT:%p, mcRenderThread:%p, this:-?thread:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), mMCRenderer->thread(), thread());
+#warning "Unused method, destroy?"
 }
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    hasContext = d->mHasContext;
+    hasContext = d->mHasContext && mInThreadRendering;
     viewPortSize = d->mGLSurfaceSize;
 }
 
-void QuickMozView::updateGLContextInfo(bool hasContext, QSize viewPortSize)
+void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
 {
-    d->mHasContext = hasContext;
-    d->mGLSurfaceSize = viewPortSize;
+    d->mHasContext = true;
+    d->mGLSurfaceSize = ctx->surface()->size();
     QRectF r(0, 0, d->mGLSurfaceSize.width(), d->mGLSurfaceSize.height());
     r = mapRectToScene(r);
     d->mGLSurfaceSize = r.size().toSize();
@@ -168,39 +167,26 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void QuickMozView::sceneGraphInitialized()
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
-    mSGRenderer = new QSGThreadObject();
-    connect(mSGRenderer, SIGNAL(updateGLContextInfo(bool,QSize)), this, SLOT(updateGLContextInfo(bool,QSize)));
-    connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
-    connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
-    mSGRenderer->setupCurrentGLContext();
+    if (thread() == QThread::currentThread()) {
+        mInThreadRendering = true;
+    } else {
+        mSGRenderer = new QSGThreadObject();
+        connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
+        connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
+    }
+
+    updateGLContextInfo(QOpenGLContext::currentContext());
 }
 
 void QuickMozView::beforeRendering()
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p curCTX:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread(), QOpenGLContext::currentContext());
-
-    if (!d->mGraphicsViewAssigned) {
-        d->UpdateViewSize();
-        d->mGraphicsViewAssigned = true;
-        // Disable for future gl context in case if we did not get it yet
-        if (d->mViewInitialized &&
-            d->mContext->GetApp()->IsAccelerated() &&
-            !QOpenGLContext::currentContext()) {
-            LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
-            d->mContext->setIsAccelerated(false);
-        }
-    }
-
-    if (d->mViewInitialized) {
-       // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-       RefreshNodeTexture();
+    if (d->mViewInitialized && !mInThreadRendering) {
+        RefreshNodeTexture();
     }
 }
 
 void QuickMozView::RenderToCurrentContext()
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
@@ -211,6 +197,22 @@ void QuickMozView::RenderToCurrentContext()
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
+    if (mInThreadRendering) {
+        if (!d->mViewInitialized) {
+            return oldNode;
+        }
+        QMozViewSGNode* n = static_cast<QMozViewSGNode*>(oldNode);
+
+        const QWindow* window = this->window();
+        assert(window);
+
+        if (!n)
+            n = new QMozViewSGNode;
+        n->setRenderer(d, this);
+//        n->markDirty(QSGNode::DirtyMaterial);
+        return n;
+    }
+
     MozTextureNode *n = static_cast<MozTextureNode*>(oldNode);
     if (!n) {
         n = new MozTextureNode(this);
@@ -232,7 +234,10 @@ void QuickMozView::RefreshNodeTexture()
 
 bool QuickMozView::Invalidate()
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p offThread Rendering set params and proceed compositing\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
+    if (mInThreadRendering) {
+        update();
+        return true;
+    }
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
@@ -242,8 +247,9 @@ bool QuickMozView::Invalidate()
 
 void QuickMozView::CompositingFinished()
 {
-    // printf(">>>>>>Func:%s::%d Thr:%p\n", __PRETTY_FUNCTION__, __LINE__, QThread::currentThread());
-    Q_EMIT dispatchItemUpdate();
+    if (!mInThreadRendering) {
+        Q_EMIT dispatchItemUpdate();
+    }
 }
 
 void QuickMozView::cleanup()

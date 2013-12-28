@@ -20,21 +20,16 @@ class QSGThreadObject : public QObject
     Q_OBJECT
 public:
     QSGThreadObject();
-    ~QSGThreadObject() {}
+    virtual ~QSGThreadObject() {}
 
 public Q_SLOTS:
-    void setupCurrentGLContext();
-    QOpenGLContext* context() { return mGLContext; }
     void onWrapRenderThreadGLContext();
     mozilla::embedlite::EmbedLiteRenderTarget* GetTargetContextWrapper() { return mRenderTarget; }
 
 Q_SIGNALS:
-    void updateGLContextInfo(bool hasContext, QSize viewPortSize);
     void onRenderThreadReady();
 
 private:
-    QOpenGLContext* mGLContext;
-    QSurface* mGLSurface;
     mozilla::embedlite::EmbedLiteRenderTarget* mRenderTarget;
 };
 
