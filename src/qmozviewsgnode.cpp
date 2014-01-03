@@ -83,7 +83,7 @@ public:
     virtual void render(const RenderState& state)
     {
         QMatrix affine = matrix() ? (*matrix()).toAffine() : QMatrix();
-        mView->RenderToCurrentContext(affine);
+        mView->RenderToCurrentContext(affine, inheritedOpacity());
 
         if (m_program && m_texture) {
             m_program->bind();

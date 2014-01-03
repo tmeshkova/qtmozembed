@@ -189,14 +189,15 @@ void QuickMozView::beforeRendering()
     }
 }
 
-void QuickMozView::RenderToCurrentContext(QMatrix affine, EmbedLiteRenderTarget* renderTarget)
+void QuickMozView::RenderToCurrentContext(QMatrix affine, float aOpacity, EmbedLiteRenderTarget* renderTarget)
 {
     if (mMCRenderer && mMCRenderer->thread() != QThread::currentThread()) {
-        mMCRenderer->RenderToCurrentContext(affine);
+        mMCRenderer->RenderToCurrentContext(affine, aOpacity);
         return;
     }
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
+    d->mView->SetViewOpacity(aOpacity);
     d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
     d->mView->RenderGL(renderTarget);
 }

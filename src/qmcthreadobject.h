@@ -30,7 +30,7 @@ class QMCThreadObject : public QObject
 public:
     QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadObj, QSize aGLSize);
     ~QMCThreadObject();
-    void RenderToCurrentContext(QMatrix affine);
+    void RenderToCurrentContext(QMatrix affine, float aOpacity = 1.0);
     void setSGNode(QMozViewSGNode* node);
     void setView(QuickMozView* aView);
     void prepareTexture();
@@ -62,6 +62,7 @@ private:
     void* mRenderTask;
     bool mIsDestroying;
     bool mIsRendering;
+    float mProcessingOpacity;
 };
 
 #endif // QMCThreadObject_H

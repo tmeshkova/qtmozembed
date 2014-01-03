@@ -33,7 +33,7 @@ public:
     ~QuickMozView();
 
     Q_MOZ_VIEW_PUBLIC_METHODS
-    void RenderToCurrentContext(QMatrix affine, mozilla::embedlite::EmbedLiteRenderTarget* renderTarget = 0);
+    void RenderToCurrentContext(QMatrix affine, float aOpacity = 1.0f, mozilla::embedlite::EmbedLiteRenderTarget* renderTarget = 0);
     mozilla::embedlite::EmbedLiteRenderTarget* CreateEmbedLiteRenderTarget(QSize size);
     void startMoveMonitoring();
 

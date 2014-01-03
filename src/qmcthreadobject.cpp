@@ -32,6 +32,7 @@ QMCThreadObject::QMCThreadObject(QuickMozView* aView, QSGThreadObject* sgThreadO
   , mRenderTask(NULL)
   , mIsDestroying(false)
   , mIsRendering(false)
+  , mProcessingOpacity(1.0)
 {
     m_size = aGLSize;
     if (sgThreadObj->thread() != thread()) {
@@ -93,13 +94,14 @@ QMCThreadObject::~QMCThreadObject()
     delete mLoop;
 }
 
-void QMCThreadObject::RenderToCurrentContext(QMatrix affine)
+void QMCThreadObject::RenderToCurrentContext(QMatrix affine, float aOpacity)
 {
     if (mIsDestroying) {
         return;
     }
 
     mProcessingMatrix = affine;
+    mProcessingOpacity = aOpacity;
     mutex.lock();
     mIsRendering = true;
     if (!mLoop) {
@@ -127,7 +129,7 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
 {
     if (!mOffGLSurface && mView && !mIsDestroying) {
         mGLContext->makeCurrent(mGLSurface);
-        mView->RenderToCurrentContext(mProcessingMatrix);
+        mView->RenderToCurrentContext(mProcessingMatrix, mProcessingOpacity);
     } else if (mView && !mIsDestroying) {
         mGLContext->makeCurrent(mOffGLSurface);
         m_size = mGLSurface ? mGLSurface->size() : QSize();
@@ -137,7 +139,7 @@ void QMCThreadObject::ProcessRenderInGeckoCompositorThread()
         }
 
         mProcessingMatrix = QMatrix();
-        mView->RenderToCurrentContext(mProcessingMatrix, m_renderTarget);
+        mView->RenderToCurrentContext(mProcessingMatrix, mProcessingOpacity, m_renderTarget);
         glFlush();
 
         if (mSGnode) {
