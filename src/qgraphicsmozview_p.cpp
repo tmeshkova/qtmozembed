@@ -642,9 +642,9 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     }
 
     qint64 timeStamp = current_timestamp(event);
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp, 0);
-    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp, 0);
-    MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_END, timeStamp, 0);
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp);
+    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp);
+    MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_CANCEL, timeStamp);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     // Add active touch point to cancelled touch sequence.
