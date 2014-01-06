@@ -24,6 +24,7 @@
 #include <QtGui/QOpenGLContext>
 #include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
+
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
 #include "qmozhorizontalscrolldecorator.h"
@@ -152,9 +153,36 @@ void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
 {
     d->mHasContext = true;
     d->mGLSurfaceSize = ctx->surface()->size();
-    QRectF r(0, 0, d->mGLSurfaceSize.width(), d->mGLSurfaceSize.height());
-    r = mapRectToScene(r);
-    d->mGLSurfaceSize = r.size().toSize();
+}
+
+/**
+ *  Updates gl surface size based on current content orientation.
+ *  This does not do anything if QQuickItem::window() is null.
+ */
+void QuickMozView::updateGLContextInfo()
+{
+    if (window()) {
+        Qt::ScreenOrientation orientation = window()->contentOrientation();
+        QSize viewPortSize;
+        int minValue = qMin(window()->width(), window()->height());
+        int maxValue = qMax(window()->width(), window()->height());
+
+        switch (orientation) {
+        case Qt::LandscapeOrientation:
+        case Qt::InvertedLandscapeOrientation:
+            viewPortSize.setWidth(maxValue);
+            viewPortSize.setHeight(minValue);
+            LOGT("Update landscape viewPortSize: [%d,%d]", viewPortSize.width(), viewPortSize.height());
+            break;
+        default:
+            viewPortSize.setWidth(minValue);
+            viewPortSize.setHeight(maxValue);
+            LOGT("Update portrait viewPortSize: [%d,%d]", viewPortSize.width(), viewPortSize.height());
+            break;
+        }
+
+        d->mGLSurfaceSize = viewPortSize;
+    }
 }
 
 void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
@@ -171,9 +199,19 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
 
 void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
-    d->mSize = newGeometry.size();
-    d->UpdateViewSize();
+    LOGT("newGeometry size: [%g, %g] oldGeometry size: [%g,%g]", newGeometry.size().width(),
+                                                                 newGeometry.size().height(),
+                                                                 oldGeometry.size().width(),
+                                                                 oldGeometry.size().height());
     QQuickItem::geometryChanged(newGeometry, oldGeometry);
+    // Width and height are updated separately. So we want to avoid cases where width and height
+    // equals or size have not actually changed at all. This will trigger viewport
+    // calculation update.
+    if (newGeometry.width() != newGeometry.height() && d->mSize != newGeometry.size()) {
+        d->mSize = newGeometry.size();
+        updateGLContextInfo();
+        d->UpdateViewSize();
+    }
 }
 
 void QuickMozView::sceneGraphInitialized()
