@@ -89,6 +89,7 @@ private:
 #ifndef NO_PRIVATE_API
     bool mInThreadRendering;
 #endif
+    bool mPreedit;
 };
 
 #endif // QuickMozView_H
