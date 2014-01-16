@@ -310,7 +310,7 @@ void QGraphicsMozViewPrivate::ViewDestroyed()
     mViewIface->viewDestroyed();
 }
 
-void QGraphicsMozViewPrivate::RecvAsyncMessage(const PRUnichar* aMessage, const PRUnichar* aData)
+void QGraphicsMozViewPrivate::RecvAsyncMessage(const char16_t* aMessage, const char16_t* aData)
 {
     NS_ConvertUTF16toUTF8 message(aMessage);
     NS_ConvertUTF16toUTF8 data(aData);
@@ -338,7 +338,7 @@ void QGraphicsMozViewPrivate::RecvAsyncMessage(const PRUnichar* aMessage, const 
     }
 }
 
-char* QGraphicsMozViewPrivate::RecvSyncMessage(const PRUnichar* aMessage, const PRUnichar*  aData)
+char* QGraphicsMozViewPrivate::RecvSyncMessage(const char16_t* aMessage, const char16_t*  aData)
 {
     QMozReturnValue response;
     NS_ConvertUTF16toUTF8 message(aMessage);
@@ -394,7 +394,7 @@ void QGraphicsMozViewPrivate::SetIsFocused(bool aIsFocused)
 }
 
 void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
-                                              const PRUnichar* inputType, const PRUnichar* inputMode)
+                                              const char16_t* inputType, const char16_t* inputMode)
 {
     Qt::InputMethodHints hints = Qt::ImhNone;
     hints = aIstate == 2 ? Qt::ImhHiddenText : Qt::ImhPreferLowercase;
@@ -479,7 +479,7 @@ void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
 {
 }
 
-void QGraphicsMozViewPrivate::OnTitleChanged(const PRUnichar* aTitle)
+void QGraphicsMozViewPrivate::OnTitleChanged(const char16_t* aTitle)
 {
     mTitle = QString((QChar*)aTitle);
     mViewIface->titleChanged();

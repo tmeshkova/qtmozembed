@@ -254,7 +254,7 @@ void QGraphicsMozView::addMessageListeners(const QStringList& messageNamesList)
 
     nsTArray<nsString> messages;
     for (int i = 0; i < messageNamesList.size(); i++) {
-        messages.AppendElement((PRUnichar*)messageNamesList.at(i).data());
+        messages.AppendElement((char16_t*)messageNamesList.at(i).data());
     }
     d->mView->AddMessageListeners(messages);
 }
@@ -272,7 +272,7 @@ void QGraphicsMozView::sendAsyncMessage(const QString& name, const QVariant& var
     QByteArray array = doc.toJson();
 #endif
 
-    d->mView->SendAsyncMessage((const PRUnichar*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
+    d->mView->SendAsyncMessage((const char16_t*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }
 
 QPointF QGraphicsMozView::scrollableOffset() const

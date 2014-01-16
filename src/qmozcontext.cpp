@@ -117,7 +117,7 @@ public:
             mQtPump->deleteLater();
         }
     }
-    virtual void OnObserve(const char* aTopic, const PRUnichar* aData) {
+    virtual void OnObserve(const char* aTopic, const char16_t* aData) {
         // LOGT("aTopic: %s, data: %s", aTopic, NS_ConvertUTF16toUTF8(aData).get());
         QString data((QChar*)aData);
         if (!data.startsWith('{') && !data.startsWith('[') && !data.startsWith('"')) {
@@ -238,7 +238,7 @@ QMozContext::sendObserve(const QString& aTopic, const QVariant& variant)
     QByteArray array = doc.toJson();
 #endif
 
-    d->mApp->SendObserve(aTopic.toUtf8().data(), (const PRUnichar*)QString(array).constData());
+    d->mApp->SendObserve(aTopic.toUtf8().data(), (const char16_t*)QString(array).constData());
 }
 
 void
@@ -247,7 +247,7 @@ QMozContext::sendObserve(const QString& aTopic, const QString& string)
     if (!d->mApp)
         return;
 
-    d->mApp->SendObserve(aTopic.toUtf8().data(), (const PRUnichar*)string.constData());
+    d->mApp->SendObserve(aTopic.toUtf8().data(), (const char16_t*)string.constData());
 }
 
 void

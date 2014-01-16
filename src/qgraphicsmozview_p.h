@@ -49,17 +49,17 @@ public:
 
     // View finally destroyed and deleted
     virtual void ViewDestroyed();
-    virtual void RecvAsyncMessage(const PRUnichar* aMessage, const PRUnichar* aData);
-    virtual char* RecvSyncMessage(const PRUnichar* aMessage, const PRUnichar*  aData);
+    virtual void RecvAsyncMessage(const char16_t* aMessage, const char16_t* aData);
+    virtual char* RecvSyncMessage(const char16_t* aMessage, const char16_t*  aData);
     virtual void OnLoadRedirect(void);
     virtual void OnSecurityChanged(const char* aStatus, unsigned int aState);
     virtual void OnFirstPaint(int32_t aX, int32_t aY);
     virtual void GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext);
-    virtual void IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange, const PRUnichar* inputType, const PRUnichar* inputMode);
+    virtual void IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange, const char16_t* inputType, const char16_t* inputMode);
 
     virtual void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight);
     virtual void OnScrollChanged(int32_t offSetX, int32_t offSetY);
-    virtual void OnTitleChanged(const PRUnichar* aTitle);
+    virtual void OnTitleChanged(const char16_t* aTitle);
     virtual void SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
                                        const nsIntRect& aPageRect, const gfxRect& aCssPageRect);
     virtual void SyncViewportInfo(const nsIntRect& aDisplayPort,
