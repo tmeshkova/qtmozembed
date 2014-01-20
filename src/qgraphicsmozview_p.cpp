@@ -61,7 +61,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mChromeGestureThreshold(0.0)
     , mChrome(true)
     , mMoveDelta(0.0)
-    , mDragStartY(0)
+    , mDragStartY(0.0)
     , mMoving(false)
     , mPinching(false)
     , mLastTimestamp(0)
@@ -189,8 +189,8 @@ void QGraphicsMozViewPrivate::HandleTouchEnd(bool &draggingChanged, bool &pinchi
 void QGraphicsMozViewPrivate::ResetState()
 {
     // Invalid initial drag start Y.
-    mDragStartY = -1;
-    mMoveDelta = 0;
+    mDragStartY = -1.0;
+    mMoveDelta = 0.0;
 
     mFlicking = false;
     if (mMoving) {
@@ -522,7 +522,7 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
         // When chromeGestureThreshold is true, chrome is set false when chromeGestrureThreshold is exceeded (pan/flick)
         // and set to true when flicking/panning the same amount to the the opposite direction.
         // This do not have relationship to HTML5 fullscreen API.
-        if (mEnabled && mChromeGestureEnabled && mDragStartY >= 0) {
+        if (mEnabled && mChromeGestureEnabled && mDragStartY >= 0.0) {
             qreal offset = mScrollableOffset.y();
             qreal currentDelta = offset - mDragStartY;
 
@@ -736,14 +736,21 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         mViewIface->pinchingChanged();
     }
 
-    if (mMoving != (mDragging || mCanFlick)) {
-        mMoving = (mDragging || mCanFlick);
+    if (event->type() == QEvent::TouchEnd) {
+        if (mCanFlick) {
+            if (mMoving != mCanFlick) {
+                mMoving = mCanFlick;
+                mViewIface->movingChanged();
+            }
+            mViewIface->startMoveMonitoring();
+        } else {
+            // From dragging (panning) end to clean state
+            ResetState();
+        }
+    } else if (mMoving != mDragging) {
+        mMoving = mDragging;
         mViewIface->movingChanged();
     }
-
-     if (event->type() == QEvent::TouchEnd && mCanFlick) {
-        mViewIface->startMoveMonitoring();
-     }
 }
 
 void QGraphicsMozViewPrivate::ReceiveInputEvent(const InputData& event)
