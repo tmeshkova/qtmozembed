@@ -68,7 +68,7 @@ protected:
 
 public Q_SLOTS:
     void beforeRendering();
-    void sceneGraphInitialized();
+    void init();
     void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
     void updateGLContextInfo(QOpenGLContext*);
