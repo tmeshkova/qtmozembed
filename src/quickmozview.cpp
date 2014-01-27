@@ -79,7 +79,9 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
-        QTimer::singleShot(0, this, SLOT(onInitialized()));
+        // QQuickWindow::sceneGraphInitialized is emitted only once for a QQuickWindow.
+        init();
+        onInitialized();
     }
 }
 
@@ -193,7 +195,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
         if (!win)
             return;
         connect(win, SIGNAL(beforeRendering()), this, SLOT(beforeRendering()), Qt::DirectConnection);
-        connect(win, SIGNAL(sceneGraphInitialized()), this, SLOT(sceneGraphInitialized()), Qt::DirectConnection);
+        connect(win, SIGNAL(sceneGraphInitialized()), this, SLOT(init()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
 }
@@ -215,7 +217,7 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
     }
 }
 
-void QuickMozView::sceneGraphInitialized()
+void QuickMozView::init()
 {
 #ifndef NO_PRIVATE_API
     if (thread() == QThread::currentThread()) {
