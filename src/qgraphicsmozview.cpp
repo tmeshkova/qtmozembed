@@ -11,14 +11,8 @@
 #include <QTimer>
 #include <QThread>
 #include <QtOpenGL/QGLContext>
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QInputContext>
-#include <qjson/serializer.h>
-#include <qjson/parser.h>
-#else
 #include <QJsonDocument>
 #include <QJsonParseError>
-#endif
 #include "EmbedQtKeyUtils.h"
 
 #include "qgraphicsmozview.h"
@@ -264,13 +258,8 @@ void QGraphicsMozView::sendAsyncMessage(const QString& name, const QVariant& var
     if (!d->mViewInitialized)
         return;
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-    QJson::Serializer serializer;
-    QByteArray array = serializer.serialize(variant);
-#else
     QJsonDocument doc = QJsonDocument::fromVariant(variant);
     QByteArray array = doc.toJson();
-#endif
 
     d->mView->SendAsyncMessage((const char16_t*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }

@@ -8,17 +8,10 @@
 
 #include <QVariant>
 #include <QThread>
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QApplication>
-#include <qjson/serializer.h>
-#include <qjson/parser.h>
-#include <QtDeclarative/qdeclarative.h>
-#else
 #include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QtQml/QtQml>
-#endif
 
 #include "qmozembedlog.h"
 #include "qmozcontext.h"
@@ -126,24 +119,15 @@ public:
             return;
         }
         bool ok = true;
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-        QJson::Parser parser;
-        QVariant vdata = parser.parse(data.toUtf8(), &ok);
-#else
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &error);
         ok = error.error == QJsonParseError::NoError;
         QVariant vdata = doc.toVariant();
-#endif
         if (ok) {
             // LOGT("mesg:%s, data:%s", aTopic, data.toUtf8().data());
             Q_EMIT q->recvObserve(aTopic, vdata);
         } else {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-            LOGT("parse: s:'%s', err:%s, errLine:%i", data.toUtf8().data(), parser.errorString().toUtf8().data(), parser.errorLine());
-#else
             LOGT("parse: s:'%s', err:%s, errLine:%i", data.toUtf8().data(), error.errorString().toUtf8().data(), error.offset);
-#endif
         }
     }
     void setDefaultPrefs()
@@ -230,13 +214,8 @@ QMozContext::sendObserve(const QString& aTopic, const QVariant& variant)
     if (!d->mApp)
         return;
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-    QJson::Serializer serializer;
-    QByteArray array = serializer.serialize(variant);
-#else
     QJsonDocument doc = QJsonDocument::fromVariant(variant);
     QByteArray array = doc.toJson();
-#endif
 
     d->mApp->SendObserve(aTopic.toUtf8().data(), (const char16_t*)QString(array).constData());
 }

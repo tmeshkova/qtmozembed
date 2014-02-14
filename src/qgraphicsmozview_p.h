@@ -14,9 +14,7 @@
 #include <QString>
 #include <QPointF>
 #include <QMap>
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QSGSimpleTextureNode>
-#endif
 #include "qmozhorizontalscrolldecorator.h"
 #include "qmozverticalscrolldecorator.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
@@ -85,9 +83,7 @@ public:
     bool mViewInitialized;
     QColor mBgColor;
     QImage mTempBufferImage;
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     QSGTexture* mTempTexture;
-#endif
     bool mEnabled;
     bool mChromeGestureEnabled;
     qreal mChromeGestureThreshold;

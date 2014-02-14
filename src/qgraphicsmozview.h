@@ -15,11 +15,6 @@ class QMozContext;
 class QSyncMessage;
 class QGraphicsMozViewPrivate;
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#undef Q_SIGNALS
-#define Q_SIGNALS public
-#endif
-
 class QGraphicsMozView : public QGraphicsWidget
 {
     Q_OBJECT
@@ -130,10 +125,5 @@ private:
 
     bool mUseQmlMouse;
 };
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#undef Q_SIGNALS
-#define Q_SIGNALS protected
-#endif
 
 #endif /* qgraphicsmozview_h */

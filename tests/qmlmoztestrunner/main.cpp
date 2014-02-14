@@ -34,31 +34,16 @@
 
 #include "qmozcontext.h"
 #include "qtestrunner.h"
-#include <QApplication>
+#include <QGuiApplication>
 #include <QtCore/qstring.h>
 #include <QTimer>
 #include <stdio.h>
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QtQuickTest/quicktest.h>
-#else
 #include <QQuickView>
-#endif
-#if defined(Q_WS_X11)
-#include <X11/Xlib.h>
-#endif
 
 int main(int argc, char **argv)
 {
-#if defined(Q_WS_X11)
-#if QT_VERSION >= 0x040800
-    QApplication::setAttribute(Qt::AA_X11InitThreads, true);
-#else
-    XInitThreads();
-    QApplication::setAttribute(static_cast<Qt::ApplicationAttribute>(10), true);
-#endif
-#endif
     {
-        QApplication app(argc, argv);
+        QGuiApplication app(argc, argv);
         {
             bool isOpenGL = false;
             for (int index = 1; index < argc; ++index) {

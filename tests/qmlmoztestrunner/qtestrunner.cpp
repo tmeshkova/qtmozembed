@@ -34,24 +34,11 @@
 
 #include "qmozcontext.h"
 #include "qtestrunner.h"
-#include <QApplication>
+#include <QGuiApplication>
 #include <QtQuickTest/quicktest.h>
 #include <QtCore/qstring.h>
-#ifdef QT_OPENGL_LIB
-#include <QtOpenGL/qgl.h>
-#endif
 #include <QTimer>
 #include <stdio.h>
-#if defined(Q_WS_X11)
-#include <X11/Xlib.h>
-#endif
-
-#ifdef QT_OPENGL_LIB
-static QWidget *qmltestrunner_create_gl_viewport()
-{
-    return new QGLWidget();
-}
-#endif
 
 static int gargc;
 static char **gargv;
@@ -71,17 +58,5 @@ void QTestRunner::DropInStartup()
 
 int QTestRunner::RunMainTest()
 {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#ifdef QT_OPENGL_LIB
-    if (mIsOpenGL) {
-        return quick_test_main(gargc, gargv, "qmlmoztestrunner",
-                               qmltestrunner_create_gl_viewport, ".");
-    } else
-#endif
-    {
-        return quick_test_main(gargc, gargv, "qmlmoztestrunner", 0, ".");
-    }
-#else
     return quick_test_main(gargc, gargv, "qmlmoztestrunner", 0);
-#endif
 };

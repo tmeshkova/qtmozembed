@@ -1,10 +1,6 @@
 CONFIG += qt thread debug ordered create_pc create_prl no_install_prl
 
-contains(QT_MAJOR_VERSION, 5) {
-  TARGET = qt5embedwidget
-} else {
-  TARGET = qtembedwidget
-}
+TARGET = qt5embedwidget
 TEMPLATE = lib
 
 isEmpty(VERSION) {
@@ -39,31 +35,18 @@ HEADERS += qmozcontext.h \
            qmozview_defined_wrapper.h \
            qmozview_templated_wrapper.h
 
-!contains(QT_MAJOR_VERSION, 4) {
-  SOURCES += quickmozview.cpp qmoztexturenode.cpp qsgthreadobject.cpp
-  HEADERS += quickmozview.h qmoztexturenode.h qsgthreadobject.h
-  !isEmpty(NO_PRIVATE_API) {
-    DEFINES += NO_PRIVATE_API
-  } else {
-    SOURCES += qmozviewsgnode.cpp
-    HEADERS += qmozviewsgnode.h
-  }
+SOURCES += quickmozview.cpp qmoztexturenode.cpp qsgthreadobject.cpp
+HEADERS += quickmozview.h qmoztexturenode.h qsgthreadobject.h
+!isEmpty(NO_PRIVATE_API) {
+  DEFINES += NO_PRIVATE_API
+} else {
+  SOURCES += qmozviewsgnode.cpp
+  HEADERS += qmozviewsgnode.h
 }
-contains(QT_MAJOR_VERSION, 4) {
+
+!isEmpty(BUILD_QT5QUICK1) {
   SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
   HEADERS += qdeclarativemozview.h qgraphicsmozview.h
-} else {
-  !isEmpty(BUILD_QT5QUICK1) {
-    SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
-    HEADERS += qdeclarativemozview.h qgraphicsmozview.h
-  }
-}
-
-
-CONFIG(opengl) {
-  message(Building with OpenGL support.)
-} else {
-  message(OpenGL support is not available.)
 }
 
 include(qmozembed.pri)
@@ -74,28 +57,19 @@ include($$RELATIVE_PATH/relative-objdir.pri)
 
 PREFIX = /usr
 
-contains(QT_MAJOR_VERSION, 4) {
-  QT += opengl
-  PKGCONFIG += QJson
-} else {
-  QT += quick qml
-  isEmpty(NO_PRIVATE_API) {
-    QT += quick-private
-  }
-  !isEmpty(BUILD_QT5QUICK1) {
-    QT += declarative widgets opengl
-  }
+QT += quick qml
+isEmpty(NO_PRIVATE_API) {
+  QT += quick-private
+}
+!isEmpty(BUILD_QT5QUICK1) {
+  QT += declarative widgets opengl
 }
 
 #DEFINES += Q_DEBUG_LOG
 
 target.path = $$PREFIX/lib
 
-contains(QT_MAJOR_VERSION, 5) {
-  QMAKE_PKGCONFIG_NAME = qt5embedwidget
-} else {
-  QMAKE_PKGCONFIG_NAME = qtembedwidget
-}
+QMAKE_PKGCONFIG_NAME = qt5embedwidget
 QMAKE_PKGCONFIG_DESCRIPTION = Model that emits process info
 QMAKE_PKGCONFIG_LIBDIR = $$target.path
 QMAKE_PKGCONFIG_INCDIR = $$target.path

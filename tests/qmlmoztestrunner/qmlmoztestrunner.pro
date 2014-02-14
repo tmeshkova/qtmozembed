@@ -9,11 +9,7 @@ VDEPTH_PATH=tests/qmlmoztestrunner
 include($$RELATIVE_PATH/relative-objdir.pri)
 
 INCLUDEPATH+=$$RELATIVE_PATH/src
-contains(QT_MAJOR_VERSION, 5) {
-  LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqt5embedwidget
-} else {
-  LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqtembedwidget
-}
+LIBS+= -L$$RELATIVE_PATH/$$OBJ_BUILD_PATH/src -lqt5embedwidget
 
 isEmpty(DEFAULT_COMPONENT_PATH) {
   DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"/usr/lib/mozembedlite/\\\"\"
@@ -21,18 +17,10 @@ isEmpty(DEFAULT_COMPONENT_PATH) {
   DEFINES += DEFAULT_COMPONENTS_PATH=\"\\\"$$DEFAULT_COMPONENT_PATH\\\"\"
 }
 
-contains(QT_MAJOR_VERSION, 4) {
-  LIBS += -lQtQuickTest
-  PKGCONFIG += QJson
-} else {
-  PKGCONFIG += Qt5QuickTest
-  QT += qml quick
-  !isEmpty(BUILD_QT5QUICK1) {
-    QT += declarative
-  }
-}
-contains(QT_CONFIG, opengl)|contains(QT_CONFIG, opengles1)|contains(QT_CONFIG, opengles2) {
-    QT += opengl
+PKGCONFIG += Qt5QuickTest
+QT += qml quick
+!isEmpty(BUILD_QT5QUICK1) {
+  QT += declarative
 }
 
 target.path = $$[QT_INSTALL_BINS]

@@ -7,15 +7,8 @@
 #define LOG_COMPONENT "QGraphicsMozViewPrivate"
 
 #include <QTouchEvent>
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QApplication>
-#include <QInputContext>
-#include <qjson/serializer.h>
-#include <qjson/parser.h>
-#else
 #include <QJsonDocument>
 #include <QGuiApplication>
-#endif
 
 #include "qgraphicsmozview_p.h"
 #include "qmozcontext.h"
@@ -36,11 +29,10 @@ using namespace mozilla::embedlite;
 
 qint64 current_timestamp(QTouchEvent* aEvent)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     if (aEvent) {
         return aEvent->timestamp();
     }
-#endif
+
     struct timeval te;
     gettimeofday(&te, NULL);
     qint64 milliseconds = te.tv_sec*1000LL + te.tv_usec/1000;
@@ -53,9 +45,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mView(NULL)
     , mViewInitialized(false)
     , mBgColor(Qt::white)
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     , mTempTexture(NULL)
-#endif
     , mEnabled(true)
     , mChromeGestureEnabled(true)
     , mChromeGestureThreshold(0.0)
@@ -314,25 +304,16 @@ void QGraphicsMozViewPrivate::RecvAsyncMessage(const char16_t* aMessage, const c
     NS_ConvertUTF16toUTF8 data(aData);
 
     bool ok = false;
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-    QJson::Parser parser;
-    QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
-#else
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
     ok = error.error == QJsonParseError::NoError;
     QVariant vdata = doc.toVariant();
-#endif
 
     if (ok) {
         LOGT("mesg:%s, data:%s", message.get(), data.get());
         mViewIface->recvAsyncMessage(message.get(), vdata);
     } else {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-        LOGT("parse: err:%s, errLine:%i", parser.errorString().toUtf8().data(), parser.errorLine());
-#else
         LOGT("parse: err:%s, errLine:%i", error.errorString().toUtf8().data(), error.offset);
-#endif
     }
 }
 
@@ -343,24 +324,16 @@ char* QGraphicsMozViewPrivate::RecvSyncMessage(const char16_t* aMessage, const c
     NS_ConvertUTF16toUTF8 data(aData);
 
     bool ok = false;
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-    QJson::Parser parser;
-    QVariant vdata = parser.parse(QByteArray(data.get()), &ok);
-#else
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
     ok = error.error == QJsonParseError::NoError;
     QVariant vdata = doc.toVariant();
-#endif
+
     mViewIface->recvSyncMessage(message.get(), vdata, &response);
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-    QJson::Serializer serializer;
-    QByteArray array = serializer.serialize(response.getMessage());
-#else
     QJsonDocument respdoc = QJsonDocument::fromVariant(response.getMessage());
     QByteArray array = respdoc.toJson();
-#endif
+
     LOGT("msg:%s, response:%s", message.get(), array.constData());
     return strdup(array.constData());
 }
@@ -416,26 +389,6 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
     if (aFocusChange) {
         mIsInputFieldFocused = aIstate;
         if (mViewIsFocused) {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-            QWidget* focusWidget = qApp->focusWidget();
-            if (focusWidget && aFocusChange) {
-                QInputContext* inputContext = qApp->inputContext();
-                if (!inputContext) {
-                    LOGT("Requesting SIP: but no input context");
-                    return;
-                }
-                if (aIstate) {
-                    QEvent request(QEvent::RequestSoftwareInputPanel);
-                    inputContext->filterEvent(&request);
-                    focusWidget->setAttribute(Qt::WA_InputMethodEnabled, true);
-                    inputContext->setFocusWidget(focusWidget);
-                } else {
-                    QEvent request(QEvent::CloseSoftwareInputPanel);
-                    inputContext->filterEvent(&request);
-                    inputContext->reset();
-                }
-            }
-#else
 #ifndef QT_NO_IM
             QInputMethod* inputContext = qGuiApp->inputMethod();
             if (!inputContext) {
@@ -450,7 +403,6 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
             }
             inputContext->update(Qt::ImQueryAll);
 #endif
-#endif
         }
 
     }
@@ -459,11 +411,7 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
 
 void QGraphicsMozViewPrivate::GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext)
 {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-    *aNativeIMEContext = (intptr_t)qApp->inputContext();
-#else
     *aNativeIMEContext = (intptr_t)qApp->inputMethod();
-#endif
 }
 
 void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
@@ -635,12 +583,10 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         }
     } else if (event->type() == QEvent::TouchEnd) {
         HandleTouchEnd(draggingChanged, pinchingChanged);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     } else if (event->type() == QEvent::TouchCancel) {
         HandleTouchEnd(draggingChanged, pinchingChanged);
         testFlick = false;
         mCanFlick = false;
-#endif
     }
 
     if (testFlick) {
@@ -652,7 +598,6 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp, 0);
     MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_END, timeStamp, 0);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     // Add active touch point to cancelled touch sequence.
     if (event->type() == QEvent::TouchCancel && touchPointsCount == 0) {
         QMapIterator<int, QPointF> i(mActiveTouchPoints);
@@ -668,7 +613,6 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         // All touch point should be cleared but let's clear active touch points anyways.
         mActiveTouchPoints.clear();
     }
-#endif
 
     for (int i = 0; i < touchPointsCount; ++i) {
         const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);

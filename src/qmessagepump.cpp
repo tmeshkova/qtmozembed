@@ -10,12 +10,7 @@
 #include <QEvent>
 #include <QThread>
 #include <QAbstractEventDispatcher>
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QCoreApplication>
-#else
 #include <QGuiApplication>
-#endif
 
 #include "qmessagepump.h"
 
