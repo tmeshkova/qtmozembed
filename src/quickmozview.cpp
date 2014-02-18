@@ -378,7 +378,26 @@ void QuickMozView::inputMethodEvent(QInputMethodEvent* event)
     LOGT("cStr:%s, preStr:%s, replLen:%i, replSt:%i", event->commitString().toUtf8().data(), event->preeditString().toUtf8().data(), event->replacementLength(), event->replacementStart());
     mPreedit = !event->preeditString().isEmpty();
     if (d->mViewInitialized) {
-        d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+        if (d->mInputMethodHints & Qt::ImhFormattedNumbersOnly || d->mInputMethodHints & Qt::ImhDialableCharactersOnly) {
+            bool ok;
+            int asciiNumber = event->commitString().toInt(&ok) + Qt::Key_0;
+
+            if (ok) {
+                int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(asciiNumber, Qt::NoModifier);
+                int32_t charCode = 0;
+
+                if (event->commitString().length() && event->commitString()[0].isPrint()) {
+                    charCode = (int32_t)event->commitString()[0].unicode();
+                }
+                d->mView->SendKeyPress(domKeyCode, 0, charCode);
+                d->mView->SendKeyRelease(domKeyCode, 0, charCode);
+                qGuiApp->inputMethod()->reset();
+            } else {
+                d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+            }
+        } else {
+            d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+        }
     }
 }
 
