@@ -512,16 +512,16 @@ bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const floa
             // Update vertical scroll decorator
             qreal ySizeRatio = mContentRect.height() / mScrollableSize.height();
             qreal tmpValue = mSize.height() * ySizeRatio;
-            mVerticalScrollDecorator.setHeight(tmpValue);
+            mVerticalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.y() * ySizeRatio;
-            mVerticalScrollDecorator.setY(tmpValue);
+            mVerticalScrollDecorator.setPosition(tmpValue);
 
             // Update horizontal scroll decorator
             qreal xSizeRatio = mContentRect.width() / mScrollableSize.width();
             tmpValue = mSize.width() * xSizeRatio;
-            mHorizontalScrollDecorator.setWidth(tmpValue);
+            mHorizontalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.x() * xSizeRatio;
-            mHorizontalScrollDecorator.setX(tmpValue);
+            mHorizontalScrollDecorator.setPosition(tmpValue);
         }
     }
 

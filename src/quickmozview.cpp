@@ -27,8 +27,7 @@
 
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
-#include "qmozhorizontalscrolldecorator.h"
-#include "qmozverticalscrolldecorator.h"
+#include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
 #include "qsgthreadobject.h"
 #include "assert.h"
@@ -559,12 +558,12 @@ bool QuickMozView::pinching() const{
     return d->mPinching;
 }
 
-QMozVerticalScrollDecorator* QuickMozView::verticalScrollDecorator() const
+QMozScrollDecorator* QuickMozView::verticalScrollDecorator() const
 {
     return &d->mVerticalScrollDecorator;
 }
 
-QMozHorizontalScrollDecorator* QuickMozView::horizontalScrollDecorator() const
+QMozScrollDecorator* QuickMozView::horizontalScrollDecorator() const
 {
     return &d->mHorizontalScrollDecorator;
 }

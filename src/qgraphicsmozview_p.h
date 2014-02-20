@@ -15,8 +15,7 @@
 #include <QPointF>
 #include <QMap>
 #include <QSGSimpleTextureNode>
-#include "qmozhorizontalscrolldecorator.h"
-#include "qmozverticalscrolldecorator.h"
+#include "qmozscrolldecorator.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "qmozview_templated_wrapper.h"
 #include "qmozview_defined_wrapper.h"
@@ -113,8 +112,8 @@ public:
     QSizeF mScrollableSize;
     QPointF mScrollableOffset;
     // Non visual
-    QMozVerticalScrollDecorator mVerticalScrollDecorator;
-    QMozHorizontalScrollDecorator mHorizontalScrollDecorator;
+    QMozScrollDecorator mVerticalScrollDecorator;
+    QMozScrollDecorator mHorizontalScrollDecorator;
     float mContentResolution;
     bool mIsPainted;
     Qt::InputMethodHints mInputMethodHints;

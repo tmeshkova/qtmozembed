@@ -17,8 +17,7 @@ isEmpty(VERSION) {
 }
 
 SOURCES += qmozcontext.cpp \
-           qmozhorizontalscrolldecorator.cpp \
-           qmozverticalscrolldecorator.cpp \
+           qmozscrolldecorator.cpp \
            qmessagepump.cpp \
            EmbedQtKeyUtils.cpp \
            qgraphicsmozview_p.cpp \
@@ -26,8 +25,7 @@ SOURCES += qmozcontext.cpp \
 
 HEADERS += qmozcontext.h \
            qmozviewcreator.h \
-           qmozhorizontalscrolldecorator.h \
-           qmozverticalscrolldecorator.h \
+           qmozscrolldecorator.h \
            qmessagepump.h \
            EmbedQtKeyUtils.h \
            qgraphicsmozview_p.h \
