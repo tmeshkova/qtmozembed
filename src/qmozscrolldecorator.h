@@ -13,6 +13,7 @@ class QMozScrollDecorator : public QObject
     Q_OBJECT
     Q_PROPERTY(int position READ position NOTIFY positionChanged FINAL)
     Q_PROPERTY(int size READ size NOTIFY sizeChanged FINAL)
+    Q_PROPERTY(bool moving READ moving NOTIFY movingChanged FINAL)
 
 public:
     QMozScrollDecorator(QObject *parent = 0);
@@ -24,13 +25,18 @@ public:
     int size() const;
     void setSize(qreal size);
 
+    bool moving() const;
+    void setMoving(bool moving);
+
 Q_SIGNALS:
     void positionChanged();
     void sizeChanged();
+    void movingChanged();
 
 private:
     int mPos;
     int mSize;
+    bool mMoving;
 };
 
 #endif

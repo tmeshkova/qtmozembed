@@ -10,6 +10,7 @@ QMozScrollDecorator::QMozScrollDecorator(QObject *parent)
     : QObject(parent)
     , mPos(0)
     , mSize(0)
+    , mMoving(false)
 {
 }
 
@@ -43,5 +44,18 @@ void QMozScrollDecorator::setSize(qreal size)
     if (mSize != size) {
         mSize = size;
         Q_EMIT sizeChanged();
+    }
+}
+
+bool QMozScrollDecorator::moving() const
+{
+    return mMoving;
+}
+
+void QMozScrollDecorator::setMoving(bool moving)
+{
+    if (mMoving != moving) {
+        mMoving = moving;
+        Q_EMIT movingChanged();
     }
 }

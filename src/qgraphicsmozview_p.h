@@ -75,6 +75,7 @@ public:
     void TestFlickingMode(QTouchEvent *event);
     void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
     void ResetState();
+    void UpdateMoving(bool moving);
 
     IMozQViewIface* mViewIface;
     QMozContext* mContext;
@@ -114,6 +115,7 @@ public:
     // Non visual
     QMozScrollDecorator mVerticalScrollDecorator;
     QMozScrollDecorator mHorizontalScrollDecorator;
+    bool mRootFrameScrolling;
     float mContentResolution;
     bool mIsPainted;
     Qt::InputMethodHints mInputMethodHints;
