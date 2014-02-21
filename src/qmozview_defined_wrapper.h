@@ -3,8 +3,7 @@
 
 #include <QVariant>
 
-class QMozVerticalScrollDecorator;
-class QMozHorizontalScrollDecorator;
+class QMozScrollDecorator;
 
 class QMozReturnValue : public QObject
 {
@@ -60,8 +59,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     Q_PROPERTY(bool dragging READ dragging NOTIFY draggingChanged FINAL) \
     Q_PROPERTY(bool moving READ moving NOTIFY movingChanged FINAL) \
     Q_PROPERTY(bool pinching READ pinching NOTIFY pinchingChanged FINAL) \
-    Q_PROPERTY(QMozVerticalScrollDecorator* verticalScrollDecorator READ verticalScrollDecorator NOTIFY verticalScrollDecoratorChanged FINAL) \
-    Q_PROPERTY(QMozHorizontalScrollDecorator* horizontalScrollDecorator READ horizontalScrollDecorator NOTIFY horizontalScrollDecoratorChanged FINAL) \
+    Q_PROPERTY(QMozScrollDecorator* verticalScrollDecorator READ verticalScrollDecorator NOTIFY verticalScrollDecoratorChanged FINAL) \
+    Q_PROPERTY(QMozScrollDecorator* horizontalScrollDecorator READ horizontalScrollDecorator NOTIFY horizontalScrollDecoratorChanged FINAL) \
     Q_PROPERTY(bool chrome READ chrome WRITE setChrome NOTIFY chromeChanged FINAL) \
     Q_PROPERTY(bool chromeGestureEnabled READ chromeGestureEnabled WRITE setChromeGestureEnabled NOTIFY chromeGestureEnabledChanged FINAL) \
     Q_PROPERTY(qreal chromeGestureThreshold READ chromeGestureThreshold WRITE setChromeGestureThreshold NOTIFY chromeGestureThresholdChanged FINAL)
@@ -89,8 +88,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     bool dragging() const; \
     bool moving() const; \
     bool pinching() const; \
-    QMozVerticalScrollDecorator* verticalScrollDecorator() const; \
-    QMozHorizontalScrollDecorator* horizontalScrollDecorator() const; \
+    QMozScrollDecorator* verticalScrollDecorator() const; \
+    QMozScrollDecorator* horizontalScrollDecorator() const; \
     bool chromeGestureEnabled() const; \
     void setChromeGestureEnabled(bool value); \
     bool chrome() const; \

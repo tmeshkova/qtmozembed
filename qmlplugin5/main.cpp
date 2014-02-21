@@ -8,8 +8,7 @@
 #include <QtQml/qqml.h>
 #include "quickmozview.h"
 #include "qmozcontext.h"
-#include "qmozhorizontalscrolldecorator.h"
-#include "qmozverticalscrolldecorator.h"
+#include "qmozscrolldecorator.h"
 #include "qmlmozcontext.h"
 
 class QtMozEmbedPlugin : public QQmlExtensionPlugin
@@ -23,8 +22,7 @@ public:
         Q_ASSERT(uri == QLatin1String("Qt5Mozilla"));
         qmlRegisterType<QuickMozView>("Qt5Mozilla", 1, 0, "QmlMozView");
         qmlRegisterType<QmlMozContext>("Qt5Mozilla", 1, 0, "QmlMozContext");
-        qmlRegisterUncreatableType<QMozVerticalScrollDecorator>("Qt5Mozilla", 1, 0, "QmlMozVerticalScrollDecorator", "");
-        qmlRegisterUncreatableType<QMozHorizontalScrollDecorator>("Qt5Mozilla", 1, 0, "QmlMozHorizontalScrollDecorator", "");
+        qmlRegisterUncreatableType<QMozScrollDecorator>("Qt5Mozilla", 1, 0, "QmlMozScrollDecorator", "");
         setenv("EMBED_COMPONENTS_PATH", DEFAULT_COMPONENTS_PATH, 1);
     }
 };

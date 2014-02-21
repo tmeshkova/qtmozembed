@@ -15,8 +15,7 @@
 #include <QPointF>
 #include <QMap>
 #include <QSGSimpleTextureNode>
-#include "qmozhorizontalscrolldecorator.h"
-#include "qmozverticalscrolldecorator.h"
+#include "qmozscrolldecorator.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "qmozview_templated_wrapper.h"
 #include "qmozview_defined_wrapper.h"
@@ -76,6 +75,7 @@ public:
     void TestFlickingMode(QTouchEvent *event);
     void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
     void ResetState();
+    void UpdateMoving(bool moving);
 
     IMozQViewIface* mViewIface;
     QMozContext* mContext;
@@ -113,8 +113,9 @@ public:
     QSizeF mScrollableSize;
     QPointF mScrollableOffset;
     // Non visual
-    QMozVerticalScrollDecorator mVerticalScrollDecorator;
-    QMozHorizontalScrollDecorator mHorizontalScrollDecorator;
+    QMozScrollDecorator mVerticalScrollDecorator;
+    QMozScrollDecorator mHorizontalScrollDecorator;
+    bool mRootFrameScrolling;
     float mContentResolution;
     bool mIsPainted;
     Qt::InputMethodHints mInputMethodHints;

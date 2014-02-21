@@ -183,9 +183,20 @@ void QGraphicsMozViewPrivate::ResetState()
     mMoveDelta = 0.0;
 
     mFlicking = false;
-    if (mMoving) {
-        mMoving = false;
+    UpdateMoving(false);
+}
+
+void QGraphicsMozViewPrivate::UpdateMoving(bool moving)
+{
+    if (mMoving != moving) {
+        mMoving = moving;
         mViewIface->movingChanged();
+    }
+
+    if (mRootFrameScrolling) {
+        mVerticalScrollDecorator.setMoving(mMoving);
+        mHorizontalScrollDecorator.setMoving(mMoving);
+        mRootFrameScrolling = mMoving;
     }
 }
 
@@ -501,6 +512,9 @@ bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const floa
     float posX(aPosition.x * mContentResolution);
     float posY(aPosition.y * mContentResolution);
 
+    // This is set to false when flick or pan stops or when a new touch sequence starts.
+    mRootFrameScrolling = true;
+
     if (!gfx::FuzzyEqual(mScrollableOffset.x(), posX, SCROLL_EPSILON) ||
         !gfx::FuzzyEqual(mScrollableOffset.y(), posY, SCROLL_EPSILON)) {
 
@@ -512,16 +526,16 @@ bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const floa
             // Update vertical scroll decorator
             qreal ySizeRatio = mContentRect.height() / mScrollableSize.height();
             qreal tmpValue = mSize.height() * ySizeRatio;
-            mVerticalScrollDecorator.setHeight(tmpValue);
+            mVerticalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.y() * ySizeRatio;
-            mVerticalScrollDecorator.setY(tmpValue);
+            mVerticalScrollDecorator.setPosition(tmpValue);
 
             // Update horizontal scroll decorator
             qreal xSizeRatio = mContentRect.width() / mScrollableSize.width();
             tmpValue = mSize.width() * xSizeRatio;
-            mHorizontalScrollDecorator.setWidth(tmpValue);
+            mHorizontalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.x() * xSizeRatio;
-            mHorizontalScrollDecorator.setX(tmpValue);
+            mHorizontalScrollDecorator.setPosition(tmpValue);
         }
     }
 
@@ -680,18 +694,14 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
 
     if (event->type() == QEvent::TouchEnd) {
         if (mCanFlick) {
-            if (mMoving != mCanFlick) {
-                mMoving = mCanFlick;
-                mViewIface->movingChanged();
-            }
+            UpdateMoving(mCanFlick);
             mViewIface->startMoveMonitoring();
         } else {
             // From dragging (panning) end to clean state
             ResetState();
         }
-    } else if (mMoving != mDragging) {
-        mMoving = mDragging;
-        mViewIface->movingChanged();
+    } else {
+        UpdateMoving(mDragging);
     }
 }
 
