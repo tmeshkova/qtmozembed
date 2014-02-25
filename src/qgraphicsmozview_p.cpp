@@ -91,13 +91,8 @@ void QGraphicsMozViewPrivate::CompositorCreated()
     mViewIface->createGeckoGLContext();
 }
 
-void QGraphicsMozViewPrivate::UpdateContentSize(unsigned int aWidth, unsigned int aHeight)
+void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY, bool aRootFrame)
 {
-    // Get mContentResolution at startup via context's pixelRatio
-    if (mContentResolution == 0.0) {
-        mContentResolution = mContext->pixelRatio();
-    }
-
     bool widthChanged = false;
     bool heightChanged = false;
     // Emit changes only after both values have been updated.
@@ -109,6 +104,34 @@ void QGraphicsMozViewPrivate::UpdateContentSize(unsigned int aWidth, unsigned in
     if (mScrollableSize.height() != aHeight * mContentResolution) {
         mScrollableSize.setHeight(aHeight * mContentResolution);
         heightChanged = true;
+    }
+
+    if (aRootFrame) {
+        float posX(aPosX * mContentResolution);
+        float posY(aPosY * mContentResolution);
+        if (!gfx::FuzzyEqual(mScrollableOffset.x(), posX, SCROLL_EPSILON) ||
+            !gfx::FuzzyEqual(mScrollableOffset.y(), posY, SCROLL_EPSILON)) {
+
+            mScrollableOffset.setX(posX);
+            mScrollableOffset.setY(posY);
+            mViewIface->scrollableOffsetChanged();
+
+            if (mEnabled) {
+                // Update vertical scroll decorator
+                qreal ySizeRatio = mContentRect.height() / mScrollableSize.height();
+                qreal tmpValue = mSize.height() * ySizeRatio;
+                mVerticalScrollDecorator.setSize(tmpValue);
+                tmpValue = mScrollableOffset.y() * ySizeRatio;
+                mVerticalScrollDecorator.setPosition(tmpValue);
+
+                // Update horizontal scroll decorator
+                qreal xSizeRatio = mContentRect.width() / mScrollableSize.width();
+                tmpValue = mSize.width() * xSizeRatio;
+                mHorizontalScrollDecorator.setSize(tmpValue);
+                tmpValue = mScrollableOffset.x() * xSizeRatio;
+                mHorizontalScrollDecorator.setPosition(tmpValue);
+            }
+        }
     }
 
     if (widthChanged) {
@@ -462,10 +485,7 @@ void QGraphicsMozViewPrivate::SetPageRect(const gfxRect& aCssPageRect)
 
 bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize)
 {
-    // Get mContentResolution at startup via context's pixelRatio
-    if (mContentResolution == 0.0) {
-        mContentResolution = mContext->pixelRatio();
-    }
+    mContentResolution = mSize.width() / aContentRect.width;
 
     if (mContentRect.x() != aContentRect.x * mContentResolution || mContentRect.y() != aContentRect.y * mContentResolution ||
             mContentRect.width() != aContentRect.width * mContentResolution ||
@@ -502,43 +522,16 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
         }
     }
 
-    UpdateContentSize(aScrollableSize.width, aScrollableSize.height);
+    UpdateScrollArea(aScrollableSize.width, aScrollableSize.height, aContentRect.x, aContentRect.y, mRootFrameScrolling /*rootFrame*/ );
     return false;
 }
 
 bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const float aResolution)
 {
-    mContentResolution = aResolution;
-    float posX(aPosition.x * mContentResolution);
-    float posY(aPosition.y * mContentResolution);
-
-    // This is set to false when flick or pan stops or when a new touch sequence starts.
+    Q_UNUSED(aPosition);
+    Q_UNUSED(aResolution);
+    // TODO: Remove this to SendAsyncScrollDOMEvent once it has rootFrame scrolling information.
     mRootFrameScrolling = true;
-
-    if (!gfx::FuzzyEqual(mScrollableOffset.x(), posX, SCROLL_EPSILON) ||
-        !gfx::FuzzyEqual(mScrollableOffset.y(), posY, SCROLL_EPSILON)) {
-
-        mScrollableOffset.setX(posX);
-        mScrollableOffset.setY(posY);
-        mViewIface->scrollableOffsetChanged();
-
-        if (mEnabled) {
-            // Update vertical scroll decorator
-            qreal ySizeRatio = mContentRect.height() / mScrollableSize.height();
-            qreal tmpValue = mSize.height() * ySizeRatio;
-            mVerticalScrollDecorator.setSize(tmpValue);
-            tmpValue = mScrollableOffset.y() * ySizeRatio;
-            mVerticalScrollDecorator.setPosition(tmpValue);
-
-            // Update horizontal scroll decorator
-            qreal xSizeRatio = mContentRect.width() / mScrollableSize.width();
-            tmpValue = mSize.width() * xSizeRatio;
-            mHorizontalScrollDecorator.setSize(tmpValue);
-            tmpValue = mScrollableOffset.x() * xSizeRatio;
-            mHorizontalScrollDecorator.setPosition(tmpValue);
-        }
-    }
-
     return false;
 }
 

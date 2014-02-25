@@ -71,7 +71,7 @@ public:
     virtual void SetIsFocused(bool aIsFocused);
     virtual void CompositorCreated();
 
-    void UpdateContentSize(unsigned int aWidth, unsigned int aHeight);
+    void UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY, bool aRootFrame);
     void TestFlickingMode(QTouchEvent *event);
     void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
     void ResetState();
