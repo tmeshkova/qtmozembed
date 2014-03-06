@@ -321,6 +321,11 @@ void QGraphicsMozViewPrivate::OnLoadFinished(void)
     }
 }
 
+void QGraphicsMozViewPrivate::OnWindowCloseRequested()
+{
+    mViewIface->windowCloseRequested();
+}
+
 // View finally destroyed and deleted
 void QGraphicsMozViewPrivate::ViewDestroyed()
 {

@@ -132,6 +132,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void navigationHistoryChanged(); \
     void loadingChanged(); \
     void viewDestroyed(); \
+    void windowCloseRequested(); \
     void recvAsyncMessage(const QString message, const QVariant data); \
     bool recvSyncMessage(const QString message, const QVariant data, QMozReturnValue* response); \
     void loadRedirect(); \
