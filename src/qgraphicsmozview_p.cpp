@@ -500,17 +500,20 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
             // In MozView coordinates
             qreal offset = aContentRect.y * mContentResolution;
             qreal currentDelta = offset - mDragStartY;
+            LOGT("dragStartY: %f, %f, %f, %f, %d", mDragStartY, offset, currentDelta, mMoveDelta, (qAbs(currentDelta) < mMoveDelta));
 
             if (qAbs(currentDelta) < mMoveDelta) {
                 mDragStartY = offset;
             }
 
             if (currentDelta > mChromeGestureThreshold) {
+                LOGT("currentDelta > mChromeGestureThreshold: %d", mChrome);
                 if (mChrome) {
                     mChrome = false;
                     mViewIface->chromeChanged();
                 }
             } else if (currentDelta < -mChromeGestureThreshold) {
+                LOGT("currentDelta < -mChromeGestureThreshold: %d", mChrome);
                 if (!mChrome) {
                     mChrome = true;
                     mViewIface->chromeChanged();
@@ -578,7 +581,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     } else if (event->type() == QEvent::TouchUpdate) {
         if (!mDragging) {
             mDragging = true;
-            mDragStartY = mScrollableOffset.y();
+            mDragStartY = mContentRect.y() * mContentResolution;
             mMoveDelta = 0;
             draggingChanged = true;
         }
