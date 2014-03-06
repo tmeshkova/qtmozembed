@@ -315,7 +315,6 @@ void QMozContext::stopEmbedding()
 quint32
 QMozContext::createView(const QString& url, const quint32& parentId)
 {
-    Q_EMIT newWindowRequested(url);
     return d->mViewCreator ? d->mViewCreator->createView(url, parentId) : 0;
 }
 
