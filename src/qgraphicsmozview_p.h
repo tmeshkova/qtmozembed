@@ -65,14 +65,13 @@ public:
                                   nsIntPoint& aScrollOffset, float& aScaleX, float& aScaleY);
     virtual void SetPageRect(const gfxRect& aCssPageRect);
     virtual bool SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize);
-    virtual bool ScrollUpdate(const gfxPoint& aPosition, const float aResolution);
     virtual bool HandleLongTap(const nsIntPoint& aPoint);
     virtual bool HandleSingleTap(const nsIntPoint& aPoint);
     virtual bool HandleDoubleTap(const nsIntPoint& aPoint);
     virtual void SetIsFocused(bool aIsFocused);
     virtual void CompositorCreated();
 
-    void UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY, bool aRootFrame);
+    void UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY);
     void TestFlickingMode(QTouchEvent *event);
     void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
     void ResetState();
@@ -116,7 +115,6 @@ public:
     // Non visual
     QMozScrollDecorator mVerticalScrollDecorator;
     QMozScrollDecorator mHorizontalScrollDecorator;
-    bool mRootFrameScrolling;
     float mContentResolution;
     bool mIsPainted;
     Qt::InputMethodHints mInputMethodHints;

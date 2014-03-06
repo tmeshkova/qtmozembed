@@ -34,7 +34,6 @@ public:
 
 Q_SIGNALS:
     void onInitialized();
-    void newWindowRequested(const QString& url);
     void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
