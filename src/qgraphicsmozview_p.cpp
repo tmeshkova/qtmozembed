@@ -91,7 +91,7 @@ void QGraphicsMozViewPrivate::CompositorCreated()
     mViewIface->createGeckoGLContext();
 }
 
-void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY, bool aRootFrame)
+void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY)
 {
     bool widthChanged = false;
     bool heightChanged = false;
@@ -106,29 +106,32 @@ void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int
         heightChanged = true;
     }
 
-    if (aRootFrame) {
-        if (!gfx::FuzzyEqual(mScrollableOffset.x(), aPosX, SCROLL_EPSILON) ||
-            !gfx::FuzzyEqual(mScrollableOffset.y(), aPosY, SCROLL_EPSILON)) {
+    if (!gfx::FuzzyEqual(mScrollableOffset.x(), aPosX, SCROLL_EPSILON) ||
+        !gfx::FuzzyEqual(mScrollableOffset.y(), aPosY, SCROLL_EPSILON)) {
 
-            mScrollableOffset.setX(aPosX);
-            mScrollableOffset.setY(aPosY);
-            mViewIface->scrollableOffsetChanged();
+        mScrollableOffset.setX(aPosX);
+        mScrollableOffset.setY(aPosY);
+        mViewIface->scrollableOffsetChanged();
 
-            if (mEnabled) {
-                // Update vertical scroll decorator
-                qreal ySizeRatio = mContentRect.height() * mContentResolution / mScrollableSize.height();
-                qreal tmpValue = mSize.height() * ySizeRatio;
-                mVerticalScrollDecorator.setSize(tmpValue);
-                tmpValue = mScrollableOffset.y() * ySizeRatio;
-                mVerticalScrollDecorator.setPosition(tmpValue);
+        if (mEnabled) {
+            // We could add moving timers for both of these and check them separately.
+            // Currently we have only one timer event for content.
+            mVerticalScrollDecorator.setMoving(true);
+            mHorizontalScrollDecorator.setMoving(true);
 
-                // Update horizontal scroll decorator
-                qreal xSizeRatio = mContentRect.width() * mContentResolution / mScrollableSize.width();
-                tmpValue = mSize.width() * xSizeRatio;
-                mHorizontalScrollDecorator.setSize(tmpValue);
-                tmpValue = mScrollableOffset.x() * xSizeRatio;
-                mHorizontalScrollDecorator.setPosition(tmpValue);
-            }
+            // Update vertical scroll decorator
+            qreal ySizeRatio = mContentRect.height() * mContentResolution / mScrollableSize.height();
+            qreal tmpValue = mSize.height() * ySizeRatio;
+            mVerticalScrollDecorator.setSize(tmpValue);
+            tmpValue = mScrollableOffset.y() * ySizeRatio;
+            mVerticalScrollDecorator.setPosition(tmpValue);
+
+            // Update horizontal scroll decorator
+            qreal xSizeRatio = mContentRect.width() * mContentResolution / mScrollableSize.width();
+            tmpValue = mSize.width() * xSizeRatio;
+            mHorizontalScrollDecorator.setSize(tmpValue);
+            tmpValue = mScrollableOffset.x() * xSizeRatio;
+            mHorizontalScrollDecorator.setPosition(tmpValue);
         }
     }
 
@@ -205,6 +208,8 @@ void QGraphicsMozViewPrivate::ResetState()
 
     mFlicking = false;
     UpdateMoving(false);
+    mVerticalScrollDecorator.setMoving(false);
+    mHorizontalScrollDecorator.setMoving(false);
 }
 
 void QGraphicsMozViewPrivate::UpdateMoving(bool moving)
@@ -212,12 +217,6 @@ void QGraphicsMozViewPrivate::UpdateMoving(bool moving)
     if (mMoving != moving) {
         mMoving = moving;
         mViewIface->movingChanged();
-    }
-
-    if (mRootFrameScrolling) {
-        mVerticalScrollDecorator.setMoving(mMoving);
-        mHorizontalScrollDecorator.setMoving(mMoving);
-        mRootFrameScrolling = mMoving;
     }
 }
 
@@ -523,17 +522,9 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
         }
     }
 
-    UpdateScrollArea(aScrollableSize.width * mContentResolution, aScrollableSize.height * mContentResolution,
-                     aContentRect.x * mContentResolution, aContentRect.y * mContentResolution, mRootFrameScrolling /*rootFrame*/ );
-    return false;
-}
 
-bool QGraphicsMozViewPrivate::ScrollUpdate(const gfxPoint& aPosition, const float aResolution)
-{
-    Q_UNUSED(aPosition);
-    Q_UNUSED(aResolution);
-    // TODO: Remove this to SendAsyncScrollDOMEvent once it has rootFrame scrolling information.
-    mRootFrameScrolling = true;
+    UpdateScrollArea(aScrollableSize.width * mContentResolution, aScrollableSize.height * mContentResolution,
+                     aContentRect.x * mContentResolution, aContentRect.y * mContentResolution);
     return false;
 }
 
