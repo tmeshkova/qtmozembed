@@ -43,6 +43,7 @@ public:
     virtual void OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal);
     virtual void OnLoadStarted(const char* aLocation);
     virtual void OnLoadFinished(void);
+    virtual void OnWindowCloseRequested();
 
     // View finally destroyed and deleted
     virtual void ViewDestroyed();

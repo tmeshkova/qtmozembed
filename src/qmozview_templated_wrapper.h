@@ -30,6 +30,7 @@ public:
     virtual void navigationHistoryChanged() = 0;
     virtual void loadingChanged() = 0;
     virtual void viewDestroyed() = 0;
+    virtual void windowCloseRequested() = 0;
     virtual void recvAsyncMessage(const QString message, const QVariant data) = 0;
     virtual bool recvSyncMessage(const QString message, const QVariant data, QMozReturnValue* response) = 0;
     virtual void loadRedirect() = 0;
@@ -111,6 +112,10 @@ public:
     void viewDestroyed()
     {
         Q_EMIT view.viewDestroyed();
+    }
+    void windowCloseRequested()
+    {
+        Q_EMIT view.windowCloseRequested();
     }
     void recvAsyncMessage(const QString message, const QVariant data)
     {
