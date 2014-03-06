@@ -75,13 +75,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
     connect(this, SIGNAL(dispatchItemUpdate()), this, SLOT(update()));
     updateEnabled();
-    if (!d->mContext->initialized()) {
-        connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
-    } else {
-        // QQuickWindow::sceneGraphInitialized is emitted only once for a QQuickWindow.
-        init();
-        onInitialized();
-    }
 }
 
 QuickMozView::~QuickMozView()
@@ -127,7 +120,7 @@ QuickMozView::onRenderThreadReady()
     if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
-        d->mView = d->mContext->GetApp()->CreateView();
+        d->mView = d->mContext->GetApp()->CreateView(mParentID);
         d->mView->SetListener(d);
     }
 }
@@ -881,5 +874,21 @@ void QuickMozView::timerEvent(QTimerEvent *event)
         }
         mOffsetX = offsetX;
         mOffsetY = offsetY;
+    }
+}
+
+void QuickMozView::componentComplete()
+{
+    QQuickItem::componentComplete();
+    // Now property assigned to QuickMozView are in place. Do rest of initialization
+    // steps. For instance mParentID needs to be passed to CreateView when subviews are created.
+    // TODO: Initialization steps could be improved futher e.g. by adding messageListeners
+    // property and adding them all them view initialized so that it would not be a need operation
+    // in viewInitilized signal handler.
+    if (!d->mContext->initialized()) {
+        connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
+    } else {
+        init();
+        onInitialized();
     }
 }
