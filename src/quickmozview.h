@@ -17,6 +17,7 @@ class QSGThreadObject;
 class QuickMozView : public QQuickItem
 {
     Q_OBJECT
+    Q_PROPERTY(int parentId READ parentId WRITE setParentID NOTIFY parentIdChanged FINAL)
     Q_PROPERTY(unsigned parentid WRITE setParentID)
     Q_PROPERTY(QObject* child READ getChild NOTIFY childChanged)
 
@@ -30,6 +31,8 @@ public:
     void RenderToCurrentContext();
     void startMoveMonitoring();
     void RefreshNodeTexture();
+
+    int parentId() const;
 
 private:
     QObject* getChild() { return this; }
@@ -46,6 +49,7 @@ Q_SIGNALS:
     void wrapRenderThreadGLContext();
     void dispatchItemUpdate();
     void textureReady(int id, const QSize &size);
+    void parentIdChanged();
 
     Q_MOZ_VIEW_SIGNALS
 
