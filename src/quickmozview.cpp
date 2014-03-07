@@ -289,6 +289,11 @@ void QuickMozView::RefreshNodeTexture()
     }
 }
 
+int QuickMozView::parentId() const
+{
+    return mParentID;
+}
+
 bool QuickMozView::Invalidate()
 {
 #ifndef NO_PRIVATE_API
@@ -705,7 +710,11 @@ quint32 QuickMozView::uniqueID() const
 
 void QuickMozView::setParentID(unsigned aParentID)
 {
-    mParentID = aParentID;
+    if (aParentID != mParentID) {
+        mParentID = aParentID;
+        Q_EMIT parentIdChanged();
+    }
+
     if (mParentID) {
         onInitialized();
     }
