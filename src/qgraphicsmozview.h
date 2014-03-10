@@ -97,6 +97,7 @@ Q_SIGNALS:
     void movingChanged();
     void chromeChanged();
     void pinchingChanged();
+    void windowCloseRequested();
 
 protected:
     virtual void setGeometry(const QRectF& rect);
