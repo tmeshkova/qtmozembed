@@ -55,6 +55,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mInThreadRendering(false)
 #endif
   , mPreedit(false)
+  , mActive(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -294,6 +295,20 @@ int QuickMozView::parentId() const
     return mParentID;
 }
 
+bool QuickMozView::active() const
+{
+    return mActive;
+}
+
+void QuickMozView::setActive(bool active)
+{
+    if (mActive != active) {
+        mActive = active;
+        Q_EMIT activeChanged();
+    }
+    SetIsActive(active);
+}
+
 bool QuickMozView::Invalidate()
 {
 #ifndef NO_PRIVATE_API
@@ -462,7 +477,7 @@ void QuickMozView::forceViewActiveFocus()
 {
     forceActiveFocus();
     if (d->mViewInitialized) {
-        d->mView->SetIsActive(true);
+        setActive(true);
         d->mView->SetIsFocused(true);
     }
 }
@@ -790,7 +805,7 @@ void QuickMozView::suspendView()
     if (!d->mView) {
         return;
     }
-    d->mView->SetIsActive(false);
+    setActive(false);
     d->mView->SuspendTimeouts();
 }
 
@@ -799,7 +814,7 @@ void QuickMozView::resumeView()
     if (!d->mView) {
         return;
     }
-    d->mView->SetIsActive(true);
+    setActive(true);
     d->mView->ResumeTimeouts();
 }
 

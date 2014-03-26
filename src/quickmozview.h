@@ -19,6 +19,7 @@ class QuickMozView : public QQuickItem
     Q_OBJECT
     Q_PROPERTY(int parentId READ parentId WRITE setParentID NOTIFY parentIdChanged FINAL)
     Q_PROPERTY(unsigned parentid WRITE setParentID)
+    Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
     Q_PROPERTY(QObject* child READ getChild NOTIFY childChanged)
 
     Q_MOZ_VIEW_PRORERTIES
@@ -34,13 +35,15 @@ public:
 
     int parentId() const;
 
+    bool active() const;
+    void setActive(bool active);
+
 private:
     QObject* getChild() { return this; }
     void updateGLContextInfo();
 
 public Q_SLOTS:
     Q_MOZ_VIEW_PUBLIC_SLOTS
-    void SetIsActive(bool aIsActive);
     void onRenderThreadReady();
 
 Q_SIGNALS:
@@ -50,8 +53,12 @@ Q_SIGNALS:
     void dispatchItemUpdate();
     void textureReady(int id, const QSize &size);
     void parentIdChanged();
+    void activeChanged();
 
     Q_MOZ_VIEW_SIGNALS
+
+private Q_SLOTS:
+    void SetIsActive(bool aIsActive);
 
 // INTERNAL
 protected:
@@ -95,6 +102,7 @@ private:
     bool mInThreadRendering;
 #endif
     bool mPreedit;
+    bool mActive;
 };
 
 #endif // QuickMozView_H
