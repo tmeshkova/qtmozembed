@@ -12,6 +12,29 @@
 
 class QuickMozView;
 
+class QSGMozTexture : public QSGTexture
+{
+    Q_OBJECT
+public:
+    QSGMozTexture();
+    virtual ~QSGMozTexture();
+
+    void setTexture(int id, int target);
+    void setTextureSize(const QSize &size) { m_texture_size = size; }
+    QSize textureSize() const { return m_texture_size; }
+    virtual void bind();
+
+    virtual int textureId() const { return m_texture_id; }
+    virtual bool hasAlphaChannel() const { return false; }
+    virtual bool hasMipmaps() const { return false; }
+
+protected:
+    GLuint m_texture_id;
+    GLuint m_texture_target;
+    QSize m_texture_size;
+    QRectF m_texture_rect;
+};
+
 class MozTextureNode : public QObject, public QSGSimpleTextureNode
 {
     Q_OBJECT

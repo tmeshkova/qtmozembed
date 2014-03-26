@@ -7,6 +7,30 @@
 #include "quickmozview.h"
 #include <QQuickWindow>
 #include <QThread>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
+
+QSGMozTexture::QSGMozTexture()
+    : QSGTexture()
+    , m_texture_id(0)
+    , m_texture_target(GL_TEXTURE_2D)
+{
+}
+
+QSGMozTexture::~QSGMozTexture()
+{
+}
+
+void QSGMozTexture::setTexture(int id, int target)
+{
+    m_texture_id = id;
+    m_texture_target = target;
+}
+
+void QSGMozTexture::bind()
+{
+    glBindTexture(m_texture_target, m_texture_id);
+}
 
 MozTextureNode::MozTextureNode(QuickMozView* aView)
   : m_id(0)
@@ -34,6 +58,7 @@ MozTextureNode::newTexture(int id, const QSize &size)
     Q_EMIT pendingNewTexture();
 }
 
+#define LOCAL_GL_TEXTURE_EXTERNAL 0x8D65
 // Before the scene graph starts to render, we update to the pending texture
 void
 MozTextureNode::prepareNode()
@@ -45,7 +70,10 @@ MozTextureNode::prepareNode()
     m_mutex.unlock();
     if (newId) {
         delete m_texture;
-        m_texture = m_view->window()->createTextureFromId(newId, size);
+        QSGMozTexture* texture = new QSGMozTexture();
+        texture->setTexture(newId, LOCAL_GL_TEXTURE_EXTERNAL);
+        texture->setTextureSize(size);
+        m_texture = texture;
         setTexture(m_texture);
     }
 }
