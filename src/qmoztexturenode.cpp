@@ -94,7 +94,6 @@ MozTextureNode::newTexture(int id, const QSize &size)
     Q_EMIT pendingNewTexture();
 }
 
-#define LOCAL_GL_TEXTURE_EXTERNAL 0x8D65
 // Before the scene graph starts to render, we update to the pending texture
 void
 MozTextureNode::prepareNode()
