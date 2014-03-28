@@ -6,36 +6,13 @@
 #ifndef qmoztexturenode_h
 #define qmoztexturenode_h
 
-#include <QtQuick/QSGSimpleTextureNode>
+#include <QtQuick/QSGGeometryNode>
 #include <QObject>
 #include <QMutex>
 
 class QuickMozView;
 
-class QSGMozTexture : public QSGTexture
-{
-    Q_OBJECT
-public:
-    QSGMozTexture();
-    virtual ~QSGMozTexture();
-
-    void setTexture(int id, int target);
-    void setTextureSize(const QSize &size) { m_texture_size = size; }
-    QSize textureSize() const { return m_texture_size; }
-    virtual void bind();
-
-    virtual int textureId() const { return m_texture_id; }
-    virtual bool hasAlphaChannel() const { return false; }
-    virtual bool hasMipmaps() const { return false; }
-
-protected:
-    GLuint m_texture_id;
-    GLuint m_texture_target;
-    QSize m_texture_size;
-    QRectF m_texture_rect;
-};
-
-class MozTextureNode : public QObject, public QSGSimpleTextureNode
+class MozTextureNode : public QObject, public QSGGeometryNode
 {
     Q_OBJECT
 public:
@@ -43,7 +20,6 @@ public:
 
     ~MozTextureNode()
     {
-        delete m_texture;
     }
 
 Q_SIGNALS:
@@ -55,15 +31,15 @@ public Q_SLOTS:
     // texture id and size and schedule an update on the window.
     void newTexture(int id, const QSize &size);
 
+    void setRect(const QRectF &rect);
+
     // Before the scene graph starts to render, we update to the pending texture
     void prepareNode();
 
 private:
 
     int m_id;
-    QSize m_size;
     QMutex m_mutex;
-    QSGTexture *m_texture;
     QuickMozView *m_view;
     bool mIsConnected;
 };
