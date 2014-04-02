@@ -147,7 +147,11 @@ void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 
 void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
 {
-    d->mHasContext = true;
+    d->mHasContext = ctx != nullptr && ctx->surface() != nullptr;
+    if (!d->mHasContext) {
+        printf("ERROR: QuickMozView not supposed to work without GL context\n");
+        return;
+    }
     d->mGLSurfaceSize = ctx->surface()->size();
 }
 
