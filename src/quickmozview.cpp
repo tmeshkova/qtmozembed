@@ -534,7 +534,7 @@ QPointF QuickMozView::scrollableOffset() const
 
 float QuickMozView::resolution() const
 {
-    return d->mContext->pixelRatio();
+    return d->mContentResolution;
 }
 
 bool QuickMozView::isPainted() const
