@@ -568,6 +568,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     int touchPointsCount = event->touchPoints().size();
 
     if (event->type() == QEvent::TouchBegin) {
+        Q_ASSERT(touchPointsCount > 0);
         mViewIface->forceViewActiveFocus();
         if (touchPointsCount > 1 && !mPinching) {
             mPinching = true;
@@ -575,6 +576,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         }
         ResetState();
     } else if (event->type() == QEvent::TouchUpdate) {
+        Q_ASSERT(touchPointsCount > 0);
         if (!mDragging) {
             mDragging = true;
             mDragStartY = mContentRect.y() * mContentResolution;
@@ -587,6 +589,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
             pinchingChanged = true;
         }
     } else if (event->type() == QEvent::TouchEnd) {
+        Q_ASSERT(touchPointsCount > 0);
         HandleTouchEnd(draggingChanged, pinchingChanged);
     } else if (event->type() == QEvent::TouchCancel) {
         HandleTouchEnd(draggingChanged, pinchingChanged);
@@ -663,15 +666,18 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         if (meventMove.mTouches.Length()) {
             meventStart.mTouches.AppendElements(meventMove.mTouches);
         }
+        Q_ASSERT(meventStart.mTouches.Length() > 0);
         ReceiveInputEvent(meventStart);
     }
     if (meventMove.mTouches.Length()) {
         if (meventStart.mTouches.Length()) {
             meventMove.mTouches.AppendElements(meventStart.mTouches);
         }
+        Q_ASSERT(meventMove.mTouches.Length() > 0);
         ReceiveInputEvent(meventMove);
     }
     if (meventEnd.mTouches.Length()) {
+        Q_ASSERT(meventEnd.mTouches.Length() > 0);
         ReceiveInputEvent(meventEnd);
     }
 
