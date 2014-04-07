@@ -29,6 +29,7 @@
 #include "EmbedQtKeyUtils.h"
 #include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
+#include "qmozextmaterialnode.h"
 #include "qsgthreadobject.h"
 #include "assert.h"
 #ifndef NO_PRIVATE_API
@@ -275,9 +276,15 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     }
 #endif
 
-    MozTextureNode *n = static_cast<MozTextureNode*>(oldNode);
+#if defined(QT_OPENGL_ES_2)
+#define TextureNodeType MozExtMaterialNode
+#else
+#define TextureNodeType MozTextureNode
+#endif
+
+    TextureNodeType* n = static_cast<TextureNodeType*>(oldNode);
     if (!n) {
-        n = new MozTextureNode(this);
+        n = new TextureNodeType(this);
         connect(this, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
         connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
     }

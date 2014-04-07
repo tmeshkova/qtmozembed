@@ -7,79 +7,17 @@
 #include "quickmozview.h"
 #include <QQuickWindow>
 #include <QThread>
-#include <QOpenGLContext>
-#include <QOpenGLFunctions>
-
-#include <QtQuick/QSGSimpleMaterial>
-
-#define LOCAL_GL_TEXTURE_EXTERNAL 0x8D65
-
-struct MozExternalTexture
-{
-    GLuint id;
-};
-
-class MozTextureShader : public QSGSimpleMaterialShader<MozExternalTexture>
-{
-    QSG_DECLARE_SIMPLE_SHADER(MozTextureShader, MozExternalTexture)
-
-public:
-
-    const char *vertexShader() const {
-        return  "attribute highp vec4 aVertex;              \n"
-                "attribute highp vec2 aTexCoord;            \n"
-                "uniform highp mat4 qt_Matrix;              \n"
-                "varying highp vec2 vTexCoord;              \n"
-                "void main() {                              \n"
-                "    gl_Position = qt_Matrix * aVertex;     \n"
-                "    vTexCoord = aTexCoord;                 \n"
-                "}";
-    }
-
-    const char *fragmentShader() const {
-        return  "#extension GL_OES_EGL_image_external : require                     \n"
-                "uniform lowp float qt_Opacity;                                     \n"
-                "uniform lowp samplerExternalOES texture;                           \n"
-                "varying highp vec2 vTexCoord;                                      \n"
-                "void main() {                                                      \n"
-                "    gl_FragColor = qt_Opacity * texture2D(texture, vTexCoord);     \n"
-                "}";
-    }
-
-    QList<QByteArray> attributes() const {
-        return QList<QByteArray>() << "aVertex" << "aTexCoord";
-    }
-
-    void updateState(const MozExternalTexture *texture, const MozExternalTexture *) {
-        glBindTexture(LOCAL_GL_TEXTURE_EXTERNAL, texture->id);
-    }
-
-    void deactivate() {
-        glBindTexture(LOCAL_GL_TEXTURE_EXTERNAL, 0);
-    }
-
-};
-
-void MozTextureNode::setRect(const QRectF &rect)
-{
-    QSGGeometry::updateTexturedRectGeometry(geometry(), rect, QRectF(0, 0, 1, 1));
-    markDirty(QSGNode::DirtyGeometry);
-}
-
 
 MozTextureNode::MozTextureNode(QuickMozView* aView)
   : m_id(0)
+  , m_size(0, 0)
+  , m_texture(0)
   , m_view(aView)
-  , mIsConnected(false)
 {
-    setGeometry(new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4));
-
-    QSGSimpleMaterial<MozExternalTexture> *material = MozTextureShader::createMaterial();
-    material->setFlag(QSGMaterial::Blending, false);
-    material->state()->id = 0;
-    setMaterial(material);
-
-    setFlags(OwnsMaterial | OwnsGeometry);
+    // Our texture node must have a texture, so use the default 0 texture.
+    m_texture = m_view->window()->createTextureFromId(0, QSize(1, 1));
+    setTexture(m_texture);
+    setFiltering(QSGTexture::Linear);
 }
 
 void
@@ -87,6 +25,7 @@ MozTextureNode::newTexture(int id, const QSize &size)
 {
     m_mutex.lock();
     m_id = id;
+    m_size = size;
     m_mutex.unlock();
 
     // We cannot call QQuickWindow::update directly here, as this is only allowed
@@ -100,11 +39,12 @@ MozTextureNode::prepareNode()
 {
     m_mutex.lock();
     int newId = m_id;
+    QSize size = m_size;
     m_id = 0;
     m_mutex.unlock();
     if (newId) {
-        MozExternalTexture *texture = static_cast<QSGSimpleMaterial<MozExternalTexture> *>(material())->state();
-        texture->id = newId;
-        markDirty(QSGNode::DirtyMaterial);
+        delete m_texture;
+        m_texture = m_view->window()->createTextureFromId(newId, size);
+        setTexture(m_texture);
     }
 }

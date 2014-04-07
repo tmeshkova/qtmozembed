@@ -3,24 +3,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef qmoztexturenode_h
-#define qmoztexturenode_h
+#ifndef qMozExtMaterialNode_h
+#define qMozExtMaterialNode_h
 
-#include <QtQuick/QSGSimpleTextureNode>
+#include <QtQuick/QSGGeometryNode>
 #include <QObject>
 #include <QMutex>
 
 class QuickMozView;
 
-class MozTextureNode : public QObject, public QSGSimpleTextureNode
+class MozExtMaterialNode : public QObject, public QSGGeometryNode
 {
     Q_OBJECT
 public:
-    MozTextureNode(QuickMozView* aView);
+    MozExtMaterialNode(QuickMozView* aView);
 
-    ~MozTextureNode()
+    ~MozExtMaterialNode()
     {
-        delete m_texture;
     }
 
 Q_SIGNALS:
@@ -32,16 +31,17 @@ public Q_SLOTS:
     // texture id and size and schedule an update on the window.
     void newTexture(int id, const QSize &size);
 
+    void setRect(const QRectF &rect);
+
     // Before the scene graph starts to render, we update to the pending texture
     void prepareNode();
 
 private:
 
     int m_id;
-    QSize m_size;
     QMutex m_mutex;
-    QSGTexture *m_texture;
     QuickMozView *m_view;
+    bool mIsConnected;
 };
 
-#endif /* qmoztexturenode_h */
+#endif /* qMozExtMaterialNode_h */
