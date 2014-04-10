@@ -189,9 +189,9 @@ void QMozContext::setCompositorInSeparateThread(bool aEnabled)
 }
 
 mozilla::embedlite::EmbedLiteRenderTarget*
-QMozContext::createEmbedLiteRenderTarget()
+QMozContext::createEmbedLiteRenderTarget(void* aContext, void* aSurface)
 {
-    return d->mApp ? d->mApp->CreateEmbedLiteRenderTarget() : nullptr;
+    return d->mApp ? d->mApp->CreateEmbedLiteRenderTarget(aContext, aSurface) : nullptr;
 }
 
 void QMozContext::setProfile(const QString profilePath)

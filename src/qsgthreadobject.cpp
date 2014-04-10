@@ -8,6 +8,12 @@
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
 
+#if defined(QT_OPENGL_ES_2)
+#include <EGL/gl.h>
+#else
+#include <GL/glx.h>
+#endif
+
 QSGThreadObject::QSGThreadObject()
   : mRenderTarget(0)
 {
@@ -16,6 +22,13 @@ QSGThreadObject::QSGThreadObject()
 void
 QSGThreadObject::onWrapRenderThreadGLContext()
 {
-    mRenderTarget = QMozContext::GetInstance()->createEmbedLiteRenderTarget();
+#if defined(QT_OPENGL_ES_2)
+    void* context = (void*)eglGetCurrentContext();
+    void* surface = (void*)eglGetCurrentSurface(EGL_DRAW);
+#else
+    void* context = (void*)glXGetCurrentContext();
+    void* surface = (void*)glXGetCurrentDrawable();
+#endif
+    mRenderTarget = QMozContext::GetInstance()->createEmbedLiteRenderTarget(context, surface);
     Q_EMIT onRenderThreadReady();
 }
