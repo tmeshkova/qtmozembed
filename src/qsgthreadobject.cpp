@@ -9,7 +9,7 @@
 #include "qmozcontext.h"
 
 #if defined(QT_OPENGL_ES_2)
-#include <EGL/gl.h>
+#include <EGL/egl.h>
 #else
 #include <GL/glx.h>
 #endif
