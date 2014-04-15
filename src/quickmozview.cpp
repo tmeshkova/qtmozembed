@@ -331,7 +331,6 @@ bool QuickMozView::Invalidate()
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
-    d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
     return false;
 }
 
