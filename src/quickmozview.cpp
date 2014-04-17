@@ -919,10 +919,10 @@ void QuickMozView::componentComplete()
     // TODO: Initialization steps could be improved futher e.g. by adding messageListeners
     // property and adding them all them view initialized so that it would not be a need operation
     // in viewInitilized signal handler.
+    init();
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
-        init();
         onInitialized();
     }
 }
