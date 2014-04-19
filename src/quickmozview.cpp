@@ -919,7 +919,12 @@ void QuickMozView::componentComplete()
     // TODO: Initialization steps could be improved futher e.g. by adding messageListeners
     // property and adding them all them view initialized so that it would not be a need operation
     // in viewInitilized signal handler.
-    init();
+    // Temporary check for QML_BAD_GUI_RENDER_LOOP in order to not break current behavior and make it work for
+    // multi thread rendering context
+    static bool isForcedInThreadRendering = getenv("QML_BAD_GUI_RENDER_LOOP") != 0 && getenv("QML_FORCE_THREADED_RENDERER") == 0;
+    if (isForcedInThreadRendering) {
+      init();
+    }
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
     } else {
