@@ -65,8 +65,9 @@ public:
 
 };
 
-void MozExtMaterialNode::setRect(const QRectF &rect)
+void MozExtMaterialNode::update()
 {
+    QRectF rect(0, 0, m_size.width(), m_size.height());
     QSGGeometry::updateTexturedRectGeometry(geometry(), rect, QRectF(0, 0, 1, 1));
     markDirty(QSGNode::DirtyGeometry);
 }
@@ -75,7 +76,6 @@ void MozExtMaterialNode::setRect(const QRectF &rect)
 MozExtMaterialNode::MozExtMaterialNode(QuickMozView* aView)
   : m_id(0)
   , m_view(aView)
-  , mIsConnected(false)
 {
     setGeometry(new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4));
 
@@ -92,6 +92,7 @@ MozExtMaterialNode::newTexture(int id, const QSize &size)
 {
     m_mutex.lock();
     m_id = id;
+    m_size = size;
     m_mutex.unlock();
 
     // We cannot call QQuickWindow::update directly here, as this is only allowed

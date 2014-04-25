@@ -288,8 +288,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         connect(this, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
         connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
     }
-    n->setRect(boundingRect());
-    n->markDirty(QSGNode::DirtyMaterial);
+    n->update();
     return n;
 }
 
