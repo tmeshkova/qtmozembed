@@ -48,3 +48,9 @@ MozTextureNode::prepareNode()
         setTexture(m_texture);
     }
 }
+
+void MozTextureNode::update()
+{
+    setRect(QRectF(0, 0, m_size.width(), m_size.height()));
+    markDirty(QSGNode::DirtyMaterial);
+}

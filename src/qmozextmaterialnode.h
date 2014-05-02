@@ -31,8 +31,6 @@ public Q_SLOTS:
     // texture id and size and schedule an update on the window.
     void newTexture(int id, const QSize &size);
 
-    void setRect(const QRectF &rect);
-
     // Before the scene graph starts to render, we update to the pending texture
     void prepareNode();
     void update();

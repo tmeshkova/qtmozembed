@@ -35,6 +35,8 @@ public Q_SLOTS:
     // Before the scene graph starts to render, we update to the pending texture
     void prepareNode();
 
+    void update();
+
 private:
 
     int m_id;
