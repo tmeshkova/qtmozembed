@@ -29,7 +29,15 @@ public:
         gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
         mPrivate->mView->SetGLViewTransform(matr);
         mPrivate->mView->SetViewOpacity(inheritedOpacity());
-        mPrivate->mView->SetViewClipping(0, 0, mPrivate->mSize.width(), mPrivate->mSize.height());
+
+        QRect clipRect(0, 0, mPrivate->mSize.width(), mPrivate->mSize.height());
+        if (mView->parentItem() && mView->parentItem()->clip()) {
+            QRect parentClipRect = mView->parentItem()->clipRect().toRect();
+            if (clipRect.contains(parentClipRect)) {
+                clipRect = parentClipRect;
+            }
+        }
+        mPrivate->mView->SetViewClipping(clipRect.x(), clipRect.y(), clipRect.width(), clipRect.height());
         mPrivate->mView->RenderGL();
     }
 
