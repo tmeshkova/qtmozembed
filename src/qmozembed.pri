@@ -20,7 +20,7 @@ isEmpty(OBJ_PATH) {
 }
 
 INCLUDEPATH += $$GECKO_INCLUDE_DIR $$GECKO_INCLUDE_DIR/nspr /usr/include/nspr4
-LIBS += -L$$GECKO_LIB_DIR -lxpcomglue -Wl,--whole-archive -lmozglue
+LIBS += -L$$GECKO_LIB_DIR -lxpcomglue -Wl,--whole-archive -lmozglue -lmemory
 LIBS += -Wl,--no-whole-archive -rdynamic -ldl
 
 DEFINES += BUILD_GRE_HOME=\"\\\"$$BIN_DIR\\\"\"
