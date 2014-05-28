@@ -74,6 +74,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
     d->mContext = QMozContext::GetInstance();
     connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
+    connect(this, SIGNAL(viewInitialized()), this, SLOT(processViewInitialization()));
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
     connect(this, SIGNAL(dispatchItemUpdate()), this, SLOT(update()));
     updateEnabled();
@@ -125,6 +126,14 @@ QuickMozView::onRenderThreadReady()
         d->mView = d->mContext->GetApp()->CreateView(mParentID);
         d->mView->SetListener(d);
     }
+}
+
+void QuickMozView::processViewInitialization()
+{
+    // This is connected to view initialization. View must be initialized
+    // over here.
+    Q_ASSERT(d->mViewInitialized);
+    setActive(mActive);
 }
 
 void QuickMozView::updateEnabled()
@@ -319,11 +328,16 @@ bool QuickMozView::active() const
 
 void QuickMozView::setActive(bool active)
 {
-    if (mActive != active) {
+    if (d->mViewInitialized) {
+        if (mActive != active) {
+            mActive = active;
+            Q_EMIT activeChanged();
+        }
+        SetIsActive(active);
+    } else {
+        // Will be processed once view is initialized.
         mActive = active;
-        Q_EMIT activeChanged();
     }
-    SetIsActive(active);
 }
 
 bool QuickMozView::Invalidate()

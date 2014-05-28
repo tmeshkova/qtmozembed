@@ -58,6 +58,7 @@ Q_SIGNALS:
     Q_MOZ_VIEW_SIGNALS
 
 private Q_SLOTS:
+    void processViewInitialization();
     void SetIsActive(bool aIsActive);
 
 // INTERNAL
