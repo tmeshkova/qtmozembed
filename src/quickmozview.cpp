@@ -93,7 +93,7 @@ QuickMozView::~QuickMozView()
 void
 QuickMozView::SetIsActive(bool aIsActive)
 {
-    if (QThread::currentThread() == thread()) {
+    if (QThread::currentThread() == thread() && d->mView) {
         d->mView->SetIsActive(aIsActive);
     } else {
         Q_EMIT setIsActive(aIsActive);
