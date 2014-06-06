@@ -15,7 +15,6 @@ public:
     MozContentSGNode(QGraphicsMozViewPrivate* aPrivate, QuickMozView* aView)
         : mPrivate(aPrivate), mView(aView)
     {
-        mView->setActive(true);
     }
 
     virtual StateFlags changedStates()
