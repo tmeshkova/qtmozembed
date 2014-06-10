@@ -43,6 +43,8 @@ using namespace mozilla::embedlite;
 #define MOZVIEW_FLICK_STOP_TIMEOUT 500
 #endif
 
+static bool gSceneGraphInitialized = false;
+
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
@@ -58,6 +60,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mPreedit(false)
   , mActive(false)
   , mHasPendingInvalidate(false)
+  , mInitialized(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -78,6 +81,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     connect(this, SIGNAL(viewInitialized()), this, SLOT(processViewInitialization()));
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
     connect(this, SIGNAL(dispatchItemUpdate()), this, SLOT(update()));
+
     updateEnabled();
 }
 
@@ -152,7 +156,10 @@ void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
     hasContext = d->mHasContext;
 #ifndef NO_PRIVATE_API
     hasContext = hasContext && mInThreadRendering;
+#else
+    hasContext = false;
 #endif
+
     viewPortSize = d->mGLSurfaceSize;
 }
 
@@ -202,8 +209,10 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
         QQuickWindow *win = window();
         if (!win)
             return;
+        // All of these signals are emitted from scene graph rendering thread.
         connect(win, SIGNAL(beforeRendering()), this, SLOT(beforeRendering()), Qt::DirectConnection);
-        connect(win, SIGNAL(sceneGraphInitialized()), this, SLOT(init()), Qt::DirectConnection);
+        connect(win, SIGNAL(sceneGraphInitialized()), this, SLOT(sceneGraphInitialized()), Qt::DirectConnection);
+        connect(win, SIGNAL(frameSwapped()), this, SLOT(initialize()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
 }
@@ -238,8 +247,19 @@ void QuickMozView::init()
         connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
         connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
     }
-
     updateGLContextInfo(QOpenGLContext::currentContext());
+    mInitialized = true;
+}
+
+void QuickMozView::initialize()
+{
+
+    if (!mInitialized && gSceneGraphInitialized) {
+        init();
+        if (d->mContext->initialized()) {
+            onInitialized();
+        }
+    }
 }
 
 void QuickMozView::beforeRendering()
@@ -253,6 +273,12 @@ void QuickMozView::beforeRendering()
     {
         RefreshNodeTexture();
     }
+}
+
+void QuickMozView::sceneGraphInitialized()
+{
+    gSceneGraphInitialized = true;
+    initialize();
 }
 
 void QuickMozView::RenderToCurrentContext()
@@ -335,10 +361,12 @@ void QuickMozView::setActive(bool active)
             Q_EMIT activeChanged();
         }
         // Process pending paint request before final suspend (unblock possible content Compositor waiters Bug 1020350)
+#ifndef NO_PRIVATE_API
         if (mInThreadRendering && mHasPendingInvalidate) {
           RenderToCurrentContext();
           mHasPendingInvalidate = false;
         }
+#endif
         SetIsActive(active);
     } else {
         // Will be processed once view is initialized.
@@ -766,10 +794,6 @@ void QuickMozView::setParentID(unsigned aParentID)
         mParentID = aParentID;
         Q_EMIT parentIdChanged();
     }
-
-    if (mParentID) {
-        onInitialized();
-    }
 }
 
 void QuickMozView::synthTouchBegin(const QVariant& touches)
@@ -954,7 +978,5 @@ void QuickMozView::componentComplete()
     }
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
-    } else {
-        onInitialized();
     }
 }
