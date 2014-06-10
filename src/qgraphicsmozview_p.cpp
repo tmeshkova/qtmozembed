@@ -17,6 +17,7 @@
 #include "mozilla/gfx/Tools.h"
 #include "qmozembedlog.h"
 #include <sys/time.h>
+#include "mozilla/TimeStamp.h"
 
 #ifndef MOZVIEW_FLICK_THRESHOLD
 #define MOZVIEW_FLICK_THRESHOLD 200
@@ -602,9 +603,9 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     }
 
     qint64 timeStamp = current_timestamp(event);
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp, 0);
-    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp, 0);
-    MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_END, timeStamp, 0);
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp, TimeStamp(), 0);
+    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp, TimeStamp(), 0);
+    MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_END, timeStamp, TimeStamp(), 0);
 
     // Add active touch point to cancelled touch sequence.
     if (event->type() == QEvent::TouchCancel && touchPointsCount == 0) {

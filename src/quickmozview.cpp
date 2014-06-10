@@ -12,6 +12,7 @@
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/embedlite/EmbedLiteRenderTarget.h"
+#include "mozilla/TimeStamp.h"
 
 #include <QTimer>
 #include <QThread>
@@ -776,7 +777,7 @@ void QuickMozView::synthTouchBegin(const QVariant& touches)
 {
     QList<QVariant> list = touches.toList();
     MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START,
-                                QDateTime::currentMSecsSinceEpoch(), 0);
+                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
     int ptId = 0;
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
@@ -796,7 +797,7 @@ void QuickMozView::synthTouchMove(const QVariant& touches)
 {
     QList<QVariant> list = touches.toList();
     MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_MOVE,
-                                QDateTime::currentMSecsSinceEpoch(), 0);
+                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
     int ptId = 0;
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
@@ -816,7 +817,7 @@ void QuickMozView::synthTouchEnd(const QVariant& touches)
 {
     QList<QVariant> list = touches.toList();
     MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_END,
-                                QDateTime::currentMSecsSinceEpoch(), 0);
+                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
     int ptId = 0;
     for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
     {
@@ -859,7 +860,7 @@ void QuickMozView::recvMouseMove(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE,
-                              QDateTime::currentMSecsSinceEpoch(), 0);
+                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
         event.mTouches.AppendElement(SingleTouchData(0,
                                      mozilla::ScreenIntPoint(posX, posY),
                                      mozilla::ScreenSize(1, 1),
@@ -874,7 +875,7 @@ void QuickMozView::recvMousePress(int posX, int posY)
     forceViewActiveFocus();
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_START,
-                              QDateTime::currentMSecsSinceEpoch(), 0);
+                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
         event.mTouches.AppendElement(SingleTouchData(0,
                                      mozilla::ScreenIntPoint(posX, posY),
                                      mozilla::ScreenSize(1, 1),
@@ -888,7 +889,7 @@ void QuickMozView::recvMouseRelease(int posX, int posY)
 {
     if (d->mViewInitialized && !d->mPendingTouchEvent) {
         MultiTouchInput event(MultiTouchInput::MULTITOUCH_END,
-                              QDateTime::currentMSecsSinceEpoch(), 0);
+                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
         event.mTouches.AppendElement(SingleTouchData(0,
                                      mozilla::ScreenIntPoint(posX, posY),
                                      mozilla::ScreenSize(1, 1),
