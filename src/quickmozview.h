@@ -80,7 +80,6 @@ protected:
     virtual void componentComplete();
 
 public Q_SLOTS:
-    void beforeRendering();
     void init();
     void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
@@ -89,6 +88,9 @@ public Q_SLOTS:
 private Q_SLOTS:
     void onInitialized();
     void updateEnabled();
+    void initialize();
+    void beforeRendering();
+    void sceneGraphInitialized();
 
 private:
     QGraphicsMozViewPrivate* d;
@@ -105,6 +107,7 @@ private:
     bool mPreedit;
     bool mActive;
     bool mHasPendingInvalidate;
+    bool mInitialized;
 };
 
 #endif // QuickMozView_H

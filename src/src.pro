@@ -3,6 +3,9 @@ CONFIG += qt thread debug ordered create_pc create_prl no_install_prl
 TARGET = qt5embedwidget
 TEMPLATE = lib
 
+# We should wipe out everything related to private api usage.
+DEFINES += NO_PRIVATE_API
+
 isEmpty(VERSION) {
     GIT_TAG = $$system(git describe --tags --abbrev=0)
     GIT_VERSION = $$system(echo $$GIT_TAG | sed 's/nemo[/]//')
