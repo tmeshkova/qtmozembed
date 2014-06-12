@@ -17,10 +17,11 @@
 QSGThreadObject::QSGThreadObject()
   : mRenderTarget(0)
 {
+    wrapRenderThreadGLContext();
 }
 
 void
-QSGThreadObject::onWrapRenderThreadGLContext()
+QSGThreadObject::wrapRenderThreadGLContext()
 {
 #if defined(QT_OPENGL_ES_2)
     void* context = (void*)eglGetCurrentContext();
@@ -30,5 +31,4 @@ QSGThreadObject::onWrapRenderThreadGLContext()
     void* surface = (void*)glXGetCurrentDrawable();
 #endif
     mRenderTarget = QMozContext::GetInstance()->createEmbedLiteRenderTarget(context, surface);
-    Q_EMIT onRenderThreadReady();
 }

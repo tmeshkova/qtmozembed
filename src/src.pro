@@ -3,9 +3,6 @@ CONFIG += qt thread debug ordered create_pc create_prl no_install_prl
 TARGET = qt5embedwidget
 TEMPLATE = lib
 
-# We should wipe out everything related to private api usage.
-DEFINES += NO_PRIVATE_API
-
 isEmpty(VERSION) {
     GIT_TAG = $$system(git describe --tags --abbrev=0)
     GIT_VERSION = $$system(echo $$GIT_TAG | sed 's/nemo[/]//')
@@ -38,12 +35,6 @@ HEADERS += qmozcontext.h \
 
 SOURCES += quickmozview.cpp qmoztexturenode.cpp qsgthreadobject.cpp qmozextmaterialnode.cpp
 HEADERS += quickmozview.h qmoztexturenode.h qsgthreadobject.h qmozextmaterialnode.h
-!isEmpty(NO_PRIVATE_API) {
-  DEFINES += NO_PRIVATE_API
-} else {
-  SOURCES += qmozviewsgnode.cpp
-  HEADERS += qmozviewsgnode.h
-}
 
 !isEmpty(BUILD_QT5QUICK1) {
   SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
@@ -59,9 +50,7 @@ include($$RELATIVE_PATH/relative-objdir.pri)
 PREFIX = /usr
 
 QT += quick qml
-isEmpty(NO_PRIVATE_API) {
-  QT += quick-private
-}
+
 !isEmpty(BUILD_QT5QUICK1) {
   QT += declarative widgets opengl
 }

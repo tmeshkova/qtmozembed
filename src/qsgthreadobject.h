@@ -22,14 +22,11 @@ public:
     QSGThreadObject();
     virtual ~QSGThreadObject() {}
 
-public Q_SLOTS:
-    void onWrapRenderThreadGLContext();
-    mozilla::embedlite::EmbedLiteRenderTarget* GetTargetContextWrapper() { return mRenderTarget; }
-
-Q_SIGNALS:
-    void onRenderThreadReady();
+    mozilla::embedlite::EmbedLiteRenderTarget* getTargetContextWrapper() { return mRenderTarget; }
 
 private:
+    void wrapRenderThreadGLContext();
+
     mozilla::embedlite::EmbedLiteRenderTarget* mRenderTarget;
 };
 
