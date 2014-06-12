@@ -44,7 +44,6 @@ private:
 
 public Q_SLOTS:
     Q_MOZ_VIEW_PUBLIC_SLOTS
-    void onRenderThreadReady();
 
 Q_SIGNALS:
     void childChanged();
@@ -80,19 +79,19 @@ protected:
     virtual void componentComplete();
 
 public Q_SLOTS:
-    void init();
     void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
     void updateGLContextInfo(QOpenGLContext*);
 
 private Q_SLOTS:
-    void onInitialized();
+    void createThreadRenderObject();
+    void contextInitialized();
     void updateEnabled();
-    void initialize();
     void beforeRendering();
-    void sceneGraphInitialized();
 
 private:
+    void createView();
+
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
@@ -107,7 +106,6 @@ private:
     bool mPreedit;
     bool mActive;
     bool mHasPendingInvalidate;
-    bool mInitialized;
 };
 
 #endif // QuickMozView_H

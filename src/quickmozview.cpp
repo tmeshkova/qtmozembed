@@ -43,8 +43,6 @@ using namespace mozilla::embedlite;
 #define MOZVIEW_FLICK_STOP_TIMEOUT 500
 #endif
 
-static bool gSceneGraphInitialized = false;
-
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
@@ -60,7 +58,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mPreedit(false)
   , mActive(false)
   , mHasPendingInvalidate(false)
-  , mInitialized(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -91,8 +88,9 @@ QuickMozView::~QuickMozView()
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
     }
-    delete mSGRenderer;
     delete d;
+    d = 0;
+    mSGRenderer->deleteLater();
 }
 
 void
@@ -106,7 +104,7 @@ QuickMozView::SetIsActive(bool aIsActive)
 }
 
 void
-QuickMozView::onInitialized()
+QuickMozView::contextInitialized()
 {
     LOGT("QuickMozView");
 #ifndef NO_PRIVATE_API
@@ -117,19 +115,9 @@ QuickMozView::onInitialized()
 #endif
     {
         d->mContext->setCompositorInSeparateThread(true);
-        Q_EMIT wrapRenderThreadGLContext();
-        update();
-    }
-}
-
-void
-QuickMozView::onRenderThreadReady()
-{
-    if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
-        d->mView = d->mContext->GetApp()->CreateView(mParentID);
-        d->mView->SetListener(d);
+        createView();
     }
 }
 
@@ -211,8 +199,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
             return;
         // All of these signals are emitted from scene graph rendering thread.
         connect(win, SIGNAL(beforeRendering()), this, SLOT(beforeRendering()), Qt::DirectConnection);
-        connect(win, SIGNAL(sceneGraphInitialized()), this, SLOT(sceneGraphInitialized()), Qt::DirectConnection);
-        connect(win, SIGNAL(frameSwapped()), this, SLOT(initialize()), Qt::DirectConnection);
+        connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
 }
@@ -234,7 +221,7 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
     }
 }
 
-void QuickMozView::init()
+void QuickMozView::createThreadRenderObject()
 {
 #ifndef NO_PRIVATE_API
     if (thread() == QThread::currentThread()) {
@@ -242,24 +229,12 @@ void QuickMozView::init()
     }
     else
 #endif
+    updateGLContextInfo(QOpenGLContext::currentContext());
     {
         mSGRenderer = new QSGThreadObject();
-        connect(mSGRenderer, SIGNAL(onRenderThreadReady()), this, SLOT(onRenderThreadReady()));
-        connect(this, SIGNAL(wrapRenderThreadGLContext()), mSGRenderer, SLOT(onWrapRenderThreadGLContext()));
     }
-    updateGLContextInfo(QOpenGLContext::currentContext());
-    mInitialized = true;
-}
 
-void QuickMozView::initialize()
-{
-
-    if (!mInitialized && gSceneGraphInitialized) {
-        init();
-        if (d->mContext->initialized()) {
-            onInitialized();
-        }
-    }
+    disconnect(window(), SIGNAL(beforeSynchronizing()), this, 0);
 }
 
 void QuickMozView::beforeRendering()
@@ -275,10 +250,12 @@ void QuickMozView::beforeRendering()
     }
 }
 
-void QuickMozView::sceneGraphInitialized()
+void QuickMozView::createView()
 {
-    gSceneGraphInitialized = true;
-    initialize();
+    if (!d->mView) {
+        d->mView = d->mContext->GetApp()->CreateView(mParentID);
+        d->mView->SetListener(d);
+    }
 }
 
 void QuickMozView::RenderToCurrentContext()
@@ -338,7 +315,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 void QuickMozView::RefreshNodeTexture()
 {
     int texId = 0, width = 0, height = 0;
-    if (d->mView->GetPendingTexture(mSGRenderer->GetTargetContextWrapper(), &texId, &width, &height)) {
+    if (mSGRenderer && d && d->mView && d->mView->GetPendingTexture(mSGRenderer->getTargetContextWrapper(), &texId, &width, &height)) {
        Q_EMIT textureReady(texId, QSize(width, height));
     }
 }
@@ -965,18 +942,10 @@ void QuickMozView::timerEvent(QTimerEvent *event)
 void QuickMozView::componentComplete()
 {
     QQuickItem::componentComplete();
-    // Now property assigned to QuickMozView are in place. Do rest of initialization
-    // steps. For instance mParentID needs to be passed to CreateView when subviews are created.
-    // TODO: Initialization steps could be improved futher e.g. by adding messageListeners
-    // property and adding them all them view initialized so that it would not be a need operation
-    // in viewInitilized signal handler.
-    // Temporary check for QML_BAD_GUI_RENDER_LOOP in order to not break current behavior and make it work for
-    // multi thread rendering context
-    static bool isForcedInThreadRendering = getenv("QML_BAD_GUI_RENDER_LOOP") != 0 && getenv("QML_FORCE_THREADED_RENDERER") == 0;
-    if (isForcedInThreadRendering) {
-      init();
-    }
+    // The first created view gets always parentId of 0
     if (!d->mContext->initialized()) {
-        connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(onInitialized()));
+        connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(contextInitialized()));
+    } else {
+        createView();
     }
 }
