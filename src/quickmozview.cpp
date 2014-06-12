@@ -32,9 +32,6 @@
 #include "qmozextmaterialnode.h"
 #include "qsgthreadobject.h"
 #include "assert.h"
-#ifndef NO_PRIVATE_API
-#include "qmozviewsgnode.h"
-#endif
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -52,9 +49,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mTimerId(0)
   , mOffsetX(0.0)
   , mOffsetY(0.0)
-#ifndef NO_PRIVATE_API
-  , mInThreadRendering(false)
-#endif
   , mPreedit(false)
   , mActive(false)
   , mHasPendingInvalidate(false)
@@ -107,18 +101,10 @@ void
 QuickMozView::contextInitialized()
 {
     LOGT("QuickMozView");
-#ifndef NO_PRIVATE_API
-    if (mInThreadRendering) {
-        onRenderThreadReady();
-    }
-    else
-#endif
-    {
-        d->mContext->setCompositorInSeparateThread(true);
-        // We really don't care about SW rendering on Qt5 anymore
-        d->mContext->GetApp()->SetIsAccelerated(true);
-        createView();
-    }
+    d->mContext->setCompositorInSeparateThread(true);
+    // We really don't care about SW rendering on Qt5 anymore
+    d->mContext->GetApp()->SetIsAccelerated(true);
+    createView();
 }
 
 void QuickMozView::processViewInitialization()
@@ -141,13 +127,7 @@ void QuickMozView::createGeckoGLContext()
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    hasContext = d->mHasContext;
-#ifndef NO_PRIVATE_API
-    hasContext = hasContext && mInThreadRendering;
-#else
     hasContext = false;
-#endif
-
     viewPortSize = d->mGLSurfaceSize;
 }
 
@@ -198,7 +178,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
         if (!win)
             return;
         // All of these signals are emitted from scene graph rendering thread.
-        connect(win, SIGNAL(beforeRendering()), this, SLOT(beforeRendering()), Qt::DirectConnection);
+        connect(win, SIGNAL(beforeRendering()), this, SLOT(refreshNodeTexture()), Qt::DirectConnection);
         connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
@@ -223,31 +203,9 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void QuickMozView::createThreadRenderObject()
 {
-#ifndef NO_PRIVATE_API
-    if (thread() == QThread::currentThread()) {
-        mInThreadRendering = true;
-    }
-    else
-#endif
     updateGLContextInfo(QOpenGLContext::currentContext());
-    {
-        mSGRenderer = new QSGThreadObject();
-    }
-
+    mSGRenderer = new QSGThreadObject();
     disconnect(window(), SIGNAL(beforeSynchronizing()), this, 0);
-}
-
-void QuickMozView::beforeRendering()
-{
-    if (!d->mViewInitialized)
-        return;
-
-#ifndef NO_PRIVATE_API
-    if (!mInThreadRendering)
-#endif
-    {
-        RefreshNodeTexture();
-    }
 }
 
 void QuickMozView::createView()
@@ -277,25 +235,6 @@ void QuickMozView::RenderToCurrentContext()
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
-#ifndef NO_PRIVATE_API
-    if (mInThreadRendering) {
-        if (!d->mViewInitialized) {
-            return oldNode;
-        }
-        QMozViewSGNode* n = static_cast<QMozViewSGNode*>(oldNode);
-
-        const QWindow* window = this->window();
-        assert(window);
-
-        if (!n)
-            n = new QMozViewSGNode;
-
-        n->setRenderer(d, this);
-
-        return n;
-    }
-#endif
-
 #if defined(QT_OPENGL_ES_2)
 #define TextureNodeType MozExtMaterialNode
 #else
@@ -312,8 +251,11 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     return n;
 }
 
-void QuickMozView::RefreshNodeTexture()
+void QuickMozView::refreshNodeTexture()
 {
+    if (!d->mViewInitialized)
+        return;
+
     int texId = 0, width = 0, height = 0;
     if (mSGRenderer && d && d->mView && d->mView->GetPendingTexture(mSGRenderer->getTargetContextWrapper(), &texId, &width, &height)) {
        Q_EMIT textureReady(texId, QSize(width, height));
@@ -338,12 +280,6 @@ void QuickMozView::setActive(bool active)
             Q_EMIT activeChanged();
         }
         // Process pending paint request before final suspend (unblock possible content Compositor waiters Bug 1020350)
-#ifndef NO_PRIVATE_API
-        if (mInThreadRendering && mHasPendingInvalidate) {
-          RenderToCurrentContext();
-          mHasPendingInvalidate = false;
-        }
-#endif
         SetIsActive(active);
     } else {
         // Will be processed once view is initialized.
@@ -353,13 +289,6 @@ void QuickMozView::setActive(bool active)
 
 bool QuickMozView::Invalidate()
 {
-#ifndef NO_PRIVATE_API
-    if (mInThreadRendering) {
-        update();
-        mHasPendingInvalidate = true;
-        return true;
-    }
-#endif
     QMatrix affine;
     gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
     d->mView->SetGLViewTransform(matr);
@@ -368,12 +297,7 @@ bool QuickMozView::Invalidate()
 
 void QuickMozView::CompositingFinished()
 {
-#ifndef NO_PRIVATE_API
-    if (!mInThreadRendering)
-#endif
-    {
-        Q_EMIT dispatchItemUpdate();
-    }
+    Q_EMIT dispatchItemUpdate();
 }
 
 void QuickMozView::cleanup()

@@ -31,7 +31,6 @@ public:
     Q_MOZ_VIEW_PUBLIC_METHODS
     void RenderToCurrentContext();
     void startMoveMonitoring();
-    void RefreshNodeTexture();
 
     int parentId() const;
 
@@ -87,7 +86,7 @@ private Q_SLOTS:
     void createThreadRenderObject();
     void contextInitialized();
     void updateEnabled();
-    void beforeRendering();
+    void refreshNodeTexture();
 
 private:
     void createView();
@@ -100,9 +99,6 @@ private:
     int mTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
-#ifndef NO_PRIVATE_API
-    bool mInThreadRendering;
-#endif
     bool mPreedit;
     bool mActive;
     bool mHasPendingInvalidate;
