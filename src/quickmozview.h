@@ -95,7 +95,6 @@ private:
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
     bool mUseQmlMouse;
-    QSGThreadObject* mSGRenderer;
     int mTimerId;
     qreal mOffsetX;
     qreal mOffsetY;

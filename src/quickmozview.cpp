@@ -41,12 +41,13 @@ using namespace mozilla::embedlite;
 #define MOZVIEW_FLICK_STOP_TIMEOUT 500
 #endif
 
+static QSGThreadObject* gSGRenderer = NULL;
+
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
   , mParentID(0)
   , mUseQmlMouse(false)
-  , mSGRenderer(NULL)
   , mTimerId(0)
   , mOffsetX(0.0)
   , mOffsetY(0.0)
@@ -85,7 +86,6 @@ QuickMozView::~QuickMozView()
     }
     delete d;
     d = 0;
-    mSGRenderer->deleteLater();
 }
 
 void
@@ -205,7 +205,9 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 void QuickMozView::createThreadRenderObject()
 {
     updateGLContextInfo(QOpenGLContext::currentContext());
-    mSGRenderer = new QSGThreadObject();
+    if (!gSGRenderer) {
+        gSGRenderer = new QSGThreadObject();
+    }
     disconnect(window(), SIGNAL(beforeSynchronizing()), this, 0);
 }
 
@@ -258,7 +260,7 @@ void QuickMozView::refreshNodeTexture()
         return;
 
     int texId = 0, width = 0, height = 0;
-    if (mSGRenderer && d && d->mView && d->mView->GetPendingTexture(mSGRenderer->getTargetContextWrapper(), &texId, &width, &height)) {
+    if (gSGRenderer && d && d->mView && d->mView->GetPendingTexture(gSGRenderer->getTargetContextWrapper(), &texId, &width, &height)) {
        Q_EMIT textureReady(texId, QSize(width, height));
     }
 }
