@@ -41,9 +41,11 @@ class QTestRunner : public QObject
 public:
     QTestRunner(bool isOpenGL, int agargc, char **agargv);
     ~QTestRunner() {}
+    int GetResult() const;
 public Q_SLOTS:
     void DropInStartup();
 private:
     int RunMainTest();
     bool mIsOpenGL;
+    int mResult;
 };

@@ -44,15 +44,20 @@ static int gargc;
 static char **gargv;
 
 QTestRunner::QTestRunner(bool isOpenGL, int agargc, char **agargv)
- : QObject(0), mIsOpenGL(isOpenGL)
+ : QObject(0), mIsOpenGL(isOpenGL), mResult(0)
 {
     gargv = agargv;
     gargc = agargc;
 }
 
+int QTestRunner::GetResult() const
+{
+    return mResult;
+}
+
 void QTestRunner::DropInStartup()
 {
-    RunMainTest();
+    mResult = RunMainTest();
     QMozContext::GetInstance()->stopEmbedding();
 }
 
