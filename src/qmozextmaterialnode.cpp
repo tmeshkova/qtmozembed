@@ -68,7 +68,7 @@ public:
 void MozExtMaterialNode::update()
 {
     QRectF rect(0, 0, m_size.width(), m_size.height());
-    QSGGeometry::updateTexturedRectGeometry(geometry(), rect, QRectF(0, 0, 1, 1));
+    QSGGeometry::updateTexturedRectGeometry(geometry(), rect, QRectF(0, 1, 1, -1));
     markDirty(QSGNode::DirtyGeometry);
 }
 
