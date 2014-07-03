@@ -80,7 +80,7 @@ MozExtMaterialNode::MozExtMaterialNode(QuickMozView* aView)
     setGeometry(new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4));
 
     QSGSimpleMaterial<MozExternalTexture> *material = MozTextureShader::createMaterial();
-    material->setFlag(QSGMaterial::Blending, false);
+    material->setFlag(QSGMaterial::Blending, true);
     material->state()->id = 0;
     setMaterial(material);
 
