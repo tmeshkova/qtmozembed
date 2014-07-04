@@ -53,7 +53,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mOffsetY(0.0)
   , mPreedit(false)
   , mActive(false)
-  , mHasPendingInvalidate(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
