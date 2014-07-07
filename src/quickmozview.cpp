@@ -53,7 +53,6 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mOffsetY(0.0)
   , mPreedit(false)
   , mActive(false)
-  , mHasPendingInvalidate(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -93,6 +92,10 @@ QuickMozView::SetIsActive(bool aIsActive)
 {
     if (QThread::currentThread() == thread() && d->mView) {
         d->mView->SetIsActive(aIsActive);
+        if (mActive) {
+            updateGLContextInfo();
+            d->UpdateViewSize();
+        }
     } else {
         Q_EMIT setIsActive(aIsActive);
     }
@@ -197,8 +200,10 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
     // calculation update.
     if (newGeometry.width() != newGeometry.height() && d->mSize != newGeometry.size()) {
         d->mSize = newGeometry.size();
-        updateGLContextInfo();
-        d->UpdateViewSize();
+        if (mActive) {
+            updateGLContextInfo();
+            d->UpdateViewSize();
+        }
     }
 }
 

@@ -100,7 +100,6 @@ private:
     qreal mOffsetY;
     bool mPreedit;
     bool mActive;
-    bool mHasPendingInvalidate;
 };
 
 #endif // QuickMozView_H
