@@ -224,22 +224,6 @@ void QuickMozView::createView()
     }
 }
 
-void QuickMozView::RenderToCurrentContext()
-{
-    QMatrix affine;
-    gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
-    d->mView->SetGLViewTransform(matr);
-    QRect clipRect(0, 0, d->mSize.width(), d->mSize.height());
-    if (parentItem() && parentItem()->clip()) {
-        QRect parentClipRect = parentItem()->clipRect().toRect();
-        if (clipRect.contains(parentClipRect)) {
-            clipRect = parentClipRect;
-        }
-    }
-    d->mView->SetViewClipping(clipRect.x(), clipRect.y(), clipRect.width(), clipRect.height());
-    d->mView->RenderGL();
-}
-
 QSGNode*
 QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 {
@@ -293,14 +277,6 @@ void QuickMozView::setActive(bool active)
         // Will be processed once view is initialized.
         mActive = active;
     }
-}
-
-bool QuickMozView::Invalidate()
-{
-    QMatrix affine;
-    gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
-    d->mView->SetGLViewTransform(matr);
-    return false;
 }
 
 void QuickMozView::CompositingFinished()

@@ -100,60 +100,7 @@ QGraphicsMozView::uniqueID() const
 void
 QGraphicsMozView::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt, QWidget*)
 {
-    if (!d->mGraphicsViewAssigned) {
-        d->mGraphicsViewAssigned = true;
-        // Disable for future gl context in case if we did not get it yet
-        if (d->mViewInitialized &&
-            d->mContext->GetApp()->IsAccelerated() &&
-            !QGLContext::currentContext()) {
-            LOGT("Gecko is setup for GL rendering but no context available on paint, disable it");
-            d->mContext->setIsAccelerated(false);
-        }
-        Q_EMIT requestGLContextQGV(d->mHasContext, d->mGLSurfaceSize);
-    }
-
-    QRect r = opt ? opt->exposedRect.toRect() : boundingRect().toRect();
-    if (d->mViewInitialized) {
-        QMatrix affine = painter->transform().toAffine();
-        gfxMatrix matr(affine.m11(), affine.m12(), affine.m21(), affine.m22(), affine.dx(), affine.dy());
-        bool changedState = d->mLastIsGoodRotation != matr.PreservesAxisAlignedRectangles();
-        d->mLastIsGoodRotation = matr.PreservesAxisAlignedRectangles();
-        if (d->mContext->GetApp()->IsAccelerated()) {
-            d->mView->SetGLViewTransform(matr);
-            d->mView->SetViewClipping(0, 0, d->mSize.width(), d->mSize.height());
-            if (changedState) {
-                d->UpdateViewSize();
-            }
-            if (d->mLastIsGoodRotation) {
-                painter->beginNativePainting();
-                d->mView->RenderGL();
-                painter->endNativePainting();
-            }
-        } else {
-            if (d->mTempBufferImage.isNull() || d->mTempBufferImage.width() != r.width() || d->mTempBufferImage.height() != r.height()) {
-                d->mTempBufferImage = QImage(r.size(), QImage::Format_RGB16);
-            }
-            {
-                QPainter imgPainter(&d->mTempBufferImage);
-                imgPainter.fillRect(r, d->mBgColor);
-            }
-            d->mView->RenderToImage(d->mTempBufferImage.bits(), d->mTempBufferImage.width(),
-                                    d->mTempBufferImage.height(), d->mTempBufferImage.bytesPerLine(),
-                                    d->mTempBufferImage.depth());
-            painter->drawImage(QPoint(0, 0), d->mTempBufferImage);
-        }
-    }
-}
-
-bool
-QGraphicsMozView::Invalidate()
-{
-    if (QThread::currentThread() != thread()) {
-        Q_EMIT updateThreaded();
-    } else {
-        update();
-    }
-    return true;
+    return;
 }
 
 void

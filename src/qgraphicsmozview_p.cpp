@@ -264,11 +264,6 @@ void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b
     mViewIface->bgColorChanged();
 }
 
-bool QGraphicsMozViewPrivate::Invalidate()
-{
-    return mViewIface->Invalidate();
-}
-
 void QGraphicsMozViewPrivate::CompositingFinished()
 {
     mViewIface->CompositingFinished();
