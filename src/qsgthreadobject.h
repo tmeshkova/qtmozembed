@@ -20,7 +20,7 @@ class QSGThreadObject : public QObject
     Q_OBJECT
 public:
     QSGThreadObject();
-    virtual ~QSGThreadObject() {}
+    virtual ~QSGThreadObject();
 
     mozilla::embedlite::EmbedLiteRenderTarget* getTargetContextWrapper() { return mRenderTarget; }
 

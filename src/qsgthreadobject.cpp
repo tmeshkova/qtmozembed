@@ -20,6 +20,11 @@ QSGThreadObject::QSGThreadObject()
     wrapRenderThreadGLContext();
 }
 
+QSGThreadObject::~QSGThreadObject()
+{
+    delete mRenderTarget;
+}
+
 void
 QSGThreadObject::wrapRenderThreadGLContext()
 {

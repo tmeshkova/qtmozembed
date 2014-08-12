@@ -184,6 +184,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
         // All of these signals are emitted from scene graph rendering thread.
         connect(win, SIGNAL(beforeRendering()), this, SLOT(refreshNodeTexture()), Qt::DirectConnection);
         connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
+        connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(clearThreadRenderObject()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
 }
@@ -212,8 +213,27 @@ void QuickMozView::createThreadRenderObject()
     updateGLContextInfo(QOpenGLContext::currentContext());
     if (!gSGRenderer) {
         gSGRenderer = new QSGThreadObject();
+        if (d->mView) {
+          d->mView->ResumeRendering();
+        }
     }
     disconnect(window(), SIGNAL(beforeSynchronizing()), this, 0);
+}
+
+void QuickMozView::clearThreadRenderObject()
+{
+    QOpenGLContext* ctx = QOpenGLContext::currentContext();
+    Q_ASSERT(ctx != NULL && ctx->makeCurrent(ctx->surface()));
+    if (gSGRenderer != NULL) {
+        if (d->mView) {
+            d->mView->SuspendRendering(gSGRenderer->getTargetContextWrapper());
+        }
+        delete gSGRenderer;
+        gSGRenderer = NULL;
+    }
+    QQuickWindow *win = window();
+    if (!win) return;
+    connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
 }
 
 void QuickMozView::createView()

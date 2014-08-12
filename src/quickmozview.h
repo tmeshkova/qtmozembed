@@ -84,6 +84,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void createThreadRenderObject();
+    void clearThreadRenderObject();
     void contextInitialized();
     void updateEnabled();
     void refreshNodeTexture();
