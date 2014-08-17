@@ -101,6 +101,7 @@ private:
     qreal mOffsetY;
     bool mPreedit;
     bool mActive;
+    GLuint mConsTex;
 };
 
 #endif // QuickMozView_H

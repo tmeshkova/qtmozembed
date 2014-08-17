@@ -31,8 +31,8 @@
 #include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
 #include "qmozextmaterialnode.h"
-#include "qsgthreadobject.h"
 #include "assert.h"
+#include <QtOpenGLExtensions>
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -40,8 +40,6 @@ using namespace mozilla::embedlite;
 #ifndef MOZVIEW_FLICK_STOP_TIMEOUT
 #define MOZVIEW_FLICK_STOP_TIMEOUT 500
 #endif
-
-static QSGThreadObject* gSGRenderer = NULL;
 
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
@@ -183,7 +181,6 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
             return;
         // All of these signals are emitted from scene graph rendering thread.
         connect(win, SIGNAL(beforeRendering()), this, SLOT(refreshNodeTexture()), Qt::DirectConnection);
-        connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
         connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(clearThreadRenderObject()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
@@ -208,32 +205,14 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
     }
 }
 
-void QuickMozView::createThreadRenderObject()
-{
-    updateGLContextInfo(QOpenGLContext::currentContext());
-    if (!gSGRenderer) {
-        gSGRenderer = new QSGThreadObject();
-        if (d->mView) {
-          d->mView->ResumeRendering();
-        }
-    }
-    disconnect(window(), SIGNAL(beforeSynchronizing()), this, 0);
-}
-
 void QuickMozView::clearThreadRenderObject()
 {
     QOpenGLContext* ctx = QOpenGLContext::currentContext();
     Q_ASSERT(ctx != NULL && ctx->makeCurrent(ctx->surface()));
-    if (gSGRenderer != NULL) {
-        if (d->mView) {
-            d->mView->SuspendRendering(gSGRenderer->getTargetContextWrapper());
-        }
-        delete gSGRenderer;
-        gSGRenderer = NULL;
+    if (mConsTex) {
+      glDeleteTextures(1, &mConsTex);
+      mConsTex = 0;
     }
-    QQuickWindow *win = window();
-    if (!win) return;
-    connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
 }
 
 void QuickMozView::createView()
@@ -268,9 +247,21 @@ void QuickMozView::refreshNodeTexture()
     if (!d->mViewInitialized)
         return;
 
-    int texId = 0, width = 0, height = 0;
-    if (gSGRenderer && d && d->mView && d->mView->GetPendingTexture(gSGRenderer->getTargetContextWrapper(), &texId, &width, &height)) {
-       Q_EMIT textureReady(texId, QSize(width, height));
+    if (d && d->mView && d->mView)
+    {
+        int width = 0, height = 0;
+        static QOpenGLExtension_OES_EGL_image* extension = nullptr;
+        if (!extension) {
+            extension = new QOpenGLExtension_OES_EGL_image();
+            extension->initializeOpenGLFunctions();
+        }
+        if (!mConsTex) {
+          glGenTextures(1, &mConsTex);
+        }
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, mConsTex);
+        void* image = d->mView->GetPlatformImage(&width, &height);
+        extension->glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
+        Q_EMIT textureReady(mConsTex, QSize(width, height));
     }
 }
 
