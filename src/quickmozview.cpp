@@ -25,14 +25,15 @@
 #include <QtGui/QOpenGLContext>
 #include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
+#include <QtOpenGLExtensions>
 
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
 #include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
 #include "qmozextmaterialnode.h"
+#include "qsgthreadobject.h"
 #include "assert.h"
-#include <QtOpenGLExtensions>
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -40,6 +41,8 @@ using namespace mozilla::embedlite;
 #ifndef MOZVIEW_FLICK_STOP_TIMEOUT
 #define MOZVIEW_FLICK_STOP_TIMEOUT 500
 #endif
+
+static QSGThreadObject* gSGRenderer = NULL;
 
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
@@ -181,6 +184,7 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
             return;
         // All of these signals are emitted from scene graph rendering thread.
         connect(win, SIGNAL(beforeRendering()), this, SLOT(refreshNodeTexture()), Qt::DirectConnection);
+        connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
         connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(clearThreadRenderObject()), Qt::DirectConnection);
         win->setClearBeforeRendering(false);
     }
@@ -205,14 +209,26 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
     }
 }
 
+void QuickMozView::createThreadRenderObject()
+{
+    updateGLContextInfo(QOpenGLContext::currentContext());
+    if (!gSGRenderer) {
+        gSGRenderer = new QSGThreadObject();
+    }
+    disconnect(window(), SIGNAL(beforeSynchronizing()), this, 0);
+}
+
 void QuickMozView::clearThreadRenderObject()
 {
     QOpenGLContext* ctx = QOpenGLContext::currentContext();
     Q_ASSERT(ctx != NULL && ctx->makeCurrent(ctx->surface()));
-    if (mConsTex) {
-      glDeleteTextures(1, &mConsTex);
-      mConsTex = 0;
+    if (gSGRenderer != NULL) {
+        delete gSGRenderer;
+        gSGRenderer = NULL;
     }
+    QQuickWindow *win = window();
+    if (!win) return;
+    connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
 }
 
 void QuickMozView::createView()
@@ -247,6 +263,7 @@ void QuickMozView::refreshNodeTexture()
     if (!d->mViewInitialized)
         return;
 
+    int width = 0, height = 0;
     if (d && d->mView && d->mView)
     {
         int width = 0, height = 0;
