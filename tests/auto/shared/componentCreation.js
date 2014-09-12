@@ -25,7 +25,7 @@ function createSpriteObjectsQt5() {
 
 function finishCreation() {
     if (component.status == Component.Ready) {
-        appWindow.mozView = component.createObject(appWindow, {"x": 0, "y": 0});
+        appWindow.mozView = component.createObject(appWindow, {"x": 0, "y": 0, "active": true});
         if (appWindow.mozView == null) {
             // Error Handling
             console.log("Error creating object");
