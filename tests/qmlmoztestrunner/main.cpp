@@ -33,10 +33,12 @@
 ****************************************************************************/
 
 #include "qmozcontext.h"
+#include "testviewcreator.h"
 #include "qtestrunner.h"
 #include <QGuiApplication>
 #include <QtCore/qstring.h>
 #include <QTimer>
+#include <QtQml>
 #include <stdio.h>
 #include <QQuickView>
 
@@ -53,6 +55,8 @@ int main(int argc, char **argv)
                     break;
                 }
             }
+
+            qmlRegisterType<TestViewCreator>("qtmozembed.tests", 1, 0, "WebViewCreator");
 
             QTestRunner runn(isOpenGL, argc, argv);
             QTimer::singleShot(0, &runn, SLOT(DropInStartup()));
