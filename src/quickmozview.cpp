@@ -386,7 +386,19 @@ void QuickMozView::inputMethodEvent(QInputMethodEvent* event)
                 d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
             }
         } else {
-            d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+            if (event->commitString().isEmpty()) {
+                d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+            } else {
+                d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+                // After commiting pre-edit, we send "dummy" keypress.
+                // Workaround for sites that enable "submit" button based on keypress events like
+                // comment fields in FB, and m.linkedin.com
+                // Chrome on Android does the same, but it does it also after each pre-edit change
+                // We cannot do exectly the same here since sending keyevent with active pre-edit would commit gecko's
+                // internal Input Engine's pre-edit
+                d->mView->SendKeyPress(0, 0, 0);
+                d->mView->SendKeyRelease(0, 0, 0);
+            }
         }
     }
 }
