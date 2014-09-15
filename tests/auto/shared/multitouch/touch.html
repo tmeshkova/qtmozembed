@@ -1,5 +1,6 @@
 <html>
 <head>
+  <meta name="viewport" content="initial-scale=1">
   <script>
     var ongoingTouches = new Array;
     var offX = 0;
@@ -54,7 +55,8 @@
       if (touches.length === 3) {
         status++;
       }
-      if (touches[0].pageX === 52 && touches[1].pageX === 53 && touches[2].pageX === 54 && status === 9) {
+      // NB: status is of string type thus not strict comparison 'status == 9'
+      if (touches[0].pageX === 52 && touches[1].pageX === 53 && touches[2].pageX === 54 && status == 9) {
         var el = document.getElementById("result");
         el.innerHTML = "ok";
       }

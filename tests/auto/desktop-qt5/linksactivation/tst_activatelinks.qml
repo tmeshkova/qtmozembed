@@ -31,6 +31,7 @@ Item {
         id: webViewport
         visible: true
         focus: true
+        active: true
         anchors.fill: parent
         Connections {
             target: webViewport.child

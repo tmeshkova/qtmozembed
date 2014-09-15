@@ -56,7 +56,7 @@ function shared_Test1LoadInputPage()
     mozContext.dumpTS("test_Test1LoadInputPage start")
     testcaseid.verify(MyScript.waitMozContext())
     testcaseid.verify(MyScript.waitMozView())
-    webViewport.child.url = "data:text/html,<input id=myelem value=''>";
+    webViewport.child.url = "data:text/html,<head><meta name='viewport' content='initial-scale=1'></head><body><input id=myelem value=''>";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -83,7 +83,7 @@ function shared_Test1LoadInputURLPage()
     testcaseid.verify(MyScript.waitMozView())
     appWindow.inputContent = ""
     appWindow.inputType = ""
-    webViewport.child.url = "data:text/html,<input type=number id=myelem value=''>";
+    webViewport.child.url = "data:text/html,<head><meta name='viewport' content='initial-scale=1'></head><body><input type=number id=myelem value=''>";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -109,7 +109,7 @@ function shared_TestScrollPaintOperations()
     mozContext.dumpTS("test_TestScrollPaintOperations start")
     testcaseid.verify(MyScript.waitMozContext())
     testcaseid.verify(MyScript.waitMozView())
-    webViewport.child.url = "data:text/html,<body bgcolor=red leftmargin=0 topmargin=0 marginwidth=0 marginheight=0><input style='position:absolute; left:0px; top:1200px;'>";
+    webViewport.child.url = "data:text/html,<head><meta name='viewport' content='initial-scale=1'></head><body bgcolor=red leftmargin=0 topmargin=0 marginwidth=0 marginheight=0><input style='position:absolute; left:0px; top:1200px;'>";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))
@@ -122,7 +122,7 @@ function shared_TestScrollPaintOperations()
         testcaseid.wait();
     }
     testcaseid.verify(appWindow.clickX === 100)
-    testcaseid.verify(appWindow.clickY === 101)
+    testcaseid.verify(wrtWait(function() {appWindow.clickY !== 101}))
     appWindow.clickX = 0
     testcaseid.mouseClick(webViewport, 10, 20)
     testcaseid.verify(wrtWait(function() { return (appWindow.clickX === 0); }))
@@ -425,7 +425,7 @@ function shared_ActiveHyperLink()
         { n: "browser.ui.touch.weight.visited", v: 120}
     ]});
     testcaseid.verify(MyScript.waitMozView())
-    webViewport.child.url = "data:text/html,<a href=about:mozilla>ActiveLink</a>";
+    webViewport.child.url = "data:text/html,<head><meta name='viewport' content='initial-scale=1'></head><body><a href=about:mozilla>ActiveLink</a>";
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
     testcaseid.verify(wrtWait(function() { return (!webViewport.child.painted); }))

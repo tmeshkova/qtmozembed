@@ -41,6 +41,7 @@ Item {
         clip: false
         visible: true
         focus: true
+        active: true
 
         anchors.fill: parent
         Connections {
