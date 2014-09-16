@@ -20,6 +20,7 @@ class QuickMozView : public QQuickItem
     Q_PROPERTY(int parentId READ parentId WRITE setParentID NOTIFY parentIdChanged FINAL)
     Q_PROPERTY(unsigned parentid WRITE setParentID)
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
+    Q_PROPERTY(bool background READ background NOTIFY backgroundChanged FINAL)
     Q_PROPERTY(QObject* child READ getChild NOTIFY childChanged)
 
     Q_MOZ_VIEW_PRORERTIES
@@ -37,6 +38,8 @@ public:
     bool active() const;
     void setActive(bool active);
 
+    bool background() const;
+
 private:
     QObject* getChild() { return this; }
     void updateGLContextInfo();
@@ -52,6 +55,7 @@ Q_SIGNALS:
     void textureReady(int id, const QSize &size);
     void parentIdChanged();
     void activeChanged();
+    void backgroundChanged();
 
     Q_MOZ_VIEW_SIGNALS
 
@@ -88,6 +92,7 @@ private Q_SLOTS:
     void contextInitialized();
     void updateEnabled();
     void refreshNodeTexture();
+    void windowVisibleChanged(bool visible);
 
 private:
     void createView();
@@ -96,11 +101,14 @@ private:
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
     bool mUseQmlMouse;
-    int mTimerId;
+    int mMovingTimerId;
+    int mBackgroundTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
     bool mPreedit;
     bool mActive;
+    bool mBackground;
+    bool mWindowVisible;
     GLuint mConsTex;
 };
 
