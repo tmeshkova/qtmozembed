@@ -33,10 +33,12 @@ Item {
                 switch (data.msg) {
                     case "init": {
                         print("Received: search:" + message, ", msg: ", data.msg, data.defaultEngine);
+                        break;
                     }
                     case "pluginslist": {
                         print("Received: search:" + message, ", msg: ", data.msg, data.list[0].name, data.list[0].isDefault, data.list[0].isCurrent);
-                        appWindow.testResult = data.list[0].name;
+                        appWindow.testResult = data.list;
+                        break;
                     }
                 }
             } else if (message == "browser-search-engine-modified") {
