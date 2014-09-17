@@ -340,6 +340,21 @@ function shared_TestPromptWithoutResponse()
 
 function shared_TestCheckDefaultSearch()
 {
+    var engineExistsPredicate = function() {
+        var found = false;
+
+        if (!Array.isArray(appWindow.testResult)) {
+            return true;
+        }
+
+        appWindow.testResult.forEach(function(e) {
+            if (e.name === "QMOZTest") {
+                found = true;
+            }
+        });
+
+        return !found;
+    };
     mozContext.dumpTS("TestCheckDefaultSearch start")
     testcaseid.verify(MyScript.waitMozContext())
     mozContext.instance.setPref("browser.search.log", true);
@@ -348,10 +363,12 @@ function shared_TestCheckDefaultSearch()
     mozContext.instance.setPref("keyword.enabled", true);
     testcaseid.verify(MyScript.waitMozView())
     mozContext.instance.sendObserve("embedui:search", {msg:"remove", name: "QMOZTest"})
+    testcaseid.verify(wrtWait(function() { return (!engineExistsPredicate()); }))
     mozContext.instance.sendObserve("embedui:search", {msg:"loadxml", uri: "file://" + mozContext.getenv("QTTESTSROOT") + "/auto/shared/searchengine/test.xml", confirm: false})
     testcaseid.verify(wrtWait(function() { return (appWindow.testResult !== "loaded"); }))
     mozContext.instance.sendObserve("embedui:search", {msg:"getlist"})
-    testcaseid.verify(wrtWait(function() { return (appWindow.testResult !== "QMOZTest"); }))
+    testcaseid.verify(wrtWait(engineExistsPredicate));
+    mozContext.instance.setPref("browser.search.defaultenginename", "QMOZTest");
     webViewport.child.load("linux home");
     testcaseid.verify(MyScript.waitLoadFinished(webViewport))
     testcaseid.compare(webViewport.child.loadProgress, 100);
