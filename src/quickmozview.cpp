@@ -251,6 +251,10 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 #else
 #define TextureNodeType MozTextureNode
 #endif
+    if (width() <= 0 || height() <= 0) {
+        delete oldNode;
+        return 0;
+    }
 
     TextureNodeType* n = static_cast<TextureNodeType*>(oldNode);
     if (!n) {
@@ -264,7 +268,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
 void QuickMozView::refreshNodeTexture()
 {
-    if (!d->mViewInitialized)
+    if (!d->mViewInitialized || !mActive)
         return;
 
     int width = 0, height = 0;
