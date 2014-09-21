@@ -7,6 +7,7 @@
 #include <QSurface>
 #include "qsgthreadobject.h"
 #include "qmozcontext.h"
+#include "mozilla/embedlite/EmbedLiteRenderTarget.h"
 
 #if defined(QT_OPENGL_ES_2)
 #include <EGL/egl.h>
