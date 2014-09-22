@@ -7,6 +7,7 @@
 #define QuickMozView_H
 
 #include <QMatrix>
+#include <QMutex>
 #include <QtQuick/QQuickItem>
 #include <QtGui/QOpenGLShaderProgram>
 #include "qmozview_defined_wrapper.h"
@@ -110,6 +111,7 @@ private:
     bool mBackground;
     bool mWindowVisible;
     GLuint mConsTex;
+    QMutex mRenderMutex;
 };
 
 #endif // QuickMozView_H
