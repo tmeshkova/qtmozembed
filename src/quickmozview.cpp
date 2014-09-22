@@ -16,6 +16,7 @@
 
 #include <QTimer>
 #include <QThread>
+#include <QMutexLocker>
 #include <QtOpenGL/QGLContext>
 #include <QGuiApplication>
 #include <QJsonDocument>
@@ -83,6 +84,8 @@ QuickMozView::QuickMozView(QQuickItem *parent)
 
 QuickMozView::~QuickMozView()
 {
+    QMutexLocker locker(&mRenderMutex);
+
     if (d->mView) {
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
@@ -268,6 +271,8 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
 void QuickMozView::refreshNodeTexture()
 {
+    QMutexLocker locker(&mRenderMutex);
+
     if (!d->mViewInitialized || !mActive)
         return;
 
