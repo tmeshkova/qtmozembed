@@ -5,10 +5,10 @@
        <set name="unit-tests" feature="QtMozEmbed">
            <description>QML component unit tests</description>
            <pre_steps>
-               <step>mcetool --set-demo-mode=on</step>
+               <step>/usr/sbin/mcetool --set-demo-mode=on</step>
            </pre_steps>
            <post_steps>
-               <step>mcetool --set-demo-mode=off</step>
+               <step>/usr/sbin/mcetool --set-demo-mode=off</step>
            </post_steps>
            <case manual="false" timeout="200" name="unittests-context">
                <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/context &amp;&amp;DISPLAY=:0 QTVER=5 ../../run-tests.sh</step>
