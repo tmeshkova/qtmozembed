@@ -267,12 +267,14 @@ void QuickMozView::refreshNodeTexture()
 
     if (d && d->mView)
     {
+#if defined(QT_OPENGL_ES_2)
         int width = 0, height = 0;
         static QOpenGLExtension_OES_EGL_image* extension = nullptr;
         if (!extension) {
             extension = new QOpenGLExtension_OES_EGL_image();
             extension->initializeOpenGLFunctions();
         }
+
         if (!mConsTex) {
           glGenTextures(1, &mConsTex);
         }
@@ -280,6 +282,9 @@ void QuickMozView::refreshNodeTexture()
         void* image = d->mView->GetPlatformImage(&width, &height);
         extension->glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
         Q_EMIT textureReady(mConsTex, QSize(width, height));
+#else
+#warning "Implement me for non ES2 platform"
+#endif
     }
 }
 
