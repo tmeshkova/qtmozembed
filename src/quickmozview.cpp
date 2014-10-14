@@ -11,7 +11,6 @@
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
-#include "mozilla/embedlite/EmbedLiteRenderTarget.h"
 #include "mozilla/TimeStamp.h"
 
 #include <QTimer>
@@ -33,7 +32,6 @@
 #include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
 #include "qmozextmaterialnode.h"
-#include "qsgthreadobject.h"
 #include "assert.h"
 
 using namespace mozilla;
@@ -42,8 +40,6 @@ using namespace mozilla::embedlite;
 #ifndef MOZVIEW_FLICK_STOP_TIMEOUT
 #define MOZVIEW_FLICK_STOP_TIMEOUT 500
 #endif
-
-static QSGThreadObject* gSGRenderer = NULL;
 
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
@@ -219,9 +215,6 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 void QuickMozView::createThreadRenderObject()
 {
     updateGLContextInfo(QOpenGLContext::currentContext());
-    if (!gSGRenderer) {
-        gSGRenderer = new QSGThreadObject();
-    }
     disconnect(window(), SIGNAL(beforeSynchronizing()), this, 0);
 }
 
@@ -229,10 +222,6 @@ void QuickMozView::clearThreadRenderObject()
 {
     QOpenGLContext* ctx = QOpenGLContext::currentContext();
     Q_ASSERT(ctx != NULL && ctx->makeCurrent(ctx->surface()));
-    if (gSGRenderer != NULL) {
-        delete gSGRenderer;
-        gSGRenderer = NULL;
-    }
     QQuickWindow *win = window();
     if (!win) return;
     connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);

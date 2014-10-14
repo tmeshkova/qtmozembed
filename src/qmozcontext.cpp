@@ -188,12 +188,6 @@ void QMozContext::setCompositorInSeparateThread(bool aEnabled)
     d->mApp->SetCompositorInSeparateThread(true);
 }
 
-mozilla::embedlite::EmbedLiteRenderTarget*
-QMozContext::createEmbedLiteRenderTarget(void* aContext, void* aSurface)
-{
-    return d->mApp ? d->mApp->CreateEmbedLiteRenderTarget(aContext, aSurface) : nullptr;
-}
-
 void QMozContext::setProfile(const QString profilePath)
 {
     d->mApp->SetProfilePath(!profilePath.isEmpty() ? profilePath.toUtf8().data() : NULL);

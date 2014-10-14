@@ -33,8 +33,8 @@ HEADERS += qmozcontext.h \
            qmozview_defined_wrapper.h \
            qmozview_templated_wrapper.h
 
-SOURCES += quickmozview.cpp qmoztexturenode.cpp qsgthreadobject.cpp qmozextmaterialnode.cpp
-HEADERS += quickmozview.h qmoztexturenode.h qsgthreadobject.h qmozextmaterialnode.h
+SOURCES += quickmozview.cpp qmoztexturenode.cpp qmozextmaterialnode.cpp
+HEADERS += quickmozview.h qmoztexturenode.h qmozextmaterialnode.h
 
 !isEmpty(BUILD_QT5QUICK1) {
   SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
