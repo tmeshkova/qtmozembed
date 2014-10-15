@@ -19,7 +19,7 @@
            <case manual="false" timeout="200" name="unittests-view">
                <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/view &amp;&amp;DISPLAY=:0 QTVER=5 ../../run-tests.sh</step>
            </case>
-           <case manual="false" timeout="200" name="unittests-basicinput">
+           <case manual="false" timeout="600" name="unittests-basicinput">
                <step>cd /opt/tests/qtmozembed/auto/desktop-qt5/basicinput &amp;&amp;DISPLAY=:0 QTVER=5 ../../run-tests.sh</step>
            </case>
            <case manual="false" timeout="200" name="unittests-basicscroll">
