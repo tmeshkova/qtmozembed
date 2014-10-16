@@ -20,6 +20,7 @@ class QuickMozView : public QQuickItem
     Q_PROPERTY(unsigned parentid WRITE setParentID)
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
     Q_PROPERTY(bool background READ background NOTIFY backgroundChanged FINAL)
+    Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged FINAL)
     Q_PROPERTY(QObject* child READ getChild NOTIFY childChanged)
 
     Q_MOZ_VIEW_PRORERTIES
@@ -38,6 +39,7 @@ public:
     void setActive(bool active);
 
     bool background() const;
+    bool loaded() const;
 
 private:
     QObject* getChild() { return this; }
@@ -55,12 +57,14 @@ Q_SIGNALS:
     void parentIdChanged();
     void activeChanged();
     void backgroundChanged();
+    void loadedChanged();
 
     Q_MOZ_VIEW_SIGNALS
 
 private Q_SLOTS:
     void processViewInitialization();
     void SetIsActive(bool aIsActive);
+    void updateLoaded();
 
 // INTERNAL
 protected:
@@ -108,6 +112,7 @@ private:
     bool mActive;
     bool mBackground;
     bool mWindowVisible;
+    bool mLoaded;
     GLuint mConsTex;
     QMutex mRenderMutex;
 };

@@ -54,6 +54,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mActive(false)
   , mBackground(false)
   , mWindowVisible(false)
+  , mLoaded(false)
 {
     static bool Initialized = false;
     if (!Initialized) {
@@ -74,6 +75,8 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     connect(this, SIGNAL(viewInitialized()), this, SLOT(processViewInitialization()));
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
     connect(this, SIGNAL(dispatchItemUpdate()), this, SLOT(update()));
+    connect(this, SIGNAL(loadProgressChanged()), this, SLOT(updateLoaded()));
+    connect(this, SIGNAL(loadingChanged()), this, SLOT(updateLoaded()));
 
     updateEnabled();
 }
@@ -101,6 +104,15 @@ QuickMozView::SetIsActive(bool aIsActive)
         }
     } else {
         Q_EMIT setIsActive(aIsActive);
+    }
+}
+
+void QuickMozView::updateLoaded()
+{
+    bool loaded = loadProgress() == 100 && !loading();
+    if (mLoaded != loaded) {
+        mLoaded = loaded;
+        Q_EMIT loadedChanged();
     }
 }
 
@@ -324,6 +336,11 @@ void QuickMozView::setActive(bool active)
 bool QuickMozView::background() const
 {
     return mBackground;
+}
+
+bool QuickMozView::loaded() const
+{
+    return mLoaded;
 }
 
 void QuickMozView::CompositingFinished()
