@@ -28,6 +28,8 @@ public:
     mozilla::embedlite::EmbedLiteApp* GetApp();
     void setPixelRatio(float ratio);
     float pixelRatio() const;
+    bool initialized() const;
+    bool isAccelerated() const;
 
     static QMozContext* GetInstance();
 
@@ -36,9 +38,7 @@ Q_SIGNALS:
     void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
-    bool initialized();
     void setIsAccelerated(bool aIsAccelerated);
-    bool isAccelerated();
     void addComponentManifest(const QString& manifestPath);
     void addObserver(const QString& aTopic);
     void sendObserve(const QString& aTopic, const QString& string);

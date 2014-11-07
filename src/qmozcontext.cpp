@@ -279,7 +279,7 @@ void QMozContext::runEmbedding(int aDelay)
 }
 
 bool
-QMozContext::initialized()
+QMozContext::initialized() const
 {
     return d->mInitialized;
 }
@@ -322,7 +322,7 @@ QMozContext::setIsAccelerated(bool aIsAccelerated)
 }
 
 bool
-QMozContext::isAccelerated()
+QMozContext::isAccelerated() const
 {
     if (!d->mApp)
         return false;
