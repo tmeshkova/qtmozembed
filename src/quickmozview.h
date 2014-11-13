@@ -65,6 +65,7 @@ private Q_SLOTS:
     void processViewInitialization();
     void SetIsActive(bool aIsActive);
     void updateLoaded();
+    void resumeRendering();
 
 // INTERNAL
 protected:
