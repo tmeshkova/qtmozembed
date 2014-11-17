@@ -28,8 +28,8 @@ public:
     mozilla::embedlite::EmbedLiteApp* GetApp();
     void setPixelRatio(float ratio);
     float pixelRatio() const;
-    bool initialized() const;
-    bool isAccelerated() const;
+    Q_INVOKABLE bool initialized() const;
+    Q_INVOKABLE bool isAccelerated() const;
 
     static QMozContext* GetInstance();
 
