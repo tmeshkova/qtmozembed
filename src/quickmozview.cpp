@@ -268,7 +268,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
     TextureNodeType* n = static_cast<TextureNodeType*>(oldNode);
     if (!n) {
-        n = new TextureNodeType(this);
+        n = new TextureNodeType();
         connect(this, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
         connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
     }
