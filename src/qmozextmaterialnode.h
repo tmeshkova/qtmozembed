@@ -36,8 +36,6 @@ private:
 
     int m_id;
     QSize m_size;
-    QMutex m_mutex;
-    QuickMozView* m_view;
 };
 
 #endif /* qMozExtMaterialNode_h */

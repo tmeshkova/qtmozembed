@@ -82,7 +82,6 @@ void MozExtMaterialNode::updateGeometry(const QSize &size)
 
 MozExtMaterialNode::MozExtMaterialNode(QuickMozView* aView)
   : m_id(0)
-  , m_view(aView)
 {
     setGeometry(new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4));
 
@@ -97,9 +96,7 @@ MozExtMaterialNode::MozExtMaterialNode(QuickMozView* aView)
 void
 MozExtMaterialNode::newTexture(int id, const QSize &size)
 {
-    m_mutex.lock();
     m_id = id;
-    m_mutex.unlock();
 
     // It might happen that after orientation change when compositing is done
     // QuickMozView::updatePaintNode() gets called before a new texture with new
@@ -116,13 +113,10 @@ MozExtMaterialNode::newTexture(int id, const QSize &size)
 void
 MozExtMaterialNode::prepareNode()
 {
-    m_mutex.lock();
-    int newId = m_id;
-    m_id = 0;
-    m_mutex.unlock();
-    if (newId) {
+    if (m_id) {
         MozExternalTexture *texture = static_cast<QSGSimpleMaterial<MozExternalTexture> *>(material())->state();
-        texture->id = newId;
+        texture->id = m_id;
+        m_id = 0;
         markDirty(QSGNode::DirtyMaterial);
     }
 }
