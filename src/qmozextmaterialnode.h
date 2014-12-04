@@ -9,13 +9,11 @@
 #include <QtQuick/QSGGeometryNode>
 #include <QObject>
 
-class QuickMozView;
-
 class MozExtMaterialNode : public QObject, public QSGGeometryNode
 {
     Q_OBJECT
 public:
-    MozExtMaterialNode(QuickMozView* aView);
+    MozExtMaterialNode();
 
     ~MozExtMaterialNode() {}
 

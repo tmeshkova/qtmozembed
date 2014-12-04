@@ -4,8 +4,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "qmozextmaterialnode.h"
-#include "quickmozview.h"
-#include <QQuickWindow>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 
@@ -79,7 +77,7 @@ void MozExtMaterialNode::updateGeometry(const QSize &size)
     markDirty(QSGNode::DirtyGeometry);
 }
 
-MozExtMaterialNode::MozExtMaterialNode(QuickMozView* aView)
+MozExtMaterialNode::MozExtMaterialNode()
   : m_id(0)
 {
     setGeometry(new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4));
