@@ -6,7 +6,6 @@
 #include "qmozextmaterialnode.h"
 #include "quickmozview.h"
 #include <QQuickWindow>
-#include <QThread>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 
@@ -65,17 +64,23 @@ public:
 
 };
 
-void MozExtMaterialNode::update()
+void MozExtMaterialNode::update(const QSize &size)
 {
-    QRectF rect(0, 0, m_size.width(), m_size.height());
+    // check if the node contains a texture for the current geometry
+    if (m_size == size) {
+        updateGeometry(size);
+    }
+}
+
+void MozExtMaterialNode::updateGeometry(const QSize &size)
+{
+    QRectF rect(0, 0, size.width(), size.height());
     QSGGeometry::updateTexturedRectGeometry(geometry(), rect, QRectF(0, 1, 1, -1));
     markDirty(QSGNode::DirtyGeometry);
 }
 
-
 MozExtMaterialNode::MozExtMaterialNode(QuickMozView* aView)
   : m_id(0)
-  , m_view(aView)
 {
     setGeometry(new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4));
 
@@ -90,27 +95,27 @@ MozExtMaterialNode::MozExtMaterialNode(QuickMozView* aView)
 void
 MozExtMaterialNode::newTexture(int id, const QSize &size)
 {
-    m_mutex.lock();
     m_id = id;
-    m_size = size;
-    m_mutex.unlock();
 
-    // We cannot call QQuickWindow::update directly here, as this is only allowed
-    // from the rendering thread or GUI thread.
-    Q_EMIT pendingNewTexture();
+    // It might happen that after orientation change when compositing is done
+    // QuickMozView::updatePaintNode() gets called before a new texture with new
+    // geometry has been created. In this case it's safer to reset node's
+    // geometry again.
+    if (m_size != size) {
+        updateGeometry(size);
+    }
+
+    m_size = size;
 }
 
 // Before the scene graph starts to render, we update to the pending texture
 void
 MozExtMaterialNode::prepareNode()
 {
-    m_mutex.lock();
-    int newId = m_id;
-    m_id = 0;
-    m_mutex.unlock();
-    if (newId) {
+    if (m_id) {
         MozExternalTexture *texture = static_cast<QSGSimpleMaterial<MozExternalTexture> *>(material())->state();
-        texture->id = newId;
+        texture->id = m_id;
+        m_id = 0;
         markDirty(QSGNode::DirtyMaterial);
     }
 }

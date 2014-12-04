@@ -13,7 +13,6 @@
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/TimeStamp.h"
 
-#include <QTimer>
 #include <QThread>
 #include <QMutexLocker>
 #include <QGuiApplication>
@@ -273,7 +272,7 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
         connect(this, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
         connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
     }
-    n->update();
+    n->update(QSize(width(), height()));
     return n;
 }
 
