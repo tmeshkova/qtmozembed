@@ -8,7 +8,6 @@
 
 #include <QtQuick/QSGGeometryNode>
 #include <QObject>
-#include <QMutex>
 
 class QuickMozView;
 

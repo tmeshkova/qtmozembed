@@ -13,7 +13,6 @@
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/TimeStamp.h"
 
-#include <QTimer>
 #include <QThread>
 #include <QMutexLocker>
 #include <QGuiApplication>

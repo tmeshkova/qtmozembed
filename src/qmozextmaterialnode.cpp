@@ -6,7 +6,6 @@
 #include "qmozextmaterialnode.h"
 #include "quickmozview.h"
 #include <QQuickWindow>
-#include <QThread>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 
