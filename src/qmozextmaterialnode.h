@@ -17,7 +17,7 @@ public:
 
     ~MozExtMaterialNode() {}
 
-    void update(const QSize &size);
+    void update();
 
 public Q_SLOTS:
 

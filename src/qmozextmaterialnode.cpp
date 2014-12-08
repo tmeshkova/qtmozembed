@@ -62,12 +62,9 @@ public:
 
 };
 
-void MozExtMaterialNode::update(const QSize &size)
+void MozExtMaterialNode::update()
 {
-    // check if the node contains a texture for the current geometry
-    if (m_size == size) {
-        updateGeometry(size);
-    }
+    updateGeometry(m_size);
 }
 
 void MozExtMaterialNode::updateGeometry(const QSize &size)
@@ -99,7 +96,7 @@ MozExtMaterialNode::newTexture(int id, const QSize &size)
     // QuickMozView::updatePaintNode() gets called before a new texture with new
     // geometry has been created. In this case it's safer to reset node's
     // geometry again.
-    if (m_size != size) {
+    if (m_size != size && m_size.width() > 0 && m_size.height() > 0) {
         updateGeometry(size);
     }
 
