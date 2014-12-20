@@ -24,6 +24,7 @@
 #include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
 #include <QtOpenGLExtensions>
+#include <QQmlInfo>
 
 #include "qgraphicsmozview_p.h"
 #include "EmbedQtKeyUtils.h"
@@ -43,6 +44,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
   , mParentID(0)
+  , mPrivateMode(false)
   , mUseQmlMouse(false)
   , mMovingTimerId(0)
   , mBackgroundTimerId(0)
@@ -248,7 +250,7 @@ void QuickMozView::clearThreadRenderObject()
 void QuickMozView::createView()
 {
     if (!d->mView) {
-        d->mView = d->mContext->GetApp()->CreateView(mParentID);
+        d->mView = d->mContext->GetApp()->CreateView(mParentID, mPrivateMode);
         d->mView->SetListener(d);
     }
 }
@@ -319,6 +321,11 @@ void QuickMozView::windowVisibleChanged(bool visible)
 int QuickMozView::parentId() const
 {
     return mParentID;
+}
+
+bool QuickMozView::privateMode() const
+{
+    return mPrivateMode;
 }
 
 bool QuickMozView::active() const
@@ -765,6 +772,20 @@ void QuickMozView::setParentID(unsigned aParentID)
     if (aParentID != mParentID) {
         mParentID = aParentID;
         Q_EMIT parentIdChanged();
+    }
+}
+
+void QuickMozView::setPrivateMode(bool aPrivateMode)
+{
+    if (isComponentComplete()) {
+        // View is created directly in componentComplete() if mozcontext ready
+        qmlInfo(this) << "privateMode cannot be changed after view is created";
+        return;
+    }
+
+    if (aPrivateMode != mPrivateMode) {
+        mPrivateMode = aPrivateMode;
+        Q_EMIT privateModeChanged();
     }
 }
 

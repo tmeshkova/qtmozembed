@@ -17,6 +17,7 @@ class QuickMozView : public QQuickItem
 {
     Q_OBJECT
     Q_PROPERTY(int parentId READ parentId WRITE setParentID NOTIFY parentIdChanged FINAL)
+    Q_PROPERTY(bool mPrivateMode READ privateMode WRITE setPrivateMode NOTIFY privateModeChanged FINAL)
     Q_PROPERTY(unsigned parentid WRITE setParentID)
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
     Q_PROPERTY(bool background READ background NOTIFY backgroundChanged FINAL)
@@ -34,9 +35,11 @@ public:
     void startMoveMonitoring();
 
     int parentId() const;
+    bool privateMode() const;
 
     bool active() const;
     void setActive(bool active);
+    void setPrivateMode(bool);
 
     bool background() const;
     bool loaded() const;
@@ -55,6 +58,7 @@ Q_SIGNALS:
     void dispatchItemUpdate();
     void textureReady(int id, const QSize &size);
     void parentIdChanged();
+    void privateModeChanged();
     void activeChanged();
     void backgroundChanged();
     void loadedChanged();
@@ -104,6 +108,7 @@ private:
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;
     unsigned mParentID;
+    bool mPrivateMode;
     bool mUseQmlMouse;
     int mMovingTimerId;
     int mBackgroundTimerId;
