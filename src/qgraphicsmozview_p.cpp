@@ -221,6 +221,14 @@ void QGraphicsMozViewPrivate::UpdateMoving(bool moving)
     }
 }
 
+void QGraphicsMozViewPrivate::ResetPainted()
+{
+    if (mIsPainted) {
+        mIsPainted = false;
+        mViewIface->firstPaint(-1, -1);
+    }
+}
+
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
     if (mSize.isEmpty())
@@ -295,10 +303,7 @@ void QGraphicsMozViewPrivate::OnLoadStarted(const char* aLocation)
 {
     Q_UNUSED(aLocation);
 
-    if (mIsPainted) {
-        mIsPainted = false;
-        mViewIface->firstPaint(-1, -1);
-    }
+    ResetPainted();
 
     if (!mIsLoading) {
         mIsLoading = true;
