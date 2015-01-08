@@ -111,13 +111,11 @@ private:
     bool mPrivateMode;
     bool mUseQmlMouse;
     int mMovingTimerId;
-    int mBackgroundTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
     bool mPreedit;
     bool mActive;
     bool mBackground;
-    bool mWindowVisible;
     bool mLoaded;
     GLuint mConsTex;
     QMutex mRenderMutex;
