@@ -682,6 +682,8 @@ void QuickMozView::goBack()
 {
     if (!d->mViewInitialized)
         return;
+
+    d->ResetPainted();
     d->mView->GoBack();
 }
 
@@ -689,6 +691,8 @@ void QuickMozView::goForward()
 {
     if (!d->mViewInitialized)
         return;
+
+    d->ResetPainted();
     d->mView->GoForward();
 }
 
@@ -703,6 +707,8 @@ void QuickMozView::reload()
 {
     if (!d->mViewInitialized)
         return;
+
+    d->ResetPainted();
     d->mView->Reload(false);
 }
 
@@ -716,6 +722,7 @@ void QuickMozView::load(const QString& url)
     }
     LOGT("url: %s", url.toUtf8().data());
     d->mProgress = 0;
+    d->ResetPainted();
     d->mView->LoadURL(url.toUtf8().data());
 }
 

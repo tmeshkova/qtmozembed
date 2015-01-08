@@ -75,6 +75,7 @@ public:
     void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
     void ResetState();
     void UpdateMoving(bool moving);
+    void ResetPainted();
 
     IMozQViewIface* mViewIface;
     QMozContext* mContext;
