@@ -75,7 +75,9 @@ QuickMozView::QuickMozView(QQuickItem *parent)
     connect(this, SIGNAL(dispatchItemUpdate()), this, SLOT(update()));
     connect(this, SIGNAL(loadProgressChanged()), this, SLOT(updateLoaded()));
     connect(this, SIGNAL(loadingChanged()), this, SLOT(updateLoaded()));
-
+    connect(this, &QuickMozView::updateViewSize, this, [=]() {
+        d->UpdateViewSize();
+    });
     updateEnabled();
 }
 
@@ -98,7 +100,6 @@ QuickMozView::SetIsActive(bool aIsActive)
         d->mView->SetIsActive(aIsActive);
         if (mActive) {
             updateGLContextInfo();
-            d->UpdateViewSize();
         }
     } else {
         Q_EMIT setIsActive(aIsActive);
@@ -185,6 +186,7 @@ void QuickMozView::updateGLContextInfo()
         }
 
         d->mGLSurfaceSize = viewPortSize;
+        Q_EMIT updateViewSize();
     }
 }
 
@@ -217,7 +219,6 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
         d->mSize = newGeometry.size();
         if (mActive) {
             updateGLContextInfo();
-            d->UpdateViewSize();
         }
     }
 }
