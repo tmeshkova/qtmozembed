@@ -54,7 +54,6 @@ public Q_SLOTS:
 Q_SIGNALS:
     void childChanged();
     void setIsActive(bool);
-    void wrapRenderThreadGLContext();
     void dispatchItemUpdate();
     void textureReady(int id, const QSize &size);
     void parentIdChanged();
