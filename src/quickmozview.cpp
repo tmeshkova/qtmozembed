@@ -53,6 +53,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mActive(false)
   , mBackground(false)
   , mLoaded(false)
+  , mConsTex(0)
 {
     static bool Initialized = false;
     if (!Initialized) {
