@@ -202,7 +202,6 @@ void QuickMozView::itemChange(ItemChange change, const ItemChangeData &)
         connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(createThreadRenderObject()), Qt::DirectConnection);
         connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(clearThreadRenderObject()), Qt::DirectConnection);
         connect(win, SIGNAL(visibleChanged(bool)), this, SLOT(windowVisibleChanged(bool)));
-        win->setClearBeforeRendering(false);
     }
 }
 
