@@ -598,9 +598,3 @@ QGraphicsMozView::synthTouchEnd(const QVariant& touches)
     }
     d->mView->ReceiveInputEvent(meventStart);
 }
-
-void
-QGraphicsMozView::scrollTo(const QPointF& position)
-{
-    LOGT("NOT IMPLEMENTED");
-}
