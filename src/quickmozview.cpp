@@ -855,11 +855,6 @@ void QuickMozView::synthTouchEnd(const QVariant& touches)
     d->mView->ReceiveInputEvent(meventStart);
 }
 
-void QuickMozView::scrollTo(const QPointF& position)
-{
-    LOGT("NOT IMPLEMENTED");
-}
-
 void QuickMozView::suspendView()
 {
     if (!d->mView) {
