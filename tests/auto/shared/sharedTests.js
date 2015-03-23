@@ -22,7 +22,7 @@ function shared_context1Init()
 {
     mozContext.dumpTS("test_context1Init start")
     testcaseid.verify(mozContext.instance !== undefined)
-    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 10, 500))
+    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 100, 500))
     testcaseid.verify(mozContext.instance.initialized())
     mozContext.dumpTS("test_context1Init end")
 }
@@ -45,7 +45,7 @@ function shared_context4ObserveAPI()
     mozContext.instance.sendObserve("memory-pressure", null);
     mozContext.instance.addObserver("test-observe-message");
     mozContext.instance.sendObserve("test-observe-message", {msg: "testMessage", val: 1});
-    testcaseid.verify(wrtWait(function() { return (lastObserveMessage === undefined); }))
+    testcaseid.verify(wrtWait(function() { return (lastObserveMessage === undefined); }, 10, 500))
     testcaseid.compare(lastObserveMessage.msg, "test-observe-message");
     testcaseid.compare(lastObserveMessage.data.val, 1);
     testcaseid.compare(lastObserveMessage.data.msg, "testMessage");
@@ -123,6 +123,7 @@ function shared_TestScrollPaintOperations()
     }
     testcaseid.verify(appWindow.clickX === 100)
     testcaseid.verify(wrtWait(function() {appWindow.clickY !== 101}))
+    testcaseid.wait(1000);
     appWindow.clickX = 0
     testcaseid.mouseClick(webViewport, 10, 20)
     testcaseid.verify(wrtWait(function() { return (appWindow.clickX === 0); }))
@@ -135,7 +136,7 @@ function shared_1contextPrepareViewContext()
 {
     mozContext.dumpTS("test_1contextPrepareViewContext start")
     testcaseid.verify(mozContext.instance !== undefined)
-    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 10, 500))
+    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 100, 500))
     testcaseid.verify(mozContext.instance.initialized())
     mozContext.dumpTS("test_1contextPrepareViewContext end")
 }
@@ -143,6 +144,7 @@ function shared_1contextPrepareViewContext()
 function shared_2viewInit(isQt5)
 {
     mozContext.dumpTS("test_2viewInit start")
+    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 100, 500))
     testcaseid.verify(mozContext.instance.initialized())
     appWindow.createParentID = 0;
     if (isQt5)
@@ -228,13 +230,14 @@ function shared_1newcontextPrepareViewContext()
 {
     mozContext.dumpTS("test_1newcontextPrepareViewContext start")
     testcaseid.verify(mozContext.instance !== undefined)
-    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 10, 500))
+    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 100, 500))
     testcaseid.verify(mozContext.instance.initialized())
     mozContext.dumpTS("test_1newcontextPrepareViewContext end")
 }
 function shared_2newviewInit(isQt5)
 {
     mozContext.dumpTS("test_2newviewInit start")
+    testcaseid.verify(wrtWait(function() { return (mozContext.instance.initialized() === false); }, 100, 500))
     testcaseid.verify(mozContext.instance.initialized())
     if (isQt5)
         MyScript.createSpriteObjectsQt5();
@@ -248,6 +251,7 @@ function shared_2newviewInit(isQt5)
 function shared_viewTestNewWindowAPI()
 {
     mozContext.dumpTS("test_viewTestNewWindowAPI start")
+    testcaseid.verify(wrtWait(function() { return (mozView.child === undefined); }, 100, 500))
     testcaseid.verify(mozView.child !== undefined)
     mozView.child.url = mozContext.getenv("QTTESTSROOT") + "/auto/shared/newviewrequest/newwin.html";
     testcaseid.verify(MyScript.waitLoadFinished(mozView))
