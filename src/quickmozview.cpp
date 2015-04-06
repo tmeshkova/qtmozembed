@@ -715,16 +715,7 @@ void QuickMozView::reload()
 
 void QuickMozView::load(const QString& url)
 {
-    if (url.isEmpty())
-        return;
-
-    if (!d->mViewInitialized) {
-        return;
-    }
-    LOGT("url: %s", url.toUtf8().data());
-    d->mProgress = 0;
-    d->ResetPainted();
-    d->mView->LoadURL(url.toUtf8().data());
+    d->load(url);
 }
 
 void QuickMozView::sendAsyncMessage(const QString& name, const QVariant& variant)
@@ -740,27 +731,17 @@ void QuickMozView::sendAsyncMessage(const QString& name, const QVariant& variant
 
 void QuickMozView::addMessageListener(const QString& name)
 {
-    if (!d->mViewInitialized)
-        return;
-
-    d->mView->AddMessageListener(name.toUtf8().data());
+    d->addMessageListener(name);
 }
 
 void QuickMozView::addMessageListeners(const QStringList& messageNamesList)
 {
-    if (!d->mViewInitialized)
-        return;
-
-    nsTArray<nsString> messages;
-    for (int i = 0; i < messageNamesList.size(); i++) {
-        messages.AppendElement((char16_t*)messageNamesList.at(i).data());
-    }
-    d->mView->AddMessageListeners(messages);
+    d->addMessageListeners(messageNamesList);
 }
 
 void QuickMozView::loadFrameScript(const QString& name)
 {
-    d->mView->LoadFrameScript(name.toUtf8().data());
+    d->loadFrameScript(name);
 }
 
 void QuickMozView::newWindow(const QString& url)
