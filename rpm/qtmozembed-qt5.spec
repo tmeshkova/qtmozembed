@@ -12,7 +12,6 @@ BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(Qt5OpenGL)
 BuildRequires:  pkgconfig(Qt5Widgets)
 BuildRequires:  pkgconfig(Qt5Quick)
-BuildRequires:  pkgconfig(Qt5Declarative)
 BuildRequires:  pkgconfig(Qt5QuickTest)
 BuildRequires:  xulrunner-qt5-devel
 BuildRequires:  pkgconfig(nspr)
