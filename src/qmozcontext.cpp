@@ -93,6 +93,10 @@ public:
             mApp->SetIsAccelerated(true);
         }
 #endif
+        if (mPixelRatio != 1.0) {
+            q->setPixelRatio(mPixelRatio);
+        }
+
         setDefaultPrefs();
         mApp->LoadGlobalStyleSheet("chrome://global/content/embedScrollStyles.css", true);
         Q_EMIT q->onInitialized();
