@@ -128,7 +128,7 @@ void QuickMozView::createGeckoGLContext()
 
 void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    hasContext = false;
+    hasContext = true;
     viewPortSize = d->mGLSurfaceSize;
 }
 
@@ -345,6 +345,11 @@ bool QuickMozView::loaded() const
 void QuickMozView::CompositingFinished()
 {
     Q_EMIT dispatchItemUpdate();
+}
+
+bool QuickMozView::Invalidate()
+{
+    return false;
 }
 
 void QuickMozView::cleanup()

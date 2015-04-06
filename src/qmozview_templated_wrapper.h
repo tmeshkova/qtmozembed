@@ -16,6 +16,7 @@ public:
     virtual ~IMozQViewIface() {}
     // Methods
     virtual void CompositingFinished() = 0;
+    virtual bool Invalidate() = 0;
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
     virtual void forceViewActiveFocus() = 0;
     virtual void createGeckoGLContext() = 0;
@@ -60,6 +61,11 @@ public:
     void CompositingFinished()
     {
         view.CompositingFinished();
+    }
+
+    bool Invalidate()
+    {
+        return view.Invalidate();
     }
 
     void setInputMethodHints(Qt::InputMethodHints hints)
