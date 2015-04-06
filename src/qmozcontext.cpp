@@ -70,6 +70,7 @@ public:
             QObject::connect(mThread, SIGNAL(finished()), worker, SLOT(quit()));
             worker->moveToThread(mThread);
 
+            mThread->setObjectName("GeckoWorkerThread");
             mThread->start(QThread::LowPriority);
             return true;
         }
@@ -185,11 +186,6 @@ QMozContext::QMozContext(QObject* parent)
 {
     Q_ASSERT(protectSingleton == nullptr);
     protectSingleton = this;
-}
-
-void QMozContext::setCompositorInSeparateThread(bool aEnabled)
-{
-    d->mApp->SetCompositorInSeparateThread(true);
 }
 
 void QMozContext::setProfile(const QString profilePath)

@@ -120,7 +120,6 @@ void
 QuickMozView::contextInitialized()
 {
     LOGT("QuickMozView");
-    d->mContext->setCompositorInSeparateThread(true);
     // We really don't care about SW rendering on Qt5 anymore
     d->mContext->GetApp()->SetIsAccelerated(true);
     createView();

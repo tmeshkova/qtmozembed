@@ -51,7 +51,6 @@ public Q_SLOTS:
     void notifyFirstUIInitialized();
     void setProfile(const QString);
     void addObservers(const QStringList& aObserversList);
-    void setCompositorInSeparateThread(bool aEnabled);
     void setViewCreator(QMozViewCreator* viewCreator);
     quint32 createView(const QString& url, const quint32& parentId = 0);
 
