@@ -77,6 +77,11 @@ public:
     void UpdateMoving(bool moving);
     void ResetPainted();
 
+    void load(const QString &url);
+    void loadFrameScript(const QString &frameScript);
+    void addMessageListener(const QString &name);
+    void addMessageListeners(const QStringList &messageNamesList);
+
     IMozQViewIface* mViewIface;
     QMozContext* mContext;
     mozilla::embedlite::EmbedLiteView* mView;
@@ -125,6 +130,10 @@ public:
     bool mPressed;
     bool mDragging;
     bool mFlicking;
+
+    QString mPendingUrl;
+    QStringList mPendingMessageListeners;
+    QStringList mPendingFrameScripts;
 };
 
 qint64 current_timestamp(QTouchEvent*);

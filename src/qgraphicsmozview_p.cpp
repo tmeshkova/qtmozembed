@@ -229,6 +229,54 @@ void QGraphicsMozViewPrivate::ResetPainted()
     }
 }
 
+void QGraphicsMozViewPrivate::load(const QString &url)
+{
+    if (url.isEmpty())
+        return;
+
+    if (!mViewInitialized) {
+        mPendingUrl = url;
+        return;
+    }
+    LOGT("url: %s", url.toUtf8().data());
+    mProgress = 0;
+    ResetPainted();
+    mView->LoadURL(url.toUtf8().data());
+}
+
+void QGraphicsMozViewPrivate::loadFrameScript(const QString &frameScript)
+{
+    if (!mView) {
+        mPendingFrameScripts.append(frameScript);
+    } else {
+        mView->LoadFrameScript(frameScript.toUtf8().data());
+    }
+}
+
+void QGraphicsMozViewPrivate::addMessageListener(const QString &name)
+{
+    if (!mViewInitialized) {
+        mPendingMessageListeners.append(name);
+        return;
+    }
+
+    mView->AddMessageListener(name.toUtf8().data());
+}
+
+void QGraphicsMozViewPrivate::addMessageListeners(const QStringList &messageNamesList)
+{
+    if (!mViewInitialized) {
+        mPendingMessageListeners.append(messageNamesList);
+        return;
+    }
+
+    nsTArray<nsString> messages;
+    for (int i = 0; i < messageNamesList.size(); i++) {
+        messages.AppendElement((char16_t*)messageNamesList.at(i).data());
+    }
+    mView->AddMessageListeners(messages);
+}
+
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
     if (mSize.isEmpty())
@@ -260,6 +308,22 @@ bool QGraphicsMozViewPrivate::RequestCurrentGLContext(QSize& aViewPortSize)
 void QGraphicsMozViewPrivate::ViewInitialized()
 {
     mViewInitialized = true;
+
+    Q_FOREACH (const QString &listener, mPendingMessageListeners) {
+        addMessageListener(listener);
+    }
+    mPendingMessageListeners.clear();
+
+    Q_FOREACH (const QString &frameScript, mPendingFrameScripts) {
+        loadFrameScript(frameScript);
+    }
+    mPendingFrameScripts.clear();
+
+    if (!mPendingUrl.isEmpty()) {
+        load(mPendingUrl);
+        mPendingUrl.clear();
+    }
+
     UpdateViewSize();
     // This is currently part of official API, so let's subscribe to these messages by default
     mViewIface->viewInitialized();
