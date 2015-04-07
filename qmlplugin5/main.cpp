@@ -23,6 +23,7 @@ public:
         qmlRegisterType<QuickMozView>("Qt5Mozilla", 1, 0, "QmlMozView");
         qmlRegisterType<QmlMozContext>("Qt5Mozilla", 1, 0, "QmlMozContext");
         qmlRegisterUncreatableType<QMozScrollDecorator>("Qt5Mozilla", 1, 0, "QmlMozScrollDecorator", "");
+        qmlRegisterUncreatableType<QMozReturnValue>("Qt5Mozilla", 1, 0, "QMozReturnValue", "");
         setenv("EMBED_COMPONENTS_PATH", DEFAULT_COMPONENTS_PATH, 1);
     }
 };

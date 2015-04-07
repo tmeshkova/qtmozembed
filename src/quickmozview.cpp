@@ -55,14 +55,7 @@ QuickMozView::QuickMozView(QQuickItem *parent)
   , mLoaded(false)
   , mConsTex(0)
 {
-    static bool Initialized = false;
-    if (!Initialized) {
-        qmlRegisterType<QMozReturnValue>("QtMozilla", 1, 0, "QMozReturnValue");
-        Initialized = true;
-    }
-
     setFlag(ItemHasContents, true);
-
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
     setFlag(ItemClipsChildrenToShape, true);
     setFlag(ItemIsFocusScope, true);
