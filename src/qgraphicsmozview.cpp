@@ -9,6 +9,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QTimer>
+#include <QTimerEvent>
 #include <QThread>
 #include <QtOpenGL/QGLContext>
 #include <QJsonDocument>
@@ -28,7 +29,7 @@ using namespace mozilla::embedlite;
 
 QGraphicsMozView::QGraphicsMozView(QGraphicsItem* parent)
     : QGraphicsWidget(parent)
-    , d(new QGraphicsMozViewPrivate(new IMozQView<QGraphicsMozView>(*this)))
+    , d(new QGraphicsMozViewPrivate(new IMozQView<QGraphicsMozView>(*this), this))
     , mParentID(0)
     , mUseQmlMouse(false)
 {
@@ -72,13 +73,6 @@ QGraphicsMozView::~QGraphicsMozView()
         d->mContext->GetApp()->DestroyView(d->mView);
     }
     delete d;
-}
-
-void QGraphicsMozView::startMoveMonitoring()
-{
-    // TODO : Add implementation for monitoring moving property.
-    // See QuickMozView startMoveMonitoring and timerEvent(QTimerEvent *event)
-    LOGT("NOT IMPLEMENTED");
 }
 
 void
@@ -431,6 +425,14 @@ void QGraphicsMozView::focusOutEvent(QFocusEvent* event)
 {
     d->SetIsFocused(false);
     QGraphicsWidget::focusOutEvent(event);
+}
+
+void QGraphicsMozView::timerEvent(QTimerEvent *event)
+{
+    d->timerEvent(event);
+    if (!event->isAccepted()) {
+        QGraphicsView::timerEvent(event);
+    }
 }
 
 

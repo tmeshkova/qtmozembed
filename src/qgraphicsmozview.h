@@ -36,7 +36,6 @@ class QGraphicsMozView : public QGraphicsWidget
 public:
     QGraphicsMozView(QGraphicsItem* parent = 0);
     virtual ~QGraphicsMozView();
-    void startMoveMonitoring();
 
     Q_MOZ_VIEW_PUBLIC_METHODS
 
@@ -113,6 +112,7 @@ protected:
     virtual QVariant inputMethodQuery(Qt::InputMethodQuery aQuery) const;
     virtual void focusInEvent(QFocusEvent*);
     virtual void focusOutEvent(QFocusEvent*);
+    virtual void timerEvent(QTimerEvent*);
 
 private Q_SLOTS:
     void onInitialized();
