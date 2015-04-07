@@ -89,6 +89,8 @@ public:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
+    void sendAsyncMessage(const QString& name, const QVariant& variant);
+
     IMozQViewIface* mViewIface;
     QScopedPointer<QObject> q;
     QMozContext* mContext;

@@ -12,8 +12,6 @@
 #include <QTimerEvent>
 #include <QThread>
 #include <QtOpenGL/QGLContext>
-#include <QJsonDocument>
-#include <QJsonParseError>
 
 #include "qgraphicsmozview.h"
 #include "qmozcontext.h"
@@ -195,13 +193,7 @@ void QGraphicsMozView::addMessageListeners(const QStringList& messageNamesList)
 
 void QGraphicsMozView::sendAsyncMessage(const QString& name, const QVariant& variant)
 {
-    if (!d->mViewInitialized)
-        return;
-
-    QJsonDocument doc = QJsonDocument::fromVariant(variant);
-    QByteArray array = doc.toJson();
-
-    d->mView->SendAsyncMessage((const char16_t*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
+    d->sendAsyncMessage(name, variant);
 }
 
 QPointF QGraphicsMozView::scrollableOffset() const
