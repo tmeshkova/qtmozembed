@@ -34,11 +34,6 @@ QDeclarativeMozView::QDeclarativeMozView(QDeclarativeItem* parent)
     , d(new QDeclarativeMozViewPrivate(this))
 {
     init();
-    static bool Initialized = false;
-    if (!Initialized) {
-        qmlRegisterType<QMozReturnValue>("QtMozilla", 1, 0, "QMozReturnValue");
-        Initialized = true;
-    }
 }
 
 QDeclarativeMozView::~QDeclarativeMozView()
