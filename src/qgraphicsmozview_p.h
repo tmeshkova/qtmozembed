@@ -27,7 +27,7 @@ class QMozContext;
 class QGraphicsMozViewPrivate : public mozilla::embedlite::EmbedLiteViewListener
 {
 public:
-    QGraphicsMozViewPrivate(IMozQViewIface* aViewIface);
+    QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QObject* publicPtr);
     virtual ~QGraphicsMozViewPrivate();
 
     void ReceiveInputEvent(const mozilla::InputData& event);
@@ -82,7 +82,11 @@ public:
     void addMessageListener(const QString &name);
     void addMessageListeners(const QStringList &messageNamesList);
 
+    void startMoveMonitor();
+    void timerEvent(QTimerEvent *event);
+
     IMozQViewIface* mViewIface;
+    QScopedPointer<QObject> q;
     QMozContext* mContext;
     mozilla::embedlite::EmbedLiteView* mView;
     bool mViewInitialized;
@@ -130,6 +134,10 @@ public:
     bool mPressed;
     bool mDragging;
     bool mFlicking;
+    // Moving monitoring
+    int mMovingTimerId;
+    qreal mOffsetX;
+    qreal mOffsetY;
 
     QString mPendingUrl;
     QStringList mPendingMessageListeners;

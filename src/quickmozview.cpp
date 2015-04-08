@@ -36,19 +36,12 @@
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
-#ifndef MOZVIEW_FLICK_STOP_TIMEOUT
-#define MOZVIEW_FLICK_STOP_TIMEOUT 500
-#endif
-
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
-  , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this)))
+  , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this), this))
   , mParentID(0)
   , mPrivateMode(false)
   , mUseQmlMouse(false)
-  , mMovingTimerId(0)
-  , mOffsetX(0.0)
-  , mOffsetY(0.0)
   , mPreedit(false)
   , mActive(false)
   , mBackground(false)
@@ -359,12 +352,6 @@ void QuickMozView::CompositingFinished()
 
 void QuickMozView::cleanup()
 {
-}
-
-void QuickMozView::startMoveMonitoring()
-{
-    mMovingTimerId = startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
-    d->mFlicking = true;
 }
 
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)
@@ -917,16 +904,9 @@ void QuickMozView::touchEvent(QTouchEvent *event)
 
 void QuickMozView::timerEvent(QTimerEvent *event)
 {
-    if (event->timerId() == mMovingTimerId) {
-        qreal offsetY = d->mScrollableOffset.y();
-        qreal offsetX = d->mScrollableOffset.x();
-        if (offsetX == mOffsetX && offsetY == mOffsetY) {
-            d->ResetState();
-            killTimer(mMovingTimerId);
-            mMovingTimerId = 0;
-        }
-        mOffsetX = offsetX;
-        mOffsetY = offsetY;
+    d->timerEvent(event);
+    if (!event->isAccepted()) {
+        QQuickItem::timerEvent(event);
     }
 }
 

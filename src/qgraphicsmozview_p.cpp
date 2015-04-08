@@ -23,6 +23,10 @@
 #define MOZVIEW_FLICK_THRESHOLD 200
 #endif
 
+#ifndef MOZVIEW_FLICK_STOP_TIMEOUT
+#define MOZVIEW_FLICK_STOP_TIMEOUT 500
+#endif
+
 #define SCROLL_EPSILON 0.001
 
 using namespace mozilla;
@@ -40,8 +44,9 @@ qint64 current_timestamp(QTouchEvent* aEvent)
     return milliseconds;
 }
 
-QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
+QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QObject *publicPtr)
     : mViewIface(aViewIface)
+    , q(publicPtr)
     , mContext(NULL)
     , mView(NULL)
     , mViewInitialized(false)
@@ -79,6 +84,9 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface)
     , mPressed(false)
     , mDragging(false)
     , mFlicking(false)
+    , mMovingTimerId(0)
+    , mOffsetX(0.0)
+    , mOffsetY(0.0)
 {
 }
 
@@ -217,6 +225,10 @@ void QGraphicsMozViewPrivate::UpdateMoving(bool moving)
 {
     if (mMoving != moving) {
         mMoving = moving;
+
+        if (mMoving && q) {
+            startMoveMonitor();
+        }
         mViewIface->movingChanged();
     }
 }
@@ -275,6 +287,32 @@ void QGraphicsMozViewPrivate::addMessageListeners(const QStringList &messageName
         messages.AppendElement((char16_t*)messageNamesList.at(i).data());
     }
     mView->AddMessageListeners(messages);
+}
+
+void QGraphicsMozViewPrivate::timerEvent(QTimerEvent *event)
+{
+    Q_ASSERT(q);
+
+    if (event->timerId() == mMovingTimerId) {
+        qreal offsetY = mScrollableOffset.y();
+        qreal offsetX = mScrollableOffset.x();
+        if (offsetX == mOffsetX && offsetY == mOffsetY) {
+            ResetState();
+            q->killTimer(mMovingTimerId);
+            mMovingTimerId = 0;
+        }
+        mOffsetX = offsetX;
+        mOffsetY = offsetY;
+        event->accept();
+    }
+}
+
+void QGraphicsMozViewPrivate::startMoveMonitor()
+{
+    Q_ASSERT(q);
+
+    mMovingTimerId = q->startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
+    mFlicking = true;
 }
 
 void QGraphicsMozViewPrivate::UpdateViewSize()
@@ -757,7 +795,6 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     if (event->type() == QEvent::TouchEnd) {
         if (mCanFlick) {
             UpdateMoving(mCanFlick);
-            mViewIface->startMoveMonitoring();
         } else {
             // From dragging (panning) end to clean state
             ResetState();

@@ -32,7 +32,6 @@ public:
 
     Q_MOZ_VIEW_PUBLIC_METHODS
     void RenderToCurrentContext();
-    void startMoveMonitoring();
 
     int parentId() const;
     bool privateMode() const;
@@ -110,9 +109,6 @@ private:
     unsigned mParentID;
     bool mPrivateMode;
     bool mUseQmlMouse;
-    int mMovingTimerId;
-    qreal mOffsetX;
-    qreal mOffsetY;
     bool mPreedit;
     bool mActive;
     bool mBackground;
