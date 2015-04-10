@@ -12,6 +12,7 @@
 
 #include "qgraphicsmozview_p.h"
 #include "qmozcontext.h"
+#include "EmbedQtKeyUtils.h"
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/gfx/Tools.h"
@@ -78,6 +79,7 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QOb
     , mIsPainted(false)
     , mInputMethodHints(0)
     , mIsInputFieldFocused(false)
+    , mPreedit(false)
     , mViewIsFocused(false)
     , mHasContext(false)
     , mGLSurfaceSize(0,0)
@@ -313,6 +315,93 @@ void QGraphicsMozViewPrivate::startMoveMonitor()
 
     mMovingTimerId = q->startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
     mFlicking = true;
+}
+
+QVariant QGraphicsMozViewPrivate::inputMethodQuery(Qt::InputMethodQuery property) const
+{
+    switch (property) {
+    case Qt::ImEnabled:
+        return QVariant((bool) mIsInputFieldFocused);
+    case Qt::ImHints:
+        return QVariant((int) mInputMethodHints);
+    default:
+        return QVariant();
+    }
+}
+
+void QGraphicsMozViewPrivate::inputMethodEvent(QInputMethodEvent *event)
+{
+    LOGT("cStr:%s, preStr:%s, replLen:%i, replSt:%i", event->commitString().toUtf8().data(), event->preeditString().toUtf8().data(), event->replacementLength(), event->replacementStart());
+    mPreedit = !event->preeditString().isEmpty();
+    if (mViewInitialized) {
+        if (mInputMethodHints & Qt::ImhFormattedNumbersOnly || mInputMethodHints & Qt::ImhDialableCharactersOnly) {
+            bool ok;
+            int asciiNumber = event->commitString().toInt(&ok) + Qt::Key_0;
+
+            if (ok) {
+                int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(asciiNumber, Qt::NoModifier);
+                int32_t charCode = 0;
+
+                if (event->commitString().length() && event->commitString()[0].isPrint()) {
+                    charCode = (int32_t)event->commitString()[0].unicode();
+                }
+                mView->SendKeyPress(domKeyCode, 0, charCode);
+                mView->SendKeyRelease(domKeyCode, 0, charCode);
+                qGuiApp->inputMethod()->reset();
+            } else {
+                mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+            }
+        } else {
+            if (event->commitString().isEmpty()) {
+                mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+            } else {
+                mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
+                // After commiting pre-edit, we send "dummy" keypress.
+                // Workaround for sites that enable "submit" button based on keypress events like
+                // comment fields in FB, and m.linkedin.com
+                // Chrome on Android does the same, but it does it also after each pre-edit change
+                // We cannot do exectly the same here since sending keyevent with active pre-edit would commit gecko's
+                // internal Input Engine's pre-edit
+                mView->SendKeyPress(0, 0, 0);
+                mView->SendKeyRelease(0, 0, 0);
+            }
+        }
+    }
+}
+
+void QGraphicsMozViewPrivate::keyPressEvent(QKeyEvent *event)
+{
+    if (!mViewInitialized)
+        return;
+
+    int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
+    int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
+    int32_t charCode = 0;
+    if (event->text().length() && event->text()[0].isPrint()) {
+        charCode = (int32_t)event->text()[0].unicode();
+        if (getenv("USE_TEXT_EVENTS")) {
+            return;
+        }
+    }
+    mView->SendKeyPress(domKeyCode, gmodifiers, charCode);
+}
+
+void QGraphicsMozViewPrivate::keyReleaseEvent(QKeyEvent *event)
+{
+    if (!mViewInitialized)
+        return;
+
+    int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
+    int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
+    int32_t charCode = 0;
+    if (event->text().length() && event->text()[0].isPrint()) {
+        charCode = (int32_t)event->text()[0].unicode();
+        if (getenv("USE_TEXT_EVENTS")) {
+            mView->SendTextEvent(event->text().toUtf8().data(), "");
+            return;
+        }
+    }
+    mView->SendKeyRelease(domKeyCode, gmodifiers, charCode);
 }
 
 void QGraphicsMozViewPrivate::UpdateViewSize()
@@ -662,6 +751,19 @@ bool QGraphicsMozViewPrivate::HandleDoubleTap(const nsIntPoint& aPoint)
 
 void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
 {
+    // QInputMethod sends the QInputMethodEvent. Thus, it will
+    // be handled before this touch event. Problem is that
+    // this also commits preedited text when moving web content.
+    // This should be committed just before moving cursor position to
+    // the old cursor position.
+    if (mPreedit) {
+        QInputMethod* inputContext = qGuiApp->inputMethod();
+        if (inputContext) {
+            inputContext->commit();
+        }
+        mPreedit = false;
+    }
+
     // Always accept the QTouchEvent so that we'll receive also TouchUpdate and TouchEnd events
     mPendingTouchEvent = true;
     event->setAccepted(true);

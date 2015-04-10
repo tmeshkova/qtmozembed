@@ -84,6 +84,10 @@ public:
 
     void startMoveMonitor();
     void timerEvent(QTimerEvent *event);
+    QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
+    void inputMethodEvent(QInputMethodEvent *event);
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 
     IMozQViewIface* mViewIface;
     QScopedPointer<QObject> q;
@@ -128,6 +132,7 @@ public:
     bool mIsPainted;
     Qt::InputMethodHints mInputMethodHints;
     bool mIsInputFieldFocused;
+    bool mPreedit;
     bool mViewIsFocused;
     bool mHasContext;
     QSize mGLSurfaceSize;

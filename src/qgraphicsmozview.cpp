@@ -14,7 +14,6 @@
 #include <QtOpenGL/QGLContext>
 #include <QJsonDocument>
 #include <QJsonParseError>
-#include "EmbedQtKeyUtils.h"
 
 #include "qgraphicsmozview.h"
 #include "qmozcontext.h"
@@ -487,45 +486,17 @@ void QGraphicsMozView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 
 void QGraphicsMozView::inputMethodEvent(QInputMethodEvent* event)
 {
-    LOGT("cStr:%s, preStr:%s, replLen:%i, replSt:%i", event->commitString().toUtf8().data(), event->preeditString().toUtf8().data(), event->replacementLength(), event->replacementStart());
-    if (d->mViewInitialized) {
-        d->mView->SendTextEvent(event->commitString().toUtf8().data(), event->preeditString().toUtf8().data());
-    }
+    d->inputMethodEvent(event);
 }
 
 void QGraphicsMozView::keyPressEvent(QKeyEvent* event)
 {
-    if (!d->mViewInitialized)
-        return;
-
-    int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
-    int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
-    int32_t charCode = 0;
-    if (event->text().length() && event->text()[0].isPrint()) {
-        charCode = (int32_t)event->text()[0].unicode();
-        if (getenv("USE_TEXT_EVENTS")) {
-            return;
-        }
-    }
-    d->mView->SendKeyPress(domKeyCode, gmodifiers, charCode);
+    d->keyPressEvent(event);
 }
 
 void QGraphicsMozView::keyReleaseEvent(QKeyEvent* event)
 {
-    if (!d->mViewInitialized)
-        return;
-
-    int32_t gmodifiers = MozKey::QtModifierToDOMModifier(event->modifiers());
-    int32_t domKeyCode = MozKey::QtKeyCodeToDOMKeyCode(event->key(), event->modifiers());
-    int32_t charCode = 0;
-    if (event->text().length() && event->text()[0].isPrint()) {
-        charCode = (int32_t)event->text()[0].unicode();
-        if (getenv("USE_TEXT_EVENTS")) {
-            d->mView->SendTextEvent(event->text().toUtf8().data(), "");
-            return;
-        }
-    }
-    d->mView->SendKeyRelease(domKeyCode, gmodifiers, charCode);
+    d->keyReleaseEvent(event);
 }
 
 QVariant

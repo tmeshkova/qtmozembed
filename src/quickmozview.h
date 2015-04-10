@@ -109,7 +109,6 @@ private:
     unsigned mParentID;
     bool mPrivateMode;
     bool mUseQmlMouse;
-    bool mPreedit;
     bool mActive;
     bool mBackground;
     bool mLoaded;
