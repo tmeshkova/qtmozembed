@@ -13,7 +13,7 @@ isEmpty(OBJ_PATH) {
 } else {
   CONFIG += link_pkgconfig
   message(OBJ_PATH defined $$OBJ_PATH)
-  GECKO_LIB_DIR = $$OBJ_PATH/dist/lib
+  GECKO_LIB_DIR = $$OBJ_PATH/dist/sdk/lib
   GECKO_INCLUDE_DIR = $$OBJ_PATH/dist/include
   BIN_DIR=$$OBJ_PATH/dist/bin
   message($$BIN_DIR - binary dir)
