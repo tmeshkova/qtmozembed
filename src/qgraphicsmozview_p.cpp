@@ -7,8 +7,9 @@
 #define LOG_COMPONENT "QGraphicsMozViewPrivate"
 
 #include <QTouchEvent>
-#include <QJsonDocument>
 #include <QGuiApplication>
+#include <QJsonDocument>
+#include <QJsonParseError>
 
 #include "qgraphicsmozview_p.h"
 #include "qmozcontext.h"
@@ -402,6 +403,17 @@ void QGraphicsMozViewPrivate::keyReleaseEvent(QKeyEvent *event)
         }
     }
     mView->SendKeyRelease(domKeyCode, gmodifiers, charCode);
+}
+
+void QGraphicsMozViewPrivate::sendAsyncMessage(const QString &name, const QVariant &variant)
+{
+    if (!mViewInitialized)
+        return;
+
+    QJsonDocument doc = QJsonDocument::fromVariant(variant);
+    QByteArray array = doc.toJson();
+
+    mView->SendAsyncMessage((const char16_t*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }
 
 void QGraphicsMozViewPrivate::UpdateViewSize()
