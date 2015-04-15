@@ -2,6 +2,13 @@
 #define qmozview_defined_wrapper_h
 
 #include <QVariant>
+#include <QColor>
+#include <QUrl>
+#include <QRectF>
+#include <QSizeF>
+#include <QString>
+#include <QPoint>
+#include <QPointF>
 
 class QMozScrollDecorator;
 
@@ -120,6 +127,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void recvMousePress(int posX, int posY); \
     void recvMouseRelease(int posX, int posY); \
     void CompositingFinished(); \
+    bool Invalidate(); \
     void requestGLContext(bool& hasContext, QSize& viewPortSize);
 
 #define Q_MOZ_VIEW_SIGNALS \

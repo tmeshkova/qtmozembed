@@ -99,6 +99,12 @@ QGraphicsMozView::CompositingFinished()
 {
 }
 
+bool
+QGraphicsMozView::Invalidate()
+{
+    return false;
+}
+
 void
 QGraphicsMozView::OnUpdateThreaded()
 {
