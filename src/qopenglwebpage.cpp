@@ -581,7 +581,7 @@ void QOpenGLWebPage::synthTouchEnd(const QVariant& touches)
 
 void QOpenGLWebPage::suspendView()
 {
-    if (!d->mView) {
+    if (!d->mViewInitialized) {
         return;
     }
     setActive(false);
@@ -590,7 +590,7 @@ void QOpenGLWebPage::suspendView()
 
 void QOpenGLWebPage::resumeView()
 {
-    if (!d->mView) {
+    if (!d->mViewInitialized) {
         return;
     }
     setActive(true);

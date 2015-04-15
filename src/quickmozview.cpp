@@ -743,7 +743,7 @@ void QuickMozView::synthTouchEnd(const QVariant& touches)
 
 void QuickMozView::suspendView()
 {
-    if (!d->mView) {
+    if (!d->mViewInitialized) {
         return;
     }
     setActive(false);
@@ -753,7 +753,7 @@ void QuickMozView::suspendView()
 
 void QuickMozView::resumeView()
 {
-    if (!d->mView) {
+    if (!d->mViewInitialized) {
         return;
     }
     setActive(true);

@@ -261,7 +261,7 @@ void QGraphicsMozViewPrivate::load(const QString &url)
 
 void QGraphicsMozViewPrivate::loadFrameScript(const QString &frameScript)
 {
-    if (!mView) {
+    if (!mViewInitialized) {
         mPendingFrameScripts.append(frameScript);
     } else {
         mView->LoadFrameScript(frameScript.toUtf8().data());
