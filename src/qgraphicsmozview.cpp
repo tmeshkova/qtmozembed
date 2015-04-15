@@ -328,7 +328,7 @@ bool QGraphicsMozView::event(QEvent* event)
 
 void QGraphicsMozView::suspendView()
 {
-    if (!d->mView) {
+    if (!d->mViewInitialized) {
         return;
     }
     d->mView->SetIsActive(false);
@@ -337,7 +337,7 @@ void QGraphicsMozView::suspendView()
 
 void QGraphicsMozView::resumeView()
 {
-    if (!d->mView) {
+    if (!d->mViewInitialized) {
         return;
     }
     d->mView->SetIsActive(true);
