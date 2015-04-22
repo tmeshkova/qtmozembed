@@ -272,6 +272,41 @@ bool QOpenGLWebPage::loaded() const
     return mLoaded;
 }
 
+bool QOpenGLWebPage::event(QEvent *event)
+{
+    switch (event->type()) {
+    case QEvent::InputMethodQuery: {
+        QInputMethodQueryEvent *query = static_cast<QInputMethodQueryEvent*>(event);
+        Qt::InputMethodQueries queries = query->queries();
+        for (int bit = 0; bit < 32; bit++) {
+            Qt::InputMethodQuery q = (Qt::InputMethodQuery)(1<<bit);
+            if (queries & q) query->setValue(q, inputMethodQuery(q));
+        }
+        query->accept();
+        break;
+    }
+    case QEvent::InputMethod:
+        inputMethodEvent(static_cast<QInputMethodEvent*>(event));
+        break;
+    case QEvent::FocusIn:
+        focusInEvent(static_cast<QFocusEvent*>(event));
+        break;
+    case QEvent::FocusOut:
+        focusOutEvent(static_cast<QFocusEvent*>(event));
+        break;
+    case QEvent::KeyPress:
+        keyPressEvent(static_cast<QKeyEvent*>(event));
+        break;
+    case QEvent::KeyRelease:
+        keyReleaseEvent(static_cast<QKeyEvent*>(event));
+        break;
+
+    default:
+        return QObject::event(event);
+    }
+    return true;
+}
+
 bool QOpenGLWebPage::Invalidate()
 {
     return true;
