@@ -125,6 +125,11 @@ QGraphicsMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
     viewPortSize = d->mGLSurfaceSize;
 }
 
+void QGraphicsMozView::drawUnderlay()
+{
+    // Do nothing
+}
+
 /*! \reimp
 */
 QSizeF QGraphicsMozView::sizeHint(Qt::SizeHint which, const QSizeF& constraint) const

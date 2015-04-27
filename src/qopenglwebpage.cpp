@@ -12,6 +12,8 @@
 
 #include <qglobal.h>
 #include <qqmlinfo.h>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions_ES2>
 
 #include "qgraphicsmozview_p.h"
 #include "qmozscrolldecorator.h"
@@ -134,6 +136,29 @@ void QOpenGLWebPage::requestGLContext(bool& hasContext, QSize& viewPortSize)
     hasContext = true;
     viewPortSize = d->mGLSurfaceSize;
     Q_EMIT requestGLContext();
+}
+
+/*!
+    \fn void QOpenGLWebPage::drawUnderlay()
+
+    Called always from gecko compositor thread. Current context
+    has been made as current by gecko compositor.
+*/
+void QOpenGLWebPage::drawUnderlay()
+{
+    // Current context used by gecko compositor thread.
+    QOpenGLContext *glContext = QOpenGLContext::currentContext();
+
+    if (!glContext) {
+        return;
+    }
+
+    QOpenGLFunctions_ES2* funcs = glContext->versionFunctions<QOpenGLFunctions_ES2>();
+    if (funcs) {
+        QColor bgColor = d->GetBackgroundColor();
+        funcs->glClearColor(bgColor.redF(), bgColor.greenF(), bgColor.blueF(), 0.0);
+        funcs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 }
 
 void QOpenGLWebPage::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)

@@ -130,6 +130,11 @@ void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
     viewPortSize = d->mGLSurfaceSize;
 }
 
+void QuickMozView::drawUnderlay()
+{
+    // Do nothing
+}
+
 void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
 {
     d->mHasContext = ctx != nullptr && ctx->surface() != nullptr;
