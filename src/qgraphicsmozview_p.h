@@ -146,6 +146,8 @@ public:
     bool mViewIsFocused;
     bool mHasContext;
     QSize mGLSurfaceSize;
+    Qt::ScreenOrientation mOrientation;
+    bool mOrientationDirty;
     bool mPressed;
     bool mDragging;
     bool mFlicking;

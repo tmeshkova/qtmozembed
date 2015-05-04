@@ -14,6 +14,7 @@
 #include <qqmlinfo.h>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_ES2>
+#include <QWindow>
 
 #include "qgraphicsmozview_p.h"
 #include "qmozscrolldecorator.h"
@@ -40,6 +41,7 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   , mBackground(false)
   , mLoaded(false)
   , mCompleted(false)
+  , mWindow(0)
 {
     d->mContext = QMozContext::GetInstance();
     d->mHasContext = true;
@@ -263,7 +265,6 @@ void QOpenGLWebPage::setSize(const QSizeF &size)
     bool heightWillChanged = d->mSize.height() != size.height();
 
     d->mSize = size;
-    d->mGLSurfaceSize = size.toSize();
     d->UpdateViewSize();
 
     if (widthWillChanged) {
@@ -295,6 +296,21 @@ void QOpenGLWebPage::setBackground(bool background)
 bool QOpenGLWebPage::loaded() const
 {
     return mLoaded;
+}
+
+QWindow *QOpenGLWebPage::window()
+{
+    return mWindow;
+}
+
+void QOpenGLWebPage::setWindow(QWindow *window)
+{
+    if (mWindow == window) {
+        return;
+    }
+
+    mWindow = window;
+    Q_EMIT windowChanged();
 }
 
 bool QOpenGLWebPage::event(QEvent *event)
@@ -356,6 +372,30 @@ void QOpenGLWebPage::forceActiveFocus()
 void QOpenGLWebPage::setInputMethodHints(Qt::InputMethodHints hints)
 {
     d->mInputMethodHints = hints;
+}
+
+void QOpenGLWebPage::updateContentOrientation(Qt::ScreenOrientation orientation)
+{
+    if (!mWindow) {
+        qDebug() << "No window set, cannot update content orientation.";
+        return;
+    }
+
+    QSize surfaceSize;
+    QSize windowSize = mWindow->size();
+
+    int minValue = qMin(windowSize.width(), windowSize.height());
+    int maxValue = qMax(windowSize.width(), windowSize.height());
+
+    if (orientation == Qt::LandscapeOrientation || orientation == Qt::InvertedLandscapeOrientation) {
+        surfaceSize.setWidth(maxValue);
+        surfaceSize.setHeight(minValue);
+    } else {
+        surfaceSize.setWidth(minValue);
+        surfaceSize.setHeight(maxValue);
+    }
+
+    setSurfaceSize(surfaceSize, orientation);
 }
 
 void QOpenGLWebPage::inputMethodEvent(QInputMethodEvent* event)
@@ -672,6 +712,12 @@ void QOpenGLWebPage::recvMouseRelease(int posX, int posY)
     Q_ASSERT_X(false, "QOpenGLWebPage", "calling recvMouseRelease not supported!");
 }
 
+/*!
+    \fn void QOpenGLWebPage::touchEvent(QTouchEvent *event)
+
+    Touch events need to be in correctly mapped coordination
+    system.
+*/
 void QOpenGLWebPage::touchEvent(QTouchEvent *event)
 {
     d->touchEvent(event);
@@ -681,4 +727,22 @@ void QOpenGLWebPage::touchEvent(QTouchEvent *event)
 void QOpenGLWebPage::timerEvent(QTimerEvent *event)
 {
     d->timerEvent(event);
+}
+
+/*!
+    \fn void QOpenGLWebPage::setSurfaceSize()
+
+    Sets surface size and orientation.
+
+    Set surface size as soon as the page is created. The page cannot be
+    shown until surface is given.
+*/
+void QOpenGLWebPage::setSurfaceSize(const QSize &surfaceSize, Qt::ScreenOrientation orientation)
+{
+    if ((d->mGLSurfaceSize != surfaceSize) || (d->mOrientation != orientation)) {
+        d->mGLSurfaceSize = surfaceSize;
+        d->mOrientation = orientation;
+        d->mOrientationDirty = true;
+        d->UpdateViewSize();
+    }
 }
