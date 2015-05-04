@@ -303,7 +303,6 @@ void QGraphicsMozViewPrivate::addMessageListeners(const QStringList &messageName
 void QGraphicsMozViewPrivate::timerEvent(QTimerEvent *event)
 {
     Q_ASSERT(q);
-
     if (event->timerId() == mMovingTimerId) {
         qreal offsetY = mScrollableOffset.y();
         qreal offsetX = mScrollableOffset.x();
@@ -321,7 +320,11 @@ void QGraphicsMozViewPrivate::timerEvent(QTimerEvent *event)
 void QGraphicsMozViewPrivate::startMoveMonitor()
 {
     Q_ASSERT(q);
-
+    // Kill running move monitor.
+    if (mMovingTimerId > 0) {
+        q->killTimer(mMovingTimerId);;
+        mMovingTimerId = 0;
+    }
     mMovingTimerId = q->startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
     mFlicking = true;
 }
