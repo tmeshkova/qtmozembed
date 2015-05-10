@@ -128,7 +128,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void recvMouseRelease(int posX, int posY); \
     void CompositingFinished(); \
     bool Invalidate(); \
-    void requestGLContext(bool& hasContext, QSize& viewPortSize);
+    void requestGLContext(bool& hasContext, QSize& viewPortSize); \
+    void drawUnderlay();
 
 #define Q_MOZ_VIEW_SIGNALS \
     void viewInitialized(); \

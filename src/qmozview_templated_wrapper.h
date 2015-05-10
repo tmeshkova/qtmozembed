@@ -21,6 +21,7 @@ public:
     virtual void forceViewActiveFocus() = 0;
     virtual void createGeckoGLContext() = 0;
     virtual void requestGLContext(bool& hasContext, QSize& viewPortSize) = 0;
+    virtual void drawUnderlay() = 0;
     // Signals
     virtual void viewInitialized() = 0;
     virtual void urlChanged() = 0;
@@ -173,6 +174,11 @@ public:
     {
         view.requestGLContext(hasContext, viewPortSize);
     }
+    void drawUnderlay()
+    {
+        view.drawUnderlay();
+    }
+
     void useQmlMouse(bool value)
     {
         Q_EMIT view.useQmlMouse(value);

@@ -103,6 +103,11 @@ void QGraphicsMozViewPrivate::CompositorCreated()
     mViewIface->createGeckoGLContext();
 }
 
+void QGraphicsMozViewPrivate::DrawUnderlay()
+{
+    mViewIface->drawUnderlay();
+}
+
 void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY)
 {
     bool widthChanged = false;
@@ -471,8 +476,16 @@ void QGraphicsMozViewPrivate::ViewInitialized()
 
 void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
+    QMutexLocker locker(&mBgColorMutex);
     mBgColor = QColor(r, g, b, a);
     mViewIface->bgColorChanged();
+}
+
+// Can be read for instance from gecko compositor thread.
+QColor QGraphicsMozViewPrivate::GetBackgroundColor() const
+{
+    QMutexLocker locker(&mBgColorMutex);
+    return mBgColor;
 }
 
 bool QGraphicsMozViewPrivate::Invalidate()
