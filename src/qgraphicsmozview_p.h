@@ -12,6 +12,7 @@
 #include <QSize>
 #include <QTime>
 #include <QString>
+#include <QPointer>
 #include <QPointF>
 #include <QMutex>
 #include <QMap>
@@ -99,7 +100,7 @@ public:
     void sendAsyncMessage(const QString& name, const QVariant& variant);
 
     IMozQViewIface* mViewIface;
-    QScopedPointer<QObject> q;
+    QPointer<QObject> q;
     QMozContext* mContext;
     mozilla::embedlite::EmbedLiteView* mView;
     bool mViewInitialized;
