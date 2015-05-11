@@ -130,6 +130,11 @@ void QGraphicsMozView::drawUnderlay()
     // Do nothing
 }
 
+void QGraphicsMozView::drawOverlay(const QRect &rect) {
+    Q_UNUSED(rect);
+    // Do nothing;
+}
+
 /*! \reimp
 */
 QSizeF QGraphicsMozView::sizeHint(Qt::SizeHint which, const QSizeF& constraint) const

@@ -111,6 +111,12 @@ void QGraphicsMozViewPrivate::DrawUnderlay()
     mViewIface->drawUnderlay();
 }
 
+void QGraphicsMozViewPrivate::DrawOverlay(const nsIntRect& aRect)
+{
+    QRect rect(aRect.x, aRect.y, aRect.width, aRect.height);
+    mViewIface->drawOverlay(rect);
+}
+
 void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY)
 {
     bool widthChanged = false;

@@ -105,6 +105,7 @@ Q_SIGNALS:
     void loadedChanged();
     void windowChanged();
     void requestGLContext();
+    void afterRendering(const QRect &rect);
 
     Q_MOZ_VIEW_SIGNALS
 
