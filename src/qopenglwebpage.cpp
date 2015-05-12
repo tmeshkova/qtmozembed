@@ -388,6 +388,15 @@ bool QOpenGLWebPage::completed() const
     return mCompleted;
 }
 
+void QOpenGLWebPage::update()
+{
+    if (!d->mViewInitialized) {
+        return;
+    }
+
+    d->mView->ScheduleUpdate();
+}
+
 void QOpenGLWebPage::forceActiveFocus()
 {
     Q_ASSERT(d->mViewInitialized);
