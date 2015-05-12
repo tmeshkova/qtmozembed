@@ -32,9 +32,9 @@ class QOpenGLWebPage : public QObject
     Q_PROPERTY(qreal width READ width WRITE setWidth NOTIFY widthChanged FINAL)
     Q_PROPERTY(qreal height READ height WRITE setHeight NOTIFY heightChanged FINAL)
     Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged FINAL)
-
     Q_PROPERTY(bool background READ background WRITE setBackground NOTIFY backgroundChanged FINAL)
     Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged FINAL)
+    Q_PROPERTY(QWindow *window READ window WRITE setWindow NOTIFY windowChanged FINAL)
 
     Q_MOZ_VIEW_PRORERTIES
 
@@ -70,6 +70,9 @@ public:
 
     bool loaded() const;
 
+    QWindow *window();
+    void setWindow(QWindow *window);
+
     virtual bool event(QEvent *event);
     virtual void geometryChanged(const QRectF & newGeometry, const QRectF & oldGeometry);
     virtual QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
@@ -86,6 +89,8 @@ public Q_SLOTS:
     void forceActiveFocus();
     void setInputMethodHints(Qt::InputMethodHints hints);
 
+    void updateContentOrientation(Qt::ScreenOrientation orientation);
+
 Q_SIGNALS:
     void setIsActive(bool);
     void parentIdChanged();
@@ -98,6 +103,7 @@ Q_SIGNALS:
     void sizeChanged();
     void backgroundChanged();
     void loadedChanged();
+    void windowChanged();
     void requestGLContext();
 
     Q_MOZ_VIEW_SIGNALS
@@ -109,6 +115,8 @@ private Q_SLOTS:
     void createView();
 
 private:
+    void setSurfaceSize(const QSize &surfaceSize, Qt::ScreenOrientation orientation);
+
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;
 
@@ -118,6 +126,7 @@ private:
     bool mBackground;
     bool mLoaded;
     bool mCompleted;
+    QWindow *mWindow;
 };
 
 QML_DECLARE_TYPE(QOpenGLWebPage)

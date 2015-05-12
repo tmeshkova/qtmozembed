@@ -17,6 +17,7 @@
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
 #include "mozilla/gfx/Tools.h"
+#include "mozilla/WidgetUtils.h"
 #include "qmozembedlog.h"
 #include <sys/time.h>
 #include "mozilla/TimeStamp.h"
@@ -84,6 +85,8 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QOb
     , mViewIsFocused(false)
     , mHasContext(false)
     , mGLSurfaceSize(0,0)
+    , mOrientation(Qt::PrimaryOrientation)
+    , mOrientationDirty(false)
     , mPressed(false)
     , mDragging(false)
     , mFlicking(false)
@@ -300,7 +303,6 @@ void QGraphicsMozViewPrivate::addMessageListeners(const QStringList &messageName
 void QGraphicsMozViewPrivate::timerEvent(QTimerEvent *event)
 {
     Q_ASSERT(q);
-
     if (event->timerId() == mMovingTimerId) {
         qreal offsetY = mScrollableOffset.y();
         qreal offsetX = mScrollableOffset.x();
@@ -318,7 +320,11 @@ void QGraphicsMozViewPrivate::timerEvent(QTimerEvent *event)
 void QGraphicsMozViewPrivate::startMoveMonitor()
 {
     Q_ASSERT(q);
-
+    // Kill running move monitor.
+    if (mMovingTimerId > 0) {
+        q->killTimer(mMovingTimerId);;
+        mMovingTimerId = 0;
+    }
     mMovingTimerId = q->startTimer(MOZVIEW_FLICK_STOP_TIMEOUT);
     mFlicking = true;
 }
@@ -434,6 +440,25 @@ void QGraphicsMozViewPrivate::UpdateViewSize()
         mView->SetGLViewPortSize(mGLSurfaceSize.width(), mGLSurfaceSize.height());
     }
     mView->SetViewSize(mSize.width(), mSize.height());
+
+    if (mOrientationDirty) {
+        ScreenRotation rotation = ROTATION_0;
+        switch (mOrientation) {
+        case Qt::LandscapeOrientation:
+            rotation = mozilla::ROTATION_90;
+            break;
+        case Qt::InvertedLandscapeOrientation:
+            rotation = mozilla::ROTATION_270;
+            break;
+        case Qt::InvertedPortraitOrientation:
+            rotation = mozilla::ROTATION_180;
+            break;
+        default:
+            break;
+        }
+        mView->SetScreenRotation(rotation);
+        mOrientationDirty = false;
+    }
 }
 
 bool QGraphicsMozViewPrivate::RequestCurrentGLContext()
