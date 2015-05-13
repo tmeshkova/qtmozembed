@@ -135,6 +135,12 @@ void QuickMozView::drawUnderlay()
     // Do nothing
 }
 
+void QuickMozView::drawOverlay(const QRect &rect)
+{
+    Q_UNUSED(rect);
+    // Do nothing;
+}
+
 void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
 {
     d->mHasContext = ctx != nullptr && ctx->surface() != nullptr;

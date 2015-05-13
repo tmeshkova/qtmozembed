@@ -9,6 +9,7 @@
 
 class QPoint;
 class QString;
+class QRect;
 class QMozReturnValue;
 class IMozQViewIface
 {
@@ -22,6 +23,8 @@ public:
     virtual void createGeckoGLContext() = 0;
     virtual void requestGLContext(bool& hasContext, QSize& viewPortSize) = 0;
     virtual void drawUnderlay() = 0;
+    virtual void drawOverlay(const QRect &rect) = 0;
+
     // Signals
     virtual void viewInitialized() = 0;
     virtual void urlChanged() = 0;
@@ -177,6 +180,11 @@ public:
     void drawUnderlay()
     {
         view.drawUnderlay();
+    }
+
+    void drawOverlay(const QRect &rect)
+    {
+        view.drawOverlay(rect);
     }
 
     void useQmlMouse(bool value)

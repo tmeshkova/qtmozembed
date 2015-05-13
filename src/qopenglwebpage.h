@@ -19,6 +19,7 @@
 #include "qmozview_defined_wrapper.h"
 
 class QGraphicsMozViewPrivate;
+class QMozGrabResult;
 
 class QOpenGLWebPage : public QObject
 {
@@ -84,8 +85,11 @@ public:
     virtual void touchEvent(QTouchEvent*);
     virtual void timerEvent(QTimerEvent*);
 
+    QSharedPointer<QMozGrabResult> grabToImage(const QSize &targetSize = QSize());
+
 public Q_SLOTS:
     Q_MOZ_VIEW_PUBLIC_SLOTS
+    void update();
     void forceActiveFocus();
     void setInputMethodHints(Qt::InputMethodHints hints);
 
@@ -105,6 +109,7 @@ Q_SIGNALS:
     void loadedChanged();
     void windowChanged();
     void requestGLContext();
+    void afterRendering(const QRect &rect);
 
     Q_MOZ_VIEW_SIGNALS
 

@@ -163,6 +163,32 @@ void QOpenGLWebPage::drawUnderlay()
     }
 }
 
+/*!
+    \fn void QOpenGLWebPage::afterRendering(const QRect &rect)
+
+    This signal is emitted after web content has been rendered, before swapbuffers
+    has been called.
+
+    This signal can be used to paint using raw GL on top of the web content, or to do
+    screen scraping of the current frame buffer.
+
+    The GL context used for rendering is bound at this point.
+
+    This signal is emitted from the gecko compositor thread, you must make sure that
+    the connection is direct (see Qt::ConnectionType).
+*/
+
+/*!
+    \fn void QOpenGLWebPage::drawOverlay(const QRect &rect)
+
+    Called always from gecko compositor thread. Current context
+    has been made as current by gecko compositor.
+*/
+void QOpenGLWebPage::drawOverlay(const QRect &rect)
+{
+    Q_EMIT afterRendering(rect);
+}
+
 void QOpenGLWebPage::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     LOGT("newGeometry size: [%g, %g] oldGeometry size: [%g,%g]", newGeometry.size().width(),
@@ -360,6 +386,15 @@ void QOpenGLWebPage::CompositingFinished()
 bool QOpenGLWebPage::completed() const
 {
     return mCompleted;
+}
+
+void QOpenGLWebPage::update()
+{
+    if (!d->mViewInitialized) {
+        return;
+    }
+
+    d->mView->ScheduleUpdate();
 }
 
 void QOpenGLWebPage::forceActiveFocus()

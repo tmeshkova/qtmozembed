@@ -4,6 +4,7 @@
 #include <QVariant>
 #include <QColor>
 #include <QUrl>
+#include <QRect>
 #include <QRectF>
 #include <QSizeF>
 #include <QString>
@@ -129,7 +130,8 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void CompositingFinished(); \
     bool Invalidate(); \
     void requestGLContext(bool& hasContext, QSize& viewPortSize); \
-    void drawUnderlay();
+    void drawUnderlay(); \
+    void drawOverlay(const QRect &rect);
 
 #define Q_MOZ_VIEW_SIGNALS \
     void viewInitialized(); \
