@@ -33,15 +33,15 @@ protected:
 Q_SIGNALS:
     void ready();
 
-private Q_SLOTS:
-    void captureImage(const QRect &rect);
-
 private:
-    QMozGrabResultPrivate *d_ptr;
-
     friend class QOpenGLWebPage;
 
     QMozGrabResult(QObject *parent = 0);
+    void captureImage(const QRect &rect);
+
+    QMozGrabResultPrivate *d_ptr;
+
+    Q_DISABLE_COPY(QMozGrabResult)
 };
 
 QT_END_NAMESPACE

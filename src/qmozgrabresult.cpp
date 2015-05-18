@@ -195,14 +195,11 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
  */
 QSharedPointer<QMozGrabResult> QOpenGLWebPage::grabToImage(const QSize &targetSize)
 {
-    QMozGrabResult *result = QMozGrabResultPrivate::create(this, targetSize);
-    if (!result) {
-        return QSharedPointer<QMozGrabResult>();
-    } else {
-        connect(this, &QOpenGLWebPage::afterRendering, result, &QMozGrabResult::captureImage, Qt::DirectConnection);
+    QSharedPointer<QMozGrabResult> result(QMozGrabResultPrivate::create(this, targetSize));
+    if (result) {
+        mGrabResultList.append(result.toWeakRef());
         update();
     }
-
-    return QSharedPointer<QMozGrabResult>(result);
+    return result;
 }
 
