@@ -96,7 +96,6 @@ public Q_SLOTS:
     void updateContentOrientation(Qt::ScreenOrientation orientation);
 
 Q_SIGNALS:
-    void setIsActive(bool);
     void parentIdChanged();
     void privateModeChanged();
     void completedChanged();
@@ -115,7 +114,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void processViewInitialization();
-    void SetIsActive(bool aIsActive);
     void updateLoaded();
     void createView();
 

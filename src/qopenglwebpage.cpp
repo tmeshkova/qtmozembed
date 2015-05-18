@@ -38,7 +38,7 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QOpenGLWebPage>(*this), this))
   , mParentID(0)
   , mPrivateMode(false)
-  , mActive(true)
+  , mActive(false)
   , mBackground(false)
   , mLoaded(false)
   , mCompleted(false)
@@ -47,7 +47,6 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
     d->mContext = QMozContext::GetInstance();
     d->mHasContext = true;
 
-    connect(this, SIGNAL(setIsActive(bool)), this, SLOT(SetIsActive(bool)));
     connect(this, SIGNAL(viewInitialized()), this, SLOT(processViewInitialization()));
     connect(this, SIGNAL(loadProgressChanged()), this, SLOT(updateLoaded()));
     connect(this, SIGNAL(loadingChanged()), this, SLOT(updateLoaded()));
@@ -67,18 +66,6 @@ QOpenGLWebPage::~QOpenGLWebPage()
     }
     mGrabResultList.clear();
     delete d;
-}
-
-void QOpenGLWebPage::SetIsActive(bool aIsActive)
-{
-    if (d->mView) {
-        d->mView->SetIsActive(aIsActive);
-        if (aIsActive) {
-            d->mView->ResumeRendering();
-        } else {
-            d->mView->SuspendRendering();
-        }
-    }
 }
 
 void QOpenGLWebPage::updateLoaded()
@@ -255,15 +242,17 @@ bool QOpenGLWebPage::active() const
 
 void QOpenGLWebPage::setActive(bool active)
 {
-    if (d->mViewInitialized) {
-        if (mActive != active) {
-            mActive = active;
-            Q_EMIT activeChanged();
-        }
-        SetIsActive(active);
-    } else {
-        // Will be processed once view is initialized.
+    // WebPage is in inactive state until the view is initialized.
+    // ::processViewInitialization always forces active state so we
+    // can just ignore early activation calls.
+    if (!d->mViewInitialized)
+        return;
+
+    if (mActive != active) {
         mActive = active;
+        d->mView->SetIsActive(mActive);
+        mActive ? d->mView->ResumeRendering() : d->mView->SuspendRendering();
+        Q_EMIT activeChanged();
     }
 }
 
