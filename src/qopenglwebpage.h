@@ -132,6 +132,9 @@ private:
     bool mLoaded;
     bool mCompleted;
     QWindow *mWindow;
+    QList<QWeakPointer<QMozGrabResult> > mGrabResultList;
+
+    Q_DISABLE_COPY(QOpenGLWebPage)
 };
 
 QML_DECLARE_TYPE(QOpenGLWebPage)

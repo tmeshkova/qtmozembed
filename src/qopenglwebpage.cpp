@@ -16,6 +16,7 @@
 #include <QOpenGLFunctions_ES2>
 #include <QWindow>
 
+#include "qmozgrabresult.h"
 #include "qgraphicsmozview_p.h"
 #include "qmozscrolldecorator.h"
 
@@ -64,6 +65,7 @@ QOpenGLWebPage::~QOpenGLWebPage()
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
     }
+    mGrabResultList.clear();
     delete d;
 }
 
@@ -186,6 +188,17 @@ void QOpenGLWebPage::drawUnderlay()
 */
 void QOpenGLWebPage::drawOverlay(const QRect &rect)
 {
+    QList<QWeakPointer<QMozGrabResult> >::const_iterator it = mGrabResultList.begin();
+    for (; it != mGrabResultList.end(); ++it) {
+        QSharedPointer<QMozGrabResult> result = it->toStrongRef();
+        if (result) {
+            result->captureImage(rect);
+        } else {
+            qWarning() << "QMozGrabResult freed before being realized!";
+        }
+    }
+    mGrabResultList.clear();
+
     Q_EMIT afterRendering(rect);
 }
 
