@@ -129,7 +129,6 @@ void QMozGrabResult::captureImage(const QRect &rect)
     }
 
     d->image = image;
-    disconnect(d->webPage.data(), &QOpenGLWebPage::afterRendering, this, &QMozGrabResult::captureImage);
     QCoreApplication::postEvent(this, new QEvent(Event_WebPageGrab_Completed));
 }
 
@@ -197,6 +196,7 @@ QSharedPointer<QMozGrabResult> QOpenGLWebPage::grabToImage(const QSize &targetSi
 {
     QSharedPointer<QMozGrabResult> result(QMozGrabResultPrivate::create(this, targetSize));
     if (result) {
+        QMutexLocker lock(&mGrabResultListLock);
         mGrabResultList.append(result.toWeakRef());
         update();
     }
