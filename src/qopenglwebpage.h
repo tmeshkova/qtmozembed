@@ -15,6 +15,7 @@
 #include <QKeyEvent>
 #include <QFocusEvent>
 #include <QTouchEvent>
+#include <QMutex>
 
 #include "qmozview_defined_wrapper.h"
 
@@ -131,6 +132,7 @@ private:
     bool mCompleted;
     QWindow *mWindow;
     QList<QWeakPointer<QMozGrabResult> > mGrabResultList;
+    QMutex mGrabResultListLock;
 
     Q_DISABLE_COPY(QOpenGLWebPage)
 };
