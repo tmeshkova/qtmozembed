@@ -34,7 +34,6 @@ class QOpenGLWebPage : public QObject
     Q_PROPERTY(qreal width READ width WRITE setWidth NOTIFY widthChanged FINAL)
     Q_PROPERTY(qreal height READ height WRITE setHeight NOTIFY heightChanged FINAL)
     Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged FINAL)
-    Q_PROPERTY(bool background READ background WRITE setBackground NOTIFY backgroundChanged FINAL)
     Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged FINAL)
     Q_PROPERTY(QWindow *window READ window WRITE setWindow NOTIFY windowChanged FINAL)
 
@@ -66,9 +65,6 @@ public:
 
     QSizeF size() const;
     void setSize(const QSizeF &size);
-
-    bool background() const;
-    void setBackground(bool background);
 
     bool loaded() const;
 
@@ -105,7 +101,6 @@ Q_SIGNALS:
     void widthChanged();
     void heightChanged();
     void sizeChanged();
-    void backgroundChanged();
     void loadedChanged();
     void windowChanged();
     void requestGLContext();
@@ -127,7 +122,6 @@ private:
     unsigned mParentID;
     bool mPrivateMode;
     bool mActive;
-    bool mBackground;
     bool mLoaded;
     bool mCompleted;
     QWindow *mWindow;
