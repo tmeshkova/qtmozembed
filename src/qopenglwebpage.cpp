@@ -389,9 +389,12 @@ void QOpenGLWebPage::update()
 
 void QOpenGLWebPage::forceActiveFocus()
 {
-    Q_ASSERT(d->mViewInitialized);
+    if (!d->mViewInitialized) {
+        return;
+    }
+
     setActive(true);
-    d->mView->SetIsFocused(true);
+    d->SetIsFocused(true);
 }
 
 void QOpenGLWebPage::setInputMethodHints(Qt::InputMethodHints hints)
