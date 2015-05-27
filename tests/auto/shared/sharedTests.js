@@ -162,7 +162,7 @@ function shared_3viewLoadURL()
     testcaseid.verify(mozView.child !== undefined)
     mozView.child.url = "about:mozilla";
     testcaseid.verify(MyScript.waitLoadFinished(mozView))
-    testcaseid.compare(mozView.child.url, "about:mozilla")
+    testcaseid.verify(wrtWait(function() { return (mozView.child.url === "about:mozilla"); }))    
     testcaseid.verify(wrtWait(function() { return (!mozView.child.painted); }))
     mozContext.dumpTS("test_3viewLoadURL end")
 }
