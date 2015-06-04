@@ -49,12 +49,6 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
     connect(this, SIGNAL(viewInitialized()), this, SLOT(processViewInitialization()));
     connect(this, SIGNAL(loadProgressChanged()), this, SLOT(updateLoaded()));
     connect(this, SIGNAL(loadingChanged()), this, SLOT(updateLoaded()));
-
-    if (!d->mContext->initialized()) {
-        connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(createView()));
-    } else {
-        createView();
-    }
 }
 
 QOpenGLWebPage::~QOpenGLWebPage()
@@ -327,6 +321,21 @@ void QOpenGLWebPage::setWindow(QWindow *window)
 
     mWindow = window;
     Q_EMIT windowChanged();
+}
+
+
+/*!
+    \fn void QOpenGLWebPage::initialize()
+
+    Call initialize to complete web page creation.
+*/
+void QOpenGLWebPage::initialize()
+{
+    if (!d->mContext->initialized()) {
+        connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(createView()));
+    } else {
+        createView();
+    }
 }
 
 bool QOpenGLWebPage::event(QEvent *event)
