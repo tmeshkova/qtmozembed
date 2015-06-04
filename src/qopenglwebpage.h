@@ -71,6 +71,8 @@ public:
     QWindow *window();
     void setWindow(QWindow *window);
 
+    void initialize();
+
     virtual bool event(QEvent *event);
     virtual void geometryChanged(const QRectF & newGeometry, const QRectF & oldGeometry);
     virtual QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
