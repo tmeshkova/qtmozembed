@@ -114,8 +114,10 @@ private Q_SLOTS:
     void processViewInitialization();
     void updateLoaded();
     void createView();
+    void updateSize();
 
 private:
+    void scheduleSizeUpdate();
     void setSurfaceSize(const QSize &surfaceSize, Qt::ScreenOrientation orientation);
 
     QGraphicsMozViewPrivate* d;
@@ -129,6 +131,7 @@ private:
     QWindow *mWindow;
     QList<QWeakPointer<QMozGrabResult> > mGrabResultList;
     QMutex mGrabResultListLock;
+    bool mSizeUpdateScheduled;
 
     Q_DISABLE_COPY(QOpenGLWebPage)
 };

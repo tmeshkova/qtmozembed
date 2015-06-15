@@ -42,6 +42,7 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   , mLoaded(false)
   , mCompleted(false)
   , mWindow(0)
+  , mSizeUpdateScheduled(false)
 {
     d->mContext = QMozContext::GetInstance();
     d->mHasContext = true;
@@ -80,6 +81,13 @@ void QOpenGLWebPage::createView()
         d->mView = d->mContext->GetApp()->CreateView(mParentID, mPrivateMode);
         d->mView->SetListener(d);
     }
+}
+
+void QOpenGLWebPage::updateSize()
+{
+    Q_ASSERT(mSizeUpdateScheduled);
+    d->UpdateViewSize();
+    mSizeUpdateScheduled = false;
 }
 
 void QOpenGLWebPage::processViewInitialization()
@@ -290,7 +298,7 @@ void QOpenGLWebPage::setSize(const QSizeF &size)
     bool heightWillChanged = d->mSize.height() != size.height();
 
     d->mSize = size;
-    d->UpdateViewSize();
+    scheduleSizeUpdate();
 
     if (widthWillChanged) {
         Q_EMIT widthChanged();
@@ -432,6 +440,7 @@ void QOpenGLWebPage::updateContentOrientation(Qt::ScreenOrientation orientation)
         surfaceSize.setHeight(maxValue);
     }
 
+    setSize(surfaceSize);
     setSurfaceSize(surfaceSize, orientation);
 }
 
@@ -766,6 +775,14 @@ void QOpenGLWebPage::timerEvent(QTimerEvent *event)
     d->timerEvent(event);
 }
 
+void QOpenGLWebPage::scheduleSizeUpdate()
+{
+    if (!mSizeUpdateScheduled) {
+        QMetaObject::invokeMethod(this, "updateSize", Qt::QueuedConnection);
+        mSizeUpdateScheduled = true;
+    }
+}
+
 /*!
     \fn void QOpenGLWebPage::setSurfaceSize()
 
@@ -780,6 +797,6 @@ void QOpenGLWebPage::setSurfaceSize(const QSize &surfaceSize, Qt::ScreenOrientat
         d->mGLSurfaceSize = surfaceSize;
         d->mOrientation = orientation;
         d->mOrientationDirty = true;
-        d->UpdateViewSize();
+        scheduleSizeUpdate();
     }
 }
