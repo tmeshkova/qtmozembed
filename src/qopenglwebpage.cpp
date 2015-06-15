@@ -89,7 +89,7 @@ void QOpenGLWebPage::processViewInitialization()
     Q_ASSERT(d->mViewInitialized);
 
     mCompleted = true;
-    forceActiveFocus();
+    setActive(true);
     Q_EMIT completedChanged();
 }
 
