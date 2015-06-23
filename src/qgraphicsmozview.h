@@ -21,8 +21,8 @@ class QGraphicsMozView : public QGraphicsWidget
 
     Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
-    Q_PROPERTY(bool canGoBack READ canGoBack NOTIFY navigationHistoryChanged FINAL)
-    Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY navigationHistoryChanged FINAL)
+    Q_PROPERTY(bool canGoBack READ canGoBack NOTIFY canGoBackChanged FINAL)
+    Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY canGoForwardChanged FINAL)
     Q_PROPERTY(int loadProgress READ loadProgress NOTIFY loadProgressChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged FINAL)
     Q_PROPERTY(QRectF contentRect READ contentRect NOTIFY viewAreaChanged FINAL)
@@ -69,7 +69,8 @@ Q_SIGNALS:
     void urlChanged();
     void titleChanged();
     void loadProgressChanged();
-    void navigationHistoryChanged();
+    void canGoBackChanged();
+    void canGoForwardChanged();
     void loadingChanged();
     void viewDestroyed();
     void recvAsyncMessage(const QString message, const QVariant data);

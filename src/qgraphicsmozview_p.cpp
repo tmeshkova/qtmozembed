@@ -502,7 +502,8 @@ void QGraphicsMozViewPrivate::ViewInitialized()
     UpdateViewSize();
     // This is currently part of official API, so let's subscribe to these messages by default
     mViewIface->viewInitialized();
-    mViewIface->navigationHistoryChanged();
+    mViewIface->canGoBackChanged();
+    mViewIface->canGoForwardChanged();
 }
 
 void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -531,10 +532,14 @@ void QGraphicsMozViewPrivate::CompositingFinished()
 
 void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)
 {
-    if (mCanGoBack != aCanGoBack || mCanGoForward != aCanGoForward) {
+    if (mCanGoBack != aCanGoBack) {
         mCanGoBack = aCanGoBack;
+        mViewIface->canGoBackChanged();
+    }
+
+    if (mCanGoForward != aCanGoForward) {
         mCanGoForward = aCanGoForward;
-        mViewIface->navigationHistoryChanged();
+        mViewIface->canGoForwardChanged();
     }
 
     if (mLocation != aLocation) {
