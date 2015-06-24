@@ -55,6 +55,9 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
 QOpenGLWebPage::~QOpenGLWebPage()
 {
     if (d->mView) {
+        if (mActive) {
+            d->mView->ClearContent(255, 255, 255, 0);
+        }
         d->mView->SetListener(NULL);
         d->mContext->GetApp()->DestroyView(d->mView);
     }
