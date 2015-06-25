@@ -73,6 +73,7 @@ public:
     virtual bool HandleSingleTap(const nsIntPoint& aPoint);
     virtual bool HandleDoubleTap(const nsIntPoint& aPoint);
     virtual void SetIsFocused(bool aIsFocused);
+    virtual void SetThrottlePainting(bool aThrottle);
     virtual void CompositorCreated();
 
     // Called always from the compositor thread.

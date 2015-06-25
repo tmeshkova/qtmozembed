@@ -658,6 +658,13 @@ void QGraphicsMozViewPrivate::SetIsFocused(bool aIsFocused)
     }
 }
 
+void QGraphicsMozViewPrivate::SetThrottlePainting(bool aThrottle)
+{
+    if (mViewInitialized) {
+        mView->SetThrottlePainting(aThrottle);
+    }
+}
+
 void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
                                               const char16_t* inputType, const char16_t* inputMode)
 {
