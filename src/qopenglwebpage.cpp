@@ -43,6 +43,7 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   , mCompleted(false)
   , mWindow(0)
   , mSizeUpdateScheduled(false)
+  , mThrottlePainting(false)
 {
     d->mContext = QMozContext::GetInstance();
     d->mHasContext = true;
@@ -319,7 +320,7 @@ bool QOpenGLWebPage::loaded() const
     return mLoaded;
 }
 
-QWindow *QOpenGLWebPage::window()
+QWindow *QOpenGLWebPage::window() const
 {
     return mWindow;
 }
@@ -334,6 +335,18 @@ void QOpenGLWebPage::setWindow(QWindow *window)
     Q_EMIT windowChanged();
 }
 
+bool QOpenGLWebPage::throttlePainting() const
+{
+    return mThrottlePainting;
+}
+
+void QOpenGLWebPage::setThrottlePainting(bool throttle)
+{
+    if (mThrottlePainting != throttle) {
+        mThrottlePainting = throttle;
+        d->SetThrottlePainting(throttle);
+    }
+}
 
 /*!
     \fn void QOpenGLWebPage::initialize()
