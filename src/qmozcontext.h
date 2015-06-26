@@ -23,6 +23,9 @@ class QMozContext : public QObject
 {
     Q_OBJECT
 public:
+    typedef void (*TaskCallback)(void* data);
+    typedef void* TaskHandle;
+
     virtual ~QMozContext();
 
     mozilla::embedlite::EmbedLiteApp* GetApp();
@@ -32,6 +35,10 @@ public:
     Q_INVOKABLE bool isAccelerated() const;
 
     static QMozContext* GetInstance();
+
+    TaskHandle PostUITask(TaskCallback, void* data, int timeout = 0);
+    TaskHandle PostCompositorTask(TaskCallback, void* data, int timeout = 0);
+    void CancelTask(TaskHandle);
 
 Q_SIGNALS:
     void onInitialized();

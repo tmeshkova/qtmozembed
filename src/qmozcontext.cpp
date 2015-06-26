@@ -265,6 +265,27 @@ QMozContext::GetInstance()
     return lsSingleton;
 }
 
+QMozContext::TaskHandle QMozContext::PostUITask(QMozContext::TaskCallback cb, void* data, int timeout)
+{
+    if (!d->mApp)
+        return nullptr;
+    return d->mApp->PostTask(cb, data, timeout);
+}
+
+QMozContext::TaskHandle QMozContext::PostCompositorTask(QMozContext::TaskCallback cb, void* data, int timeout)
+{
+    if (!d->mApp)
+        return nullptr;
+    return d->mApp->PostCompositorTask(cb, data, timeout);
+}
+
+void QMozContext::CancelTask(QMozContext::TaskHandle handle)
+{
+    if (!d->mApp)
+        return;
+    d->mApp->CancelTask(handle);
+}
+
 void QMozContext::runEmbedding(int aDelay)
 {
     if (!d->mEmbedStarted) {
