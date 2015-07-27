@@ -881,6 +881,25 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         TestFlickingMode(event);
     }
 
+    if (draggingChanged) {
+        mViewIface->draggingChanged();
+    }
+
+    if (pinchingChanged) {
+        mViewIface->pinchingChanged();
+    }
+
+    if (event->type() == QEvent::TouchEnd) {
+        if (mCanFlick) {
+            UpdateMoving(mCanFlick);
+        } else {
+            // From dragging (panning) end to clean state
+            ResetState();
+        }
+    } else {
+        UpdateMoving(mDragging);
+    }
+
     qint64 timeStamp = current_timestamp(event);
 
     // Add active touch point to cancelled touch sequence.
@@ -898,6 +917,9 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         }
         // All touch point should be cleared but let's clear active touch points anyways.
         mActiveTouchPoints.clear();
+        ReceiveInputEvent(meventEnd);
+        // touch was canceled hence no need to generate touchstart or touchmove
+        return;
     }
 
     QList<int> pressedIds, moveIds, endIds;
@@ -981,25 +1003,6 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
                                                               pt.pressure()));
         }
         ReceiveInputEvent(meventMove);
-    }
-
-    if (draggingChanged) {
-        mViewIface->draggingChanged();
-    }
-
-    if (pinchingChanged) {
-        mViewIface->pinchingChanged();
-    }
-
-    if (event->type() == QEvent::TouchEnd) {
-        if (mCanFlick) {
-            UpdateMoving(mCanFlick);
-        } else {
-            // From dragging (panning) end to clean state
-            ResetState();
-        }
-    } else {
-        UpdateMoving(mDragging);
     }
 }
 
