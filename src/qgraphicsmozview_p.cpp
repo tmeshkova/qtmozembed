@@ -822,8 +822,6 @@ bool QGraphicsMozViewPrivate::HandleDoubleTap(const nsIntPoint& aPoint)
     return retval.getMessage().toBool();
 }
 
-bool cmpInt (int i, int j) { return (i < j); }
-
 void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
 {
     // QInputMethod sends the QInputMethodEvent. Thus, it will
@@ -958,7 +956,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     Q_FOREACH (int id, pressedIds) {
         MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp, TimeStamp(), 0);
         startIds.append(id);
-        std::sort(startIds.begin(), startIds.end(), cmpInt);
+        std::sort(startIds.begin(), startIds.end(), std::less<int>());
         Q_FOREACH (int startId, startIds) {
             const QTouchEvent::TouchPoint& pt = event->touchPoints().at(idHash.value(startId));
             mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
@@ -991,7 +989,7 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
 
         // Sort touch lists by IDs just in case JS code identifies touches
         // by their order rather than their IDs.
-        std::sort(moveIds.begin(), moveIds.end(), cmpInt);
+        std::sort(moveIds.begin(), moveIds.end(), std::less<int>());
         MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp, TimeStamp(), 0);
         Q_FOREACH (int id, moveIds) {
             const QTouchEvent::TouchPoint& pt = event->touchPoints().at(idHash.value(id));
