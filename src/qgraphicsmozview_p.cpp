@@ -879,86 +879,6 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         TestFlickingMode(event);
     }
 
-    qint64 timeStamp = current_timestamp(event);
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START, timeStamp, TimeStamp(), 0);
-    MultiTouchInput meventMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp, TimeStamp(), 0);
-    MultiTouchInput meventEnd(MultiTouchInput::MULTITOUCH_END, timeStamp, TimeStamp(), 0);
-
-    // Add active touch point to cancelled touch sequence.
-    if (event->type() == QEvent::TouchCancel && touchPointsCount == 0) {
-        QMapIterator<int, QPointF> i(mActiveTouchPoints);
-        while (i.hasNext()) {
-            i.next();
-            QPointF pos = i.value();
-            meventEnd.mTouches.AppendElement(SingleTouchData(i.key(),
-                                                             mozilla::ScreenIntPoint(pos.x(), pos.y()),
-                                                             mozilla::ScreenSize(1, 1),
-                                                             180.0f,
-                                                             0));
-        }
-        // All touch point should be cleared but let's clear active touch points anyways.
-        mActiveTouchPoints.clear();
-    }
-
-    for (int i = 0; i < touchPointsCount; ++i) {
-        const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
-        mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
-        switch (pt.state()) {
-            case Qt::TouchPointPressed: {
-                mActiveTouchPoints.insert(pt.id(), pt.pos());
-                meventStart.mTouches.AppendElement(SingleTouchData(pt.id(),
-                                                                   nspt,
-                                                                   mozilla::ScreenSize(1, 1),
-                                                                   180.0f,
-                                                                   pt.pressure()));
-                break;
-            }
-            case Qt::TouchPointReleased: {
-                mActiveTouchPoints.remove(pt.id());
-                meventEnd.mTouches.AppendElement(SingleTouchData(pt.id(),
-                                                                 nspt,
-                                                                 mozilla::ScreenSize(1, 1),
-                                                                 180.0f,
-                                                                 pt.pressure()));
-                break;
-            }
-            case Qt::TouchPointMoved:
-            case Qt::TouchPointStationary: {
-                mActiveTouchPoints.insert(pt.id(), pt.pos());
-                meventMove.mTouches.AppendElement(SingleTouchData(pt.id(),
-                                                                  nspt,
-                                                                  mozilla::ScreenSize(1, 1),
-                                                                  180.0f,
-                                                                  pt.pressure()));
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
-    if (meventStart.mTouches.Length()) {
-        // We should append previous touches to start event in order
-        // to make Gecko recognize it as new added touches to existing session
-        // and not evict it here http://hg.mozilla.org/mozilla-central/annotate/1d9c510b3742/layout/base/nsPresShell.cpp#l6135
-        if (meventMove.mTouches.Length()) {
-            meventStart.mTouches.AppendElements(meventMove.mTouches);
-        }
-        Q_ASSERT(meventStart.mTouches.Length() > 0);
-        ReceiveInputEvent(meventStart);
-    }
-    if (meventMove.mTouches.Length()) {
-        if (meventStart.mTouches.Length()) {
-            meventMove.mTouches.AppendElements(meventStart.mTouches);
-        }
-        Q_ASSERT(meventMove.mTouches.Length() > 0);
-        ReceiveInputEvent(meventMove);
-    }
-    if (meventEnd.mTouches.Length()) {
-        Q_ASSERT(meventEnd.mTouches.Length() > 0);
-        ReceiveInputEvent(meventEnd);
-    }
-
     if (draggingChanged) {
         mViewIface->draggingChanged();
     }
@@ -976,6 +896,111 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
         }
     } else {
         UpdateMoving(mDragging);
+    }
+
+    qint64 timeStamp = current_timestamp(event);
+
+    // Add active touch point to cancelled touch sequence.
+    if (event->type() == QEvent::TouchCancel && touchPointsCount == 0) {
+        QMapIterator<int, QPointF> i(mActiveTouchPoints);
+        MultiTouchInput multiTouchInputEnd(MultiTouchInput::MULTITOUCH_END, timeStamp, TimeStamp(), 0);
+        while (i.hasNext()) {
+            i.next();
+            QPointF pos = i.value();
+            multiTouchInputEnd.mTouches.AppendElement(SingleTouchData(i.key(),
+                                                             mozilla::ScreenIntPoint(pos.x(), pos.y()),
+                                                             mozilla::ScreenSize(1, 1),
+                                                             180.0f,
+                                                             0));
+        }
+        // All touch point should be cleared but let's clear active touch points anyways.
+        mActiveTouchPoints.clear();
+        ReceiveInputEvent(multiTouchInputEnd);
+        // touch was canceled hence no need to generate touchstart or touchmove
+        return;
+    }
+
+    QList<int> pressedIds, moveIds, endIds;
+    QHash<int,int> idHash;
+    for (int i = 0; i < touchPointsCount; ++i) {
+        const QTouchEvent::TouchPoint& pt = event->touchPoints().at(i);
+        idHash.insert(pt.id(), i);
+        switch (pt.state()) {
+            case Qt::TouchPointPressed: {
+                mActiveTouchPoints.insert(pt.id(), pt.pos());
+                pressedIds.append(pt.id());
+                break;
+            }
+            case Qt::TouchPointReleased: {
+                mActiveTouchPoints.remove(pt.id());
+                endIds.append(pt.id());
+                break;
+            }
+            case Qt::TouchPointMoved:
+            case Qt::TouchPointStationary: {
+                mActiveTouchPoints.insert(pt.id(), pt.pos());
+                moveIds.append(pt.id());
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    // We should append previous touches to start event in order
+    // to make Gecko recognize it as new added touches to existing session
+    // and not evict it here http://hg.mozilla.org/mozilla-central/annotate/1d9c510b3742/layout/base/nsPresShell.cpp#l6135
+    QList<int> startIds(moveIds);
+
+    // Produce separate event for every pressed touch points
+    Q_FOREACH (int id, pressedIds) {
+        MultiTouchInput multiTouchInputStart(MultiTouchInput::MULTITOUCH_START, timeStamp, TimeStamp(), 0);
+        startIds.append(id);
+        std::sort(startIds.begin(), startIds.end(), std::less<int>());
+        Q_FOREACH (int startId, startIds) {
+            const QTouchEvent::TouchPoint& pt = event->touchPoints().at(idHash.value(startId));
+            mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
+            multiTouchInputStart.mTouches.AppendElement(SingleTouchData(pt.id(),
+                                                               nspt,
+                                                               mozilla::ScreenSize(1, 1),
+                                                               180.0f,
+                                                               pt.pressure()));
+        }
+
+        ReceiveInputEvent(multiTouchInputStart);
+    }
+
+    Q_FOREACH (int id, endIds) {
+        const QTouchEvent::TouchPoint& pt = event->touchPoints().at(idHash.value(id));
+        mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
+        MultiTouchInput multiTouchInputEnd(MultiTouchInput::MULTITOUCH_END, timeStamp, TimeStamp(), 0);
+        multiTouchInputEnd.mTouches.AppendElement(SingleTouchData(pt.id(),
+                                                         nspt,
+                                                         mozilla::ScreenSize(1, 1),
+                                                         180.0f,
+                                                         pt.pressure()));
+        ReceiveInputEvent(multiTouchInputEnd);
+    }
+
+    if (!moveIds.empty()) {
+        if (!pressedIds.empty()) {
+            moveIds.append(pressedIds);
+        }
+
+        // Sort touch lists by IDs just in case JS code identifies touches
+        // by their order rather than their IDs.
+        std::sort(moveIds.begin(), moveIds.end(), std::less<int>());
+        MultiTouchInput multiTouchInputMove(MultiTouchInput::MULTITOUCH_MOVE, timeStamp, TimeStamp(), 0);
+        Q_FOREACH (int id, moveIds) {
+            const QTouchEvent::TouchPoint& pt = event->touchPoints().at(idHash.value(id));
+            mozilla::ScreenIntPoint nspt(pt.pos().x(), pt.pos().y());
+            multiTouchInputMove.mTouches.AppendElement(SingleTouchData(pt.id(),
+                                                              nspt,
+                                                              mozilla::ScreenSize(1, 1),
+                                                              180.0f,
+                                                              pt.pressure()));
+        }
+        ReceiveInputEvent(multiTouchInputMove);
     }
 }
 
