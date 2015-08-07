@@ -13,6 +13,7 @@
 #include "qmozview_defined_wrapper.h"
 
 class QGraphicsMozViewPrivate;
+class QMozWindow;
 class QuickMozView : public QQuickItem
 {
     Q_OBJECT
@@ -106,6 +107,7 @@ private:
 
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;
+    QScopedPointer<QMozWindow> mWindow;
     unsigned mParentID;
     bool mPrivateMode;
     bool mUseQmlMouse;

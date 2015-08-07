@@ -5,11 +5,6 @@
 
 #include "qopenglwebpage.h"
 
-#include "qmozcontext.h"
-#include "qmozembedlog.h"
-#include "mozilla/embedlite/EmbedLiteView.h"
-#include "mozilla/embedlite/EmbedLiteApp.h"
-
 #include <qglobal.h>
 #include <qqmlinfo.h>
 #include <QOpenGLContext>
@@ -18,9 +13,15 @@
 #include <QGuiApplication>
 #include <QScreen>
 
-#include "qmozgrabresult.h"
+#include "mozilla/embedlite/EmbedLiteApp.h"
+
 #include "qgraphicsmozview_p.h"
+#include "qmozcontext.h"
+#include "qmozembedlog.h"
+#include "qmozgrabresult.h"
 #include "qmozscrolldecorator.h"
+#include "qmozwindow.h"
+#include "qmozwindow_p.h"
 
 #define LOG_COMPONENT "QOpenGLWebPage"
 
@@ -30,10 +31,7 @@ using namespace mozilla::embedlite;
 /*!
     \fn void QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
 
-    In order to use this, MOZ_USE_EXTERNAL_WINDOW environment variable needs to be set. The
-    MOZ_USE_EXTERNAL_WINDOW will take higher precedence than MOZ_LAYERS_PREFER_OFFSCREEN.
-
-    \sa QOpenGLWebPage::requestGLContext()
+    In order to use this, embedlite.compositor.external_gl_context preference  needs to be set.
 */
 QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   : QObject(parent)
@@ -43,7 +41,7 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   , mActive(false)
   , mLoaded(false)
   , mCompleted(false)
-  , mWindow(0)
+  , mMozWindow(nullptr)
   , mSizeUpdateScheduled(false)
   , mThrottlePainting(false)
 {
@@ -81,7 +79,8 @@ void QOpenGLWebPage::createView()
     if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
-        d->mView = d->mContext->GetApp()->CreateView(mParentID, mPrivateMode);
+        EmbedLiteWindow* win = mMozWindow->d->mWindow;
+        d->mView = d->mContext->GetApp()->CreateView(win, mParentID, mPrivateMode);
         d->mView->SetListener(d);
         d->mView->SetDPI(QGuiApplication::primaryScreen()->physicalDotsPerInch());
     }
@@ -109,53 +108,14 @@ void QOpenGLWebPage::createGeckoGLContext()
 {
 }
 
-/*!
-    \fn void QOpenGLWebPage::requestGLContext()
-
-    With in the slot connected to the requestGLContext() prepare QOpenGLContext and
-    make it current context of the gecko compositor thread,
-    against the surface of the QWindow.
-
-    \code
-    m_context = new QOpenGLContext();
-    m_context->setFormat(requestedFormat());
-    m_context->create();
-    m_context->makeCurrent(this);
-    \endcode
-
-    This signal is emitted from the gecko compositor thread, you must make sure that
-    the connection is direct (see Qt::ConnectionType)
-
-    \sa QOpenGLContext::makeCurrent(QSurface*)
-*/
 void QOpenGLWebPage::requestGLContext(bool& hasContext, QSize& viewPortSize)
 {
-    hasContext = true;
-    viewPortSize = d->mGLSurfaceSize;
-    Q_EMIT requestGLContext();
+    Q_ASSERT(false); // TODO: Remove
 }
 
-/*!
-    \fn void QOpenGLWebPage::drawUnderlay()
-
-    Called always from gecko compositor thread. Current context
-    has been made as current by gecko compositor.
-*/
 void QOpenGLWebPage::drawUnderlay()
 {
-    // Current context used by gecko compositor thread.
-    QOpenGLContext *glContext = QOpenGLContext::currentContext();
-
-    if (!glContext) {
-        return;
-    }
-
-    QOpenGLFunctions_ES2* funcs = glContext->versionFunctions<QOpenGLFunctions_ES2>();
-    if (funcs) {
-        QColor bgColor = d->GetBackgroundColor();
-        funcs->glClearColor(bgColor.redF(), bgColor.greenF(), bgColor.blueF(), 0.0);
-        funcs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
+   Q_ASSERT(false); // TODO: Remove
 }
 
 /*!
@@ -181,21 +141,17 @@ void QOpenGLWebPage::drawUnderlay()
 */
 void QOpenGLWebPage::drawOverlay(const QRect &rect)
 {
-    {
-        QMutexLocker lock(&mGrabResultListLock);
-        QList<QWeakPointer<QMozGrabResult> >::const_iterator it = mGrabResultList.begin();
-        for (; it != mGrabResultList.end(); ++it) {
-            QSharedPointer<QMozGrabResult> result = it->toStrongRef();
-            if (result) {
-                result->captureImage(rect);
-            } else {
-                qWarning() << "QMozGrabResult freed before being realized!";
-            }
+    QMutexLocker lock(&mGrabResultListLock);
+    QList<QWeakPointer<QMozGrabResult> >::const_iterator it = mGrabResultList.begin();
+    for (; it != mGrabResultList.end(); ++it) {
+        QSharedPointer<QMozGrabResult> result = it->toStrongRef();
+        if (result) {
+            result->captureImage(rect);
+        } else {
+            qWarning() << "QMozGrabResult freed before being realized!";
         }
-        mGrabResultList.clear();
     }
-
-    Q_EMIT afterRendering(rect);
+    mGrabResultList.clear();
 }
 
 void QOpenGLWebPage::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -260,7 +216,6 @@ void QOpenGLWebPage::setActive(bool active)
     if (mActive != active) {
         mActive = active;
         d->mView->SetIsActive(mActive);
-        mActive ? d->mView->ResumeRendering() : d->mView->SuspendRendering();
         Q_EMIT activeChanged();
     }
 }
@@ -320,19 +275,14 @@ bool QOpenGLWebPage::loaded() const
     return mLoaded;
 }
 
-QWindow *QOpenGLWebPage::window() const
+QMozWindow *QOpenGLWebPage::mozWindow() const
 {
-    return mWindow;
+    return mMozWindow;
 }
 
-void QOpenGLWebPage::setWindow(QWindow *window)
+void QOpenGLWebPage::setMozWindow(QMozWindow* window)
 {
-    if (mWindow == window) {
-        return;
-    }
-
-    mWindow = window;
-    Q_EMIT windowChanged();
+    mMozWindow = window;
 }
 
 bool QOpenGLWebPage::throttlePainting() const
@@ -355,6 +305,7 @@ void QOpenGLWebPage::setThrottlePainting(bool throttle)
 */
 void QOpenGLWebPage::initialize()
 {
+    Q_ASSERT(mMozWindow);
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(createView()));
     } else {
@@ -437,13 +388,10 @@ void QOpenGLWebPage::setInputMethodHints(Qt::InputMethodHints hints)
 
 void QOpenGLWebPage::updateContentOrientation(Qt::ScreenOrientation orientation)
 {
-    if (!mWindow) {
-        qDebug() << "No window set, cannot update content orientation.";
-        return;
-    }
+    Q_ASSERT(mMozWindow);
 
     QSize surfaceSize;
-    QSize windowSize = mWindow->size();
+    QSize windowSize = mMozWindow->size();
 
     int minValue = qMin(windowSize.width(), windowSize.height());
     int maxValue = qMax(windowSize.width(), windowSize.height());
@@ -719,10 +667,6 @@ void QOpenGLWebPage::setParentID(unsigned aParentID)
     if (aParentID != mParentID) {
         mParentID = aParentID;
         Q_EMIT parentIdChanged();
-    }
-
-    if (mParentID) {
-        createView();
     }
 }
 

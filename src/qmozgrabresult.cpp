@@ -151,7 +151,7 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
         qWarning() << "OpenGLWebPage::grabToImage web page has invalid dimensions";
         return 0;
     }
-
+#if 0
     if (!webPage->window()) {
         qWarning() << "OpenGLWebPage::grabToImage web page is not attached to a window";
         return 0;
@@ -161,6 +161,7 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
         qWarning() << "OpenGLWebPage::grabToImage web page's window is not visible";
         return 0;
     }
+#endif
     if (!webPage->completed()) {
         qWarning() << "OpenGLWebPage::grabToImage web page is not yet completed. Implies that view is not created.";
         return 0;
@@ -175,7 +176,11 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
     QMozGrabResultPrivate *d = result->d_func();
     d->textureSize = size;
     d->webPage = webPage;
+#if 0
     d->orientation = webPage->window()->contentOrientation();
+#else
+    d->orientation = Qt::PrimaryOrientation;
+#endif
 
     return result;
 }

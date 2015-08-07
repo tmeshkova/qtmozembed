@@ -23,7 +23,9 @@ SOURCES += qmozcontext.cpp \
            EmbedQtKeyUtils.cpp \
            qgraphicsmozview_p.cpp \
            geckoworker.cpp \
-           qopenglwebpage.cpp
+           qopenglwebpage.cpp \
+           qmozwindow.cpp \
+           qmozwindow_p.cpp
 
 HEADERS += qmozcontext.h \
            qmozgrabresult.h \
@@ -35,7 +37,9 @@ HEADERS += qmozcontext.h \
            geckoworker.h \
            qmozview_defined_wrapper.h \
            qmozview_templated_wrapper.h \
-           qopenglwebpage.h
+           qopenglwebpage.h \
+           qmozwindow.h \
+           qmozwindow_p.h
 
 SOURCES += quickmozview.cpp qmoztexturenode.cpp qmozextmaterialnode.cpp
 HEADERS += quickmozview.h qmoztexturenode.h qmozextmaterialnode.h

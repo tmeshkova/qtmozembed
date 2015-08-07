@@ -24,10 +24,11 @@
 #include <QQmlInfo>
 
 #include "qgraphicsmozview_p.h"
+#include "qmozextmaterialnode.h"
 #include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
-#include "qmozextmaterialnode.h"
-#include "assert.h"
+#include "qmozwindow.h"
+#include "qmozwindow_p.h"
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
@@ -35,6 +36,7 @@ using namespace mozilla::embedlite;
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this), this))
+  , mWindow(new QMozWindow)
   , mParentID(0)
   , mPrivateMode(false)
   , mUseQmlMouse(false)
@@ -240,7 +242,7 @@ void QuickMozView::clearThreadRenderObject()
 void QuickMozView::createView()
 {
     if (!d->mView) {
-        d->mView = d->mContext->GetApp()->CreateView(mParentID, mPrivateMode);
+        d->mView = d->mContext->GetApp()->CreateView(mWindow->d->mWindow, mParentID, mPrivateMode);
         d->mView->SetListener(d);
     }
 }
