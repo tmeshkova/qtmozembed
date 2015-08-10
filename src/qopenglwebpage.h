@@ -79,7 +79,6 @@ public:
     void initialize();
 
     virtual bool event(QEvent *event);
-    virtual void geometryChanged(const QRectF & newGeometry, const QRectF & oldGeometry);
     virtual QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
     virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void keyPressEvent(QKeyEvent*);
@@ -96,8 +95,6 @@ public Q_SLOTS:
     void update();
     void forceActiveFocus();
     void setInputMethodHints(Qt::InputMethodHints hints);
-
-    void updateContentOrientation(Qt::ScreenOrientation orientation);
 
 Q_SIGNALS:
     void parentIdChanged();
@@ -121,7 +118,6 @@ private Q_SLOTS:
 
 private:
     void scheduleSizeUpdate();
-    void setSurfaceSize(const QSize &surfaceSize, Qt::ScreenOrientation orientation);
 
     QGraphicsMozViewPrivate* d;
     friend class QGraphicsMozViewPrivate;

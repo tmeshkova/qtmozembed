@@ -16,6 +16,7 @@
 #include "mozilla/embedlite/EmbedLiteApp.h"
 
 #include "qgraphicsmozview_p.h"
+#include "mozilla/embedlite/EmbedLiteWindow.h"
 #include "qmozcontext.h"
 #include "qmozembedlog.h"
 #include "qmozgrabresult.h"
@@ -152,15 +153,6 @@ void QOpenGLWebPage::drawOverlay(const QRect &rect)
         }
     }
     mGrabResultList.clear();
-}
-
-void QOpenGLWebPage::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
-{
-    LOGT("newGeometry size: [%g, %g] oldGeometry size: [%g,%g]", newGeometry.size().width(),
-                                                                 newGeometry.size().height(),
-                                                                 oldGeometry.size().width(),
-                                                                 oldGeometry.size().height());
-    setSize(newGeometry.size());
 }
 
 int QOpenGLWebPage::parentId() const
@@ -384,28 +376,6 @@ void QOpenGLWebPage::forceActiveFocus()
 void QOpenGLWebPage::setInputMethodHints(Qt::InputMethodHints hints)
 {
     d->mInputMethodHints = hints;
-}
-
-void QOpenGLWebPage::updateContentOrientation(Qt::ScreenOrientation orientation)
-{
-    Q_ASSERT(mMozWindow);
-
-    QSize surfaceSize;
-    QSize windowSize = mMozWindow->size();
-
-    int minValue = qMin(windowSize.width(), windowSize.height());
-    int maxValue = qMax(windowSize.width(), windowSize.height());
-
-    if (orientation == Qt::LandscapeOrientation || orientation == Qt::InvertedLandscapeOrientation) {
-        surfaceSize.setWidth(maxValue);
-        surfaceSize.setHeight(minValue);
-    } else {
-        surfaceSize.setWidth(minValue);
-        surfaceSize.setHeight(maxValue);
-    }
-
-    setSize(surfaceSize);
-    setSurfaceSize(surfaceSize, orientation);
 }
 
 void QOpenGLWebPage::inputMethodEvent(QInputMethodEvent* event)
@@ -740,23 +710,5 @@ void QOpenGLWebPage::scheduleSizeUpdate()
     if (!mSizeUpdateScheduled) {
         QMetaObject::invokeMethod(this, "updateSize", Qt::QueuedConnection);
         mSizeUpdateScheduled = true;
-    }
-}
-
-/*!
-    \fn void QOpenGLWebPage::setSurfaceSize()
-
-    Sets surface size and orientation.
-
-    Set surface size as soon as the page is created. The page cannot be
-    shown until surface is given.
-*/
-void QOpenGLWebPage::setSurfaceSize(const QSize &surfaceSize, Qt::ScreenOrientation orientation)
-{
-    if ((d->mGLSurfaceSize != surfaceSize) || (d->mOrientation != orientation)) {
-        d->mGLSurfaceSize = surfaceSize;
-        d->mOrientation = orientation;
-        d->mOrientationDirty = true;
-        scheduleSizeUpdate();
     }
 }

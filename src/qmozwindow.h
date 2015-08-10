@@ -23,6 +23,7 @@ public:
 
     void setSize(QSize);
     QSize size() const { return mSize; }
+    void setContentOrientation(Qt::ScreenOrientation);
 
 Q_SIGNALS:
     void requestGLContext();

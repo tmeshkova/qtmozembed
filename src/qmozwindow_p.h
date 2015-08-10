@@ -16,7 +16,7 @@ class QMozWindowPrivate : public mozilla::embedlite::EmbedLiteWindowListener
 {
 public:
     QMozWindowPrivate(QMozWindow&);
-    ~QMozWindowPrivate();
+    virtual ~QMozWindowPrivate();
 
 protected:
     // EmbedLiteWindowListener:
