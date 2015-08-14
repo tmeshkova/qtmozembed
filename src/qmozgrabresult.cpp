@@ -5,6 +5,7 @@
 
 #include "qopenglwebpage.h"
 #include "qmozgrabresult.h"
+#include "qmozwindow.h"
 
 #include <QCoreApplication>
 #include <QDebug>
@@ -144,7 +145,7 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
 
     QSize size = targetSize;
     if (size.isEmpty()) {
-        size = QSize(webPage->width(), webPage->height());
+        size = webPage->mozWindow()->size();
     }
 
     if (!size.isValid()) {

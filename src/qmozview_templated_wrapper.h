@@ -55,6 +55,7 @@ public:
     virtual void draggingChanged() = 0;
     virtual void movingChanged() = 0;
     virtual void pinchingChanged() = 0;
+    virtual void marginsChanged() = 0;
 };
 
 template<class TMozQView>
@@ -210,6 +211,11 @@ public:
     void pinchingChanged()
     {
         Q_EMIT view.pinchingChanged();
+    }
+
+    void marginsChanged()
+    {
+        Q_EMIT view.marginsChanged();
     }
 
     void contentWidthChanged()

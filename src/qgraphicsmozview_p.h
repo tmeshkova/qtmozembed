@@ -25,6 +25,7 @@
 class QGraphicsView;
 class QTouchEvent;
 class QMozContext;
+class QMozWindow;
 
 class QGraphicsMozViewPrivate : public mozilla::embedlite::EmbedLiteViewListener
 {
@@ -39,6 +40,7 @@ public:
     virtual bool RequestCurrentGLContext();
     virtual void ViewInitialized();
     virtual void SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+    virtual void SetMargins(const QMargins& margins);
     virtual QColor GetBackgroundColor() const;
 
     virtual bool Invalidate();
@@ -103,10 +105,12 @@ public:
 
     IMozQViewIface* mViewIface;
     QPointer<QObject> q;
+    QPointer<QMozWindow> mMozWindow;
     QMozContext* mContext;
     mozilla::embedlite::EmbedLiteView* mView;
     bool mViewInitialized;
     QColor mBgColor;
+    QMargins mMargins;
     mutable QMutex mBgColorMutex;
     QImage mTempBufferImage;
     QSGTexture* mTempTexture;

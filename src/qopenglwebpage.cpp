@@ -42,7 +42,6 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   , mActive(false)
   , mLoaded(false)
   , mCompleted(false)
-  , mMozWindow(nullptr)
   , mSizeUpdateScheduled(false)
   , mThrottlePainting(false)
 {
@@ -80,18 +79,11 @@ void QOpenGLWebPage::createView()
     if (!d->mView) {
         // We really don't care about SW rendering on Qt5 anymore
         d->mContext->GetApp()->SetIsAccelerated(true);
-        EmbedLiteWindow* win = mMozWindow->d->mWindow;
+        EmbedLiteWindow* win = d->mMozWindow->d->mWindow;
         d->mView = d->mContext->GetApp()->CreateView(win, mParentID, mPrivateMode);
         d->mView->SetListener(d);
         d->mView->SetDPI(QGuiApplication::primaryScreen()->physicalDotsPerInch());
     }
-}
-
-void QOpenGLWebPage::updateSize()
-{
-    Q_ASSERT(mSizeUpdateScheduled);
-    d->UpdateViewSize();
-    mSizeUpdateScheduled = false;
 }
 
 void QOpenGLWebPage::processViewInitialization()
@@ -212,56 +204,6 @@ void QOpenGLWebPage::setActive(bool active)
     }
 }
 
-qreal QOpenGLWebPage::width() const
-{
-    return d->mSize.width();
-}
-
-void QOpenGLWebPage::setWidth(qreal width)
-{
-    QSizeF newSize(width, d->mSize.height());
-    setSize(newSize);
-}
-
-qreal QOpenGLWebPage::height() const
-{
-    return d->mSize.height();
-}
-
-void QOpenGLWebPage::setHeight(qreal height)
-{
-    QSizeF newSize(d->mSize.width(), height);
-    setSize(newSize);
-}
-
-QSizeF QOpenGLWebPage::size() const
-{
-    return d->mSize;
-}
-
-void QOpenGLWebPage::setSize(const QSizeF &size)
-{
-    if (d->mSize == size) {
-        return;
-    }
-
-    bool widthWillChanged = d->mSize.width() != size.width();
-    bool heightWillChanged = d->mSize.height() != size.height();
-
-    d->mSize = size;
-    scheduleSizeUpdate();
-
-    if (widthWillChanged) {
-        Q_EMIT widthChanged();
-    }
-
-    if (heightWillChanged) {
-        Q_EMIT heightChanged();
-    }
-
-    Q_EMIT sizeChanged();
-}
-
 bool QOpenGLWebPage::loaded() const
 {
     return mLoaded;
@@ -269,12 +211,12 @@ bool QOpenGLWebPage::loaded() const
 
 QMozWindow *QOpenGLWebPage::mozWindow() const
 {
-    return mMozWindow;
+    return d->mMozWindow;
 }
 
 void QOpenGLWebPage::setMozWindow(QMozWindow* window)
 {
-    mMozWindow = window;
+    d->mMozWindow = window;
 }
 
 bool QOpenGLWebPage::throttlePainting() const
@@ -297,7 +239,7 @@ void QOpenGLWebPage::setThrottlePainting(bool throttle)
 */
 void QOpenGLWebPage::initialize()
 {
-    Q_ASSERT(mMozWindow);
+    Q_ASSERT(d->mMozWindow);
     if (!d->mContext->initialized()) {
         connect(d->mContext, SIGNAL(onInitialized()), this, SLOT(createView()));
     } else {
@@ -563,6 +505,16 @@ qreal QOpenGLWebPage::contentHeight() const
     return d->mScrollableSize.height();
 }
 
+QMargins QOpenGLWebPage::margins() const
+{
+    return d->mMargins;
+}
+
+void QOpenGLWebPage::setMargins(QMargins margins)
+{
+    d->SetMargins(margins);
+}
+
 void QOpenGLWebPage::loadHtml(const QString& html, const QUrl& baseUrl)
 {
     LOGT();
@@ -703,12 +655,4 @@ void QOpenGLWebPage::touchEvent(QTouchEvent *event)
 void QOpenGLWebPage::timerEvent(QTimerEvent *event)
 {
     d->timerEvent(event);
-}
-
-void QOpenGLWebPage::scheduleSizeUpdate()
-{
-    if (!mSizeUpdateScheduled) {
-        QMetaObject::invokeMethod(this, "updateSize", Qt::QueuedConnection);
-        mSizeUpdateScheduled = true;
-    }
 }

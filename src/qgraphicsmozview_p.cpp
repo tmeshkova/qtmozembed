@@ -13,6 +13,7 @@
 
 #include "qgraphicsmozview_p.h"
 #include "qmozcontext.h"
+#include "qmozwindow.h"
 #include "EmbedQtKeyUtils.h"
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
@@ -50,6 +51,7 @@ qint64 current_timestamp(QTouchEvent* aEvent)
 QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QObject *publicPtr)
     : mViewIface(aViewIface)
     , q(publicPtr)
+    , mMozWindow(NULL)
     , mContext(NULL)
     , mView(NULL)
     , mViewInitialized(false)
@@ -147,14 +149,14 @@ void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int
 
             // Update vertical scroll decorator
             qreal ySizeRatio = mContentRect.height() * mContentResolution / mScrollableSize.height();
-            qreal tmpValue = mSize.height() * ySizeRatio;
+            qreal tmpValue = mMozWindow->size().height() * ySizeRatio;
             mVerticalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.y() * ySizeRatio;
             mVerticalScrollDecorator.setPosition(tmpValue);
 
             // Update horizontal scroll decorator
             qreal xSizeRatio = mContentRect.width() * mContentResolution / mScrollableSize.width();
-            tmpValue = mSize.width() * xSizeRatio;
+            tmpValue = mMozWindow->size().width() * xSizeRatio;
             mHorizontalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.x() * xSizeRatio;
             mHorizontalScrollDecorator.setPosition(tmpValue);
@@ -435,36 +437,7 @@ void QGraphicsMozViewPrivate::sendAsyncMessage(const QString &name, const QVaria
 
 void QGraphicsMozViewPrivate::UpdateViewSize()
 {
-    if (mSize.isEmpty())
-        return;
-
-    if (!mViewInitialized) {
-        return;
-    }
-
-    if (mContext->GetApp()->IsAccelerated() && mHasContext) {
-        mView->SetGLViewPortSize(mGLSurfaceSize.width(), mGLSurfaceSize.height());
-    }
-    mView->SetViewSize(mSize.width(), mSize.height());
-
-    if (mOrientationDirty) {
-        ScreenRotation rotation = ROTATION_0;
-        switch (mOrientation) {
-        case Qt::LandscapeOrientation:
-            rotation = mozilla::ROTATION_90;
-            break;
-        case Qt::InvertedLandscapeOrientation:
-            rotation = mozilla::ROTATION_270;
-            break;
-        case Qt::InvertedPortraitOrientation:
-            rotation = mozilla::ROTATION_180;
-            break;
-        default:
-            break;
-        }
-        mView->SetScreenRotation(rotation);
-        mOrientationDirty = false;
-    }
+    mSize = mMozWindow->size();
 }
 
 bool QGraphicsMozViewPrivate::RequestCurrentGLContext()
@@ -511,6 +484,15 @@ void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b
     QMutexLocker locker(&mBgColorMutex);
     mBgColor = QColor(r, g, b, a);
     mViewIface->bgColorChanged();
+}
+
+void QGraphicsMozViewPrivate::SetMargins(const QMargins& margins)
+{
+  if (margins != mMargins) {
+    mMargins = margins;
+    mView->SetMargins(margins.top(), margins.right(), margins.bottom(), margins.left());
+    mViewIface->marginsChanged();
+  }
 }
 
 // Can be read for instance from gecko compositor thread.
@@ -617,10 +599,9 @@ char* QGraphicsMozViewPrivate::RecvSyncMessage(const char16_t* aMessage, const c
     NS_ConvertUTF16toUTF8 message(aMessage);
     NS_ConvertUTF16toUTF8 data(aData);
 
-    bool ok = false;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
-    ok = error.error == QJsonParseError::NoError;
+    Q_ASSERT(error.error == QJsonParseError::NoError);
     QVariant vdata = doc.toVariant();
 
     mViewIface->recvSyncMessage(message.get(), vdata, &response);
@@ -752,7 +733,7 @@ void QGraphicsMozViewPrivate::SetPageRect(const gfxRect& aCssPageRect)
 
 bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize)
 {
-    mContentResolution = mSize.width() / aContentRect.width;
+    mContentResolution = mMozWindow->size().width() / aContentRect.width;
 
     if (mContentRect.x() != aContentRect.x || mContentRect.y() != aContentRect.y ||
             mContentRect.width() != aContentRect.width ||
