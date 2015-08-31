@@ -44,11 +44,6 @@ HEADERS += qmozcontext.h \
 SOURCES += quickmozview.cpp qmoztexturenode.cpp qmozextmaterialnode.cpp
 HEADERS += quickmozview.h qmoztexturenode.h qmozextmaterialnode.h
 
-!isEmpty(BUILD_QT5QUICK1) {
-  SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
-  HEADERS += qdeclarativemozview.h qgraphicsmozview.h
-}
-
 include(qmozembed.pri)
 
 RELATIVE_PATH=..

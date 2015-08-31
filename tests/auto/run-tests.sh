@@ -4,7 +4,6 @@
 export `dbus-launch`
 if [ "$QTMOZEMBEDOBJDIR" != "" ]; then
   QMLMOZTESTRUNNER=$QTMOZEMBEDOBJDIR/tests/qmlmoztestrunner/qmlmoztestrunner
-  export QML_IMPORT_PATH=$QTMOZEMBEDOBJDIR/qmlplugin4
   export QML2_IMPORT_PATH=$QTMOZEMBEDOBJDIR/qmlplugin5
 else
   QMLMOZTESTRUNNER=/usr/lib/qt$QTVER/bin/qmlmoztestrunner
