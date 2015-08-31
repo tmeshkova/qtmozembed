@@ -20,7 +20,7 @@
 
 #include "qmozview_defined_wrapper.h"
 
-class QGraphicsMozViewPrivate;
+class QMozViewPrivate;
 class QMozGrabResult;
 class QMozWindow;
 
@@ -104,8 +104,8 @@ private Q_SLOTS:
     void createView();
 
 private:
-    QGraphicsMozViewPrivate* d;
-    friend class QGraphicsMozViewPrivate;
+    QMozViewPrivate* d;
+    friend class QMozViewPrivate;
 
     unsigned mParentID;
     bool mPrivateMode;

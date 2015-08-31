@@ -12,7 +12,7 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include "qmozview_defined_wrapper.h"
 
-class QGraphicsMozViewPrivate;
+class QMozViewPrivate;
 class QMozWindow;
 class QuickMozView : public QQuickItem
 {
@@ -105,8 +105,8 @@ private Q_SLOTS:
 private:
     void createView();
 
-    QGraphicsMozViewPrivate* d;
-    friend class QGraphicsMozViewPrivate;
+    QMozViewPrivate* d;
+    friend class QMozViewPrivate;
     QScopedPointer<QMozWindow> mWindow;
     unsigned mParentID;
     bool mPrivateMode;

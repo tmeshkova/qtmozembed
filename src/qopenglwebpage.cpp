@@ -15,7 +15,7 @@
 
 #include "mozilla/embedlite/EmbedLiteApp.h"
 
-#include "qgraphicsmozview_p.h"
+#include "qmozview_p.h"
 #include "mozilla/embedlite/EmbedLiteWindow.h"
 #include "qmozcontext.h"
 #include "qmozembedlog.h"
@@ -36,7 +36,7 @@ using namespace mozilla::embedlite;
 */
 QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   : QObject(parent)
-  , d(new QGraphicsMozViewPrivate(new IMozQView<QOpenGLWebPage>(*this), this))
+  , d(new QMozViewPrivate(new IMozQView<QOpenGLWebPage>(*this), this))
   , mParentID(0)
   , mPrivateMode(false)
   , mActive(false)

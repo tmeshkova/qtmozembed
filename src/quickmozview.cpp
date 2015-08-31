@@ -23,7 +23,7 @@
 #include <QtOpenGLExtensions>
 #include <QQmlInfo>
 
-#include "qgraphicsmozview_p.h"
+#include "qmozview_p.h"
 #include "qmozextmaterialnode.h"
 #include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
@@ -35,7 +35,7 @@ using namespace mozilla::embedlite;
 
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
-  , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this), this))
+  , d(new QMozViewPrivate(new IMozQView<QuickMozView>(*this), this))
   , mWindow(new QMozWindow)
   , mParentID(0)
   , mPrivateMode(false)

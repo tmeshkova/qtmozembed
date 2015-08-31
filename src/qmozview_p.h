@@ -4,8 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef qgraphicsmozview_p_h
-#define qgraphicsmozview_p_h
+#ifndef qmozview_p_h
+#define qmozview_p_h
 
 #include <QColor>
 #include <QImage>
@@ -22,16 +22,15 @@
 #include "qmozview_templated_wrapper.h"
 #include "qmozview_defined_wrapper.h"
 
-class QGraphicsView;
 class QTouchEvent;
 class QMozContext;
 class QMozWindow;
 
-class QGraphicsMozViewPrivate : public mozilla::embedlite::EmbedLiteViewListener
+class QMozViewPrivate : public mozilla::embedlite::EmbedLiteViewListener
 {
 public:
-    QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QObject* publicPtr);
-    virtual ~QGraphicsMozViewPrivate();
+    QMozViewPrivate(IMozQViewIface* aViewIface, QObject* publicPtr);
+    virtual ~QMozViewPrivate();
 
     void ReceiveInputEvent(const mozilla::InputData& event);
     void touchEvent(QTouchEvent* event);
@@ -170,4 +169,4 @@ public:
 
 qint64 current_timestamp(QTouchEvent*);
 
-#endif /* qgraphicsmozview_p_h */
+#endif /* qmozview_p_h */
