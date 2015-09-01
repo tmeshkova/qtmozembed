@@ -26,7 +26,7 @@ protected:
     void DrawOverlay(const nsIntRect& aRect) override;
     void CompositorCreated() override;
     void CompositingFinished() override;
-
+    bool Invalidate() override;
 
 private:
     friend class QMozWindow;

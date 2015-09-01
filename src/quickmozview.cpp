@@ -36,7 +36,6 @@ using namespace mozilla::embedlite;
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
   , d(new QMozViewPrivate(new IMozQView<QuickMozView>(*this), this))
-  , mWindow(new QMozWindow)
   , mParentID(0)
   , mPrivateMode(false)
   , mUseQmlMouse(false)
@@ -105,6 +104,9 @@ QuickMozView::contextInitialized()
     LOGT("QuickMozView");
     // We really don't care about SW rendering on Qt5 anymore
     d->mContext->GetApp()->SetIsAccelerated(true);
+    d->setMozWindow(new QMozWindow);
+    connect(d->mMozWindow.data(), &QMozWindow::compositingFinished,
+            this, &QuickMozView::compositingFinished);
     createView();
 }
 
@@ -119,28 +121,6 @@ void QuickMozView::processViewInitialization()
 void QuickMozView::updateEnabled()
 {
     d->mEnabled = QQuickItem::isEnabled();
-}
-
-void QuickMozView::createGeckoGLContext()
-{
-#warning "Unused method, destroy?"
-}
-
-void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
-{
-    hasContext = true;
-    viewPortSize = d->mGLSurfaceSize;
-}
-
-void QuickMozView::drawUnderlay()
-{
-    // Do nothing
-}
-
-void QuickMozView::drawOverlay(const QRect &rect)
-{
-    Q_UNUSED(rect);
-    // Do nothing;
 }
 
 void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
@@ -179,7 +159,6 @@ void QuickMozView::updateGLContextInfo()
             break;
         }
 
-        d->mGLSurfaceSize = viewPortSize;
         Q_EMIT updateViewSize();
     }
 }
@@ -205,11 +184,11 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
                                                                  oldGeometry.size().width(),
                                                                  oldGeometry.size().height());
     QQuickItem::geometryChanged(newGeometry, oldGeometry);
-    // Width and height are updated separately. So we want to avoid cases where width and height
-    // equals or size have not actually changed at all. This will trigger viewport
-    // calculation update.
-    if (newGeometry.width() != newGeometry.height() && d->mSize != newGeometry.size()) {
+    if (newGeometry.size() != d->mSize) {
         d->mSize = newGeometry.size();
+        if (d->mMozWindow) {
+            d->mMozWindow->setSize(d->mSize.toSize());
+        }
         if (mActive) {
             updateGLContextInfo();
         }
@@ -242,7 +221,7 @@ void QuickMozView::clearThreadRenderObject()
 void QuickMozView::createView()
 {
     if (!d->mView) {
-        d->mView = d->mContext->GetApp()->CreateView(mWindow->d->mWindow, mParentID, mPrivateMode);
+        d->mView = d->mContext->GetApp()->CreateView(d->mMozWindow->d->mWindow, mParentID, mPrivateMode);
         d->mView->SetListener(d);
     }
 }
@@ -274,7 +253,7 @@ void QuickMozView::refreshNodeTexture()
 {
     QMutexLocker locker(&mRenderMutex);
 
-    if (!d->mViewInitialized || !mActive)
+    if (!d->mViewInitialized || !d->mHasCompositor || !mActive)
         return;
 
     if (d && d->mView)
@@ -286,6 +265,7 @@ void QuickMozView::refreshNodeTexture()
             extension = new QOpenGLExtension_OES_EGL_image();
             extension->initializeOpenGLFunctions();
         }
+        Q_ASSERT(extension);
 
         if (!mConsTex) {
           glGenTextures(1, &mConsTex);
@@ -293,11 +273,13 @@ void QuickMozView::refreshNodeTexture()
           QMetaObject::invokeMethod(this, "resumeRendering", Qt::QueuedConnection);
         }
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, mConsTex);
-        void* image = d->mView->GetPlatformImage(&width, &height);
+        void* image = d->mMozWindow->getPlatformImage(&width, &height);
+        Q_ASSERT(image);
         extension->glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
         Q_EMIT textureReady(mConsTex, QSize(width, height));
 #else
 #warning "Implement me for non ES2 platform"
+        Q_ASSERT(false);
 #endif
     }
 }
@@ -353,7 +335,7 @@ bool QuickMozView::loaded() const
     return mLoaded;
 }
 
-void QuickMozView::CompositingFinished()
+void QuickMozView::compositingFinished()
 {
     Q_EMIT dispatchItemUpdate();
 }
@@ -770,7 +752,7 @@ void QuickMozView::suspendView()
     }
     setActive(false);
     d->mView->SuspendTimeouts();
-    d->mView->SuspendRendering();
+    d->mMozWindow->suspendRendering();
 }
 
 void QuickMozView::resumeView()
@@ -858,5 +840,5 @@ void QuickMozView::componentComplete()
 
 void QuickMozView::resumeRendering()
 {
-    d->mView->ResumeRendering();
+    d->mMozWindow->resumeRendering();
 }

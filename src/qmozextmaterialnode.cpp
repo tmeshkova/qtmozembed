@@ -45,12 +45,12 @@ public:
                 "}";
     }
 
-    QList<QByteArray> attributes() const
+    QList<QByteArray> attributes() const override
     {
         return QList<QByteArray>() << "aVertex" << "aTexCoord";
     }
 
-    void updateState(const MozExternalTexture *texture, const MozExternalTexture *)
+    void updateState(const MozExternalTexture *texture, const MozExternalTexture *) override
     {
         glBindTexture(LOCAL_GL_TEXTURE_EXTERNAL, texture->id);
     }

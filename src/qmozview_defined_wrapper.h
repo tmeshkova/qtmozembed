@@ -94,7 +94,6 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     bool getUseQmlMouse(); \
     void setUseQmlMouse(bool value); \
     void forceViewActiveFocus(); \
-    void createGeckoGLContext(); \
     bool dragging() const; \
     bool moving() const; \
     bool pinching() const; \
@@ -131,11 +130,7 @@ Q_DECLARE_METATYPE(QMozReturnValue) \
     void recvMouseMove(int posX, int posY); \
     void recvMousePress(int posX, int posY); \
     void recvMouseRelease(int posX, int posY); \
-    void CompositingFinished(); \
     bool Invalidate(); \
-    void requestGLContext(bool& hasContext, QSize& viewPortSize); \
-    void drawUnderlay(); \
-    void drawOverlay(const QRect &rect);
 
 #define Q_MOZ_VIEW_SIGNALS \
     void viewInitialized(); \

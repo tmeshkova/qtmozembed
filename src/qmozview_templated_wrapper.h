@@ -16,14 +16,9 @@ class IMozQViewIface
 public:
     virtual ~IMozQViewIface() {}
     // Methods
-    virtual void CompositingFinished() = 0;
     virtual bool Invalidate() = 0;
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
     virtual void forceViewActiveFocus() = 0;
-    virtual void createGeckoGLContext() = 0;
-    virtual void requestGLContext(bool& hasContext, QSize& viewPortSize) = 0;
-    virtual void drawUnderlay() = 0;
-    virtual void drawOverlay(const QRect &rect) = 0;
 
     // Signals
     virtual void viewInitialized() = 0;
@@ -64,11 +59,6 @@ class IMozQView : public IMozQViewIface
 public:
     IMozQView(TMozQView& aView) : view(aView) {}
 
-    void CompositingFinished()
-    {
-        view.CompositingFinished();
-    }
-
     bool Invalidate()
     {
         return view.Invalidate();
@@ -82,10 +72,6 @@ public:
     void forceViewActiveFocus()
     {
         view.forceViewActiveFocus();
-    }
-    void createGeckoGLContext()
-    {
-        view.createGeckoGLContext();
     }
     void viewInitialized()
     {
@@ -178,19 +164,6 @@ public:
     void bgColorChanged()
     {
         Q_EMIT view.bgColorChanged();
-    }
-    void requestGLContext(bool& hasContext, QSize& viewPortSize)
-    {
-        view.requestGLContext(hasContext, viewPortSize);
-    }
-    void drawUnderlay()
-    {
-        view.drawUnderlay();
-    }
-
-    void drawOverlay(const QRect &rect)
-    {
-        view.drawOverlay(rect);
     }
 
     void useQmlMouse(bool value)

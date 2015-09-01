@@ -52,6 +52,11 @@ QMozWindow::~QMozWindow()
     d->mWindow = nullptr;
 }
 
+void QMozWindow::setListener(QMozWindowListener* listener)
+{
+    mListener = listener;
+}
+
 void QMozWindow::setSize(QSize size)
 {
     if (size != mSize) {
@@ -63,4 +68,24 @@ void QMozWindow::setSize(QSize size)
 void QMozWindow::setContentOrientation(Qt::ScreenOrientation orientation)
 {
     d->mWindow->SetContentOrientation(QtToMozillaRotation(orientation));
+}
+
+void* QMozWindow::getPlatformImage(int* width, int* height)
+{
+    return d->mWindow->GetPlatformImage(width, height);
+}
+
+void QMozWindow::suspendRendering()
+{
+    d->mWindow->SuspendRendering();
+}
+
+void QMozWindow::resumeRendering()
+{
+    d->mWindow->ResumeRendering();
+}
+
+void QMozWindow::scheduleUpdate()
+{
+    d->mWindow->ScheduleUpdate();
 }

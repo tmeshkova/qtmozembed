@@ -17,6 +17,8 @@
 #include <QMutex>
 #include <QMap>
 #include <QSGSimpleTextureNode>
+#include <QKeyEvent>
+#include "qmozwindow.h"
 #include "qmozscrolldecorator.h"
 #include "mozilla/embedlite/EmbedLiteView.h"
 #include "qmozview_templated_wrapper.h"
@@ -26,67 +28,58 @@ class QTouchEvent;
 class QMozContext;
 class QMozWindow;
 
-class QMozViewPrivate : public mozilla::embedlite::EmbedLiteViewListener
+class QMozViewPrivate : public QObject,
+                        public QMozWindowListener,
+                        public mozilla::embedlite::EmbedLiteViewListener
 {
+    Q_OBJECT
 public:
     QMozViewPrivate(IMozQViewIface* aViewIface, QObject* publicPtr);
     virtual ~QMozViewPrivate();
 
-    void ReceiveInputEvent(const mozilla::InputData& event);
-    void touchEvent(QTouchEvent* event);
-    void UpdateViewSize();
-    bool RequestCurrentGLContext(QSize&);
-    virtual bool RequestCurrentGLContext();
-    virtual void ViewInitialized();
-    virtual void SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-    virtual void SetMargins(const QMargins& margins);
-    virtual QColor GetBackgroundColor() const;
+    // EmbedLiteViewListener implementation:
+    void ViewInitialized() override;
+    void ViewDestroyed() override;
+    void SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a) override;
+    void OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward) override;
+    void OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal) override;
+    void OnLoadStarted(const char* aLocation) override;
+    void OnLoadFinished(void) override;
+    void OnWindowCloseRequested() override;
+    void RecvAsyncMessage(const char16_t* aMessage, const char16_t* aData) override;
+    char* RecvSyncMessage(const char16_t* aMessage, const char16_t*  aData) override;
+    void OnLoadRedirect(void) override;
+    void OnSecurityChanged(const char* aStatus, unsigned int aState) override;
+    void OnFirstPaint(int32_t aX, int32_t aY) override;
+    void GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext) override;
+    void IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
+                         const char16_t* inputType, const char16_t* inputMode) override;
+    void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight) override;
+    void OnScrollChanged(int32_t offSetX, int32_t offSetY) override;
+    void OnTitleChanged(const char16_t* aTitle) override;
+    bool HandleLongTap(const nsIntPoint& aPoint) override;
+    bool HandleSingleTap(const nsIntPoint& aPoint) override;
+    bool HandleDoubleTap(const nsIntPoint& aPoint) override;
+    bool SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize) override;
 
-    virtual bool Invalidate();
-    virtual void CompositingFinished();
-    virtual void OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward);
-    virtual void OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal);
-    virtual void OnLoadStarted(const char* aLocation);
-    virtual void OnLoadFinished(void);
-    virtual void OnWindowCloseRequested();
-
-    // View finally destroyed and deleted
-    virtual void ViewDestroyed();
-    virtual void RecvAsyncMessage(const char16_t* aMessage, const char16_t* aData);
-    virtual char* RecvSyncMessage(const char16_t* aMessage, const char16_t*  aData);
-    virtual void OnLoadRedirect(void);
-    virtual void OnSecurityChanged(const char* aStatus, unsigned int aState);
-    virtual void OnFirstPaint(int32_t aX, int32_t aY);
-    virtual void GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext);
-    virtual void IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange, const char16_t* inputType, const char16_t* inputMode);
-
-    virtual void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight);
-    virtual void OnScrollChanged(int32_t offSetX, int32_t offSetY);
-    virtual void OnTitleChanged(const char16_t* aTitle);
-    virtual void SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
-                                       const nsIntRect& aPageRect, const gfxRect& aCssPageRect);
-    virtual void SyncViewportInfo(const nsIntRect& aDisplayPort,
-                                  float aDisplayResolution, bool aLayersUpdated,
-                                  nsIntPoint& aScrollOffset, float& aScaleX, float& aScaleY);
-    virtual void SetPageRect(const gfxRect& aCssPageRect);
-    virtual bool SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize);
-    virtual bool HandleLongTap(const nsIntPoint& aPoint);
-    virtual bool HandleSingleTap(const nsIntPoint& aPoint);
-    virtual bool HandleDoubleTap(const nsIntPoint& aPoint);
-    virtual void SetIsFocused(bool aIsFocused);
-    virtual void SetThrottlePainting(bool aThrottle);
-    virtual void CompositorCreated();
-
-    // Called always from the compositor thread.
-    virtual void DrawUnderlay();
-    virtual void DrawOverlay(const nsIntRect& aRect);
-
+    void SetMargins(const QMargins& margins);
+    QColor GetBackgroundColor() const;
+    void SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
+                               const nsIntRect& aPageRect, const gfxRect& aCssPageRect);
+    void SyncViewportInfo(const nsIntRect& aDisplayPort,
+                          float aDisplayResolution, bool aLayersUpdated,
+                          nsIntPoint& aScrollOffset, float& aScaleX, float& aScaleY);
+    void SetPageRect(const gfxRect& aCssPageRect);
+    void SetIsFocused(bool aIsFocused);
+    void SetThrottlePainting(bool aThrottle);
     void UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY);
     void TestFlickingMode(QTouchEvent *event);
     void HandleTouchEnd(bool& draggingChanged, bool& pinchingChanged);
     void ResetState();
     void UpdateMoving(bool moving);
     void ResetPainted();
+    void UpdateViewSize();
+    void ReceiveInputEvent(const mozilla::InputData& event);
 
     void load(const QString &url);
     void loadFrameScript(const QString &frameScript);
@@ -99,8 +92,20 @@ public:
     void inputMethodEvent(QInputMethodEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
+    void touchEvent(QTouchEvent* event);
 
     void sendAsyncMessage(const QString& name, const QVariant& variant);
+    void setMozWindow(QMozWindow*);
+
+public Q_SLOTS:
+    void onCompositorCreated();
+
+protected:
+    friend class QOpenGLWebPage;
+    friend class QuickMozView;
+
+    // QMozWindowListener implementation
+    bool invalidate() override;
 
     IMozQViewIface* mViewIface;
     QPointer<QObject> q;
@@ -151,7 +156,6 @@ public:
     bool mPreedit;
     bool mViewIsFocused;
     bool mHasContext;
-    QSize mGLSurfaceSize;
     Qt::ScreenOrientation mOrientation;
     bool mOrientationDirty;
     bool mPressed;
@@ -161,6 +165,7 @@ public:
     int mMovingTimerId;
     qreal mOffsetX;
     qreal mOffsetY;
+    bool mHasCompositor;
 
     QString mPendingUrl;
     QStringList mPendingMessageListeners;

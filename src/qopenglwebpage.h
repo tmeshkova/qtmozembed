@@ -29,7 +29,6 @@ class QOpenGLWebPage : public QObject
     Q_OBJECT
     Q_PROPERTY(int parentId READ parentId WRITE setParentID NOTIFY parentIdChanged FINAL)
     Q_PROPERTY(bool privateMode READ privateMode WRITE setPrivateMode NOTIFY privateModeChanged FINAL)
-
     Q_PROPERTY(bool completed READ completed NOTIFY completedChanged FINAL)
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged FINAL)
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
@@ -66,7 +65,7 @@ public:
 
     void initialize();
 
-    virtual bool event(QEvent *event);
+    virtual bool event(QEvent *event) override;
     virtual QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
     virtual void inputMethodEvent(QInputMethodEvent* event);
     virtual void keyPressEvent(QKeyEvent*);
@@ -92,7 +91,6 @@ Q_SIGNALS:
     void activeChanged();
     void widthChanged();
     void heightChanged();
-    void sizeChanged();
     void loadedChanged();
     void throttlePaintingChanged();
 

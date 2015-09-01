@@ -2,7 +2,7 @@ MODULENAME = Qt5Mozilla
 TARGET  = qmlmozembedpluginqt5
 
 TEMPLATE = lib
-CONFIG += qt plugin
+CONFIG += qt plugin c++11
 QT += qml quick
 
 SOURCES += main.cpp qmlmozcontext.cpp

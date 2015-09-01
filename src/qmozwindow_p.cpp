@@ -78,3 +78,11 @@ void QMozWindowPrivate::CompositingFinished()
 {
     q.compositingFinished();
 }
+
+bool QMozWindowPrivate::Invalidate()
+{
+    if (q.mListener) {
+        return q.mListener->invalidate();
+    }
+    return EmbedLiteWindowListener::Invalidate();
+}

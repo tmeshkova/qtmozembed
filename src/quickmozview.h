@@ -14,12 +14,12 @@
 
 class QMozViewPrivate;
 class QMozWindow;
+
 class QuickMozView : public QQuickItem
 {
     Q_OBJECT
     Q_PROPERTY(int parentId READ parentId WRITE setParentID NOTIFY parentIdChanged FINAL)
     Q_PROPERTY(bool privateMode READ privateMode WRITE setPrivateMode NOTIFY privateModeChanged FINAL)
-    Q_PROPERTY(unsigned parentid WRITE setParentID)
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
     Q_PROPERTY(bool background READ background NOTIFY backgroundChanged FINAL)
     Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged FINAL)
@@ -70,24 +70,25 @@ private Q_SLOTS:
     void SetIsActive(bool aIsActive);
     void updateLoaded();
     void resumeRendering();
+    void compositingFinished();
 
 // INTERNAL
 protected:
-    void itemChange(ItemChange change, const ItemChangeData &);
-    virtual void geometryChanged(const QRectF & newGeometry, const QRectF & oldGeometry);
-    virtual QSGNode* updatePaintNode(QSGNode* node, UpdatePaintNodeData* data);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual void mouseReleaseEvent(QMouseEvent* event);
-    virtual QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
-    virtual void inputMethodEvent(QInputMethodEvent* event);
-    virtual void keyPressEvent(QKeyEvent*);
-    virtual void keyReleaseEvent(QKeyEvent*);
-    virtual void focusInEvent(QFocusEvent*);
-    virtual void focusOutEvent(QFocusEvent*);
-    virtual void touchEvent(QTouchEvent*);
-    virtual void timerEvent(QTimerEvent*);
-    virtual void componentComplete();
+    void itemChange(ItemChange change, const ItemChangeData &) override;
+    void geometryChanged(const QRectF & newGeometry, const QRectF & oldGeometry) override;
+    QSGNode* updatePaintNode(QSGNode* node, UpdatePaintNodeData* data) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    QVariant inputMethodQuery(Qt::InputMethodQuery property) const override;
+    void inputMethodEvent(QInputMethodEvent* event) override;
+    void keyPressEvent(QKeyEvent*) override;
+    void keyReleaseEvent(QKeyEvent*) override;
+    void focusInEvent(QFocusEvent*) override;
+    void focusOutEvent(QFocusEvent*) override;
+    void touchEvent(QTouchEvent*) override;
+    void timerEvent(QTimerEvent*) override;
+    void componentComplete() override;
 
 public Q_SLOTS:
     void cleanup();
@@ -107,7 +108,6 @@ private:
 
     QMozViewPrivate* d;
     friend class QMozViewPrivate;
-    QScopedPointer<QMozWindow> mWindow;
     unsigned mParentID;
     bool mPrivateMode;
     bool mUseQmlMouse;

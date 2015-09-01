@@ -6,14 +6,13 @@
 
 #define LOG_COMPONENT "QMozViewPrivate"
 
-#include <QTouchEvent>
 #include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QTouchEvent>
 
 #include "qmozview_p.h"
 #include "qmozcontext.h"
-#include "qmozwindow.h"
 #include "EmbedQtKeyUtils.h"
 #include "InputData.h"
 #include "mozilla/embedlite/EmbedLiteApp.h"
@@ -86,7 +85,6 @@ QMozViewPrivate::QMozViewPrivate(IMozQViewIface* aViewIface, QObject *publicPtr)
     , mPreedit(false)
     , mViewIsFocused(false)
     , mHasContext(false)
-    , mGLSurfaceSize(0,0)
     , mOrientation(Qt::PrimaryOrientation)
     , mOrientationDirty(false)
     , mPressed(false)
@@ -95,28 +93,16 @@ QMozViewPrivate::QMozViewPrivate(IMozQViewIface* aViewIface, QObject *publicPtr)
     , mMovingTimerId(0)
     , mOffsetX(0.0)
     , mOffsetY(0.0)
+    , mHasCompositor(false)
 {
 }
 
 QMozViewPrivate::~QMozViewPrivate()
 {
     delete mViewIface;
-}
-
-void QMozViewPrivate::CompositorCreated()
-{
-    mViewIface->createGeckoGLContext();
-}
-
-void QMozViewPrivate::DrawUnderlay()
-{
-    mViewIface->drawUnderlay();
-}
-
-void QMozViewPrivate::DrawOverlay(const nsIntRect& aRect)
-{
-    QRect rect(aRect.x, aRect.y, aRect.width, aRect.height);
-    mViewIface->drawOverlay(rect);
+    if (mMozWindow) {
+        mMozWindow->setListener(nullptr);
+    }
 }
 
 void QMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY)
@@ -435,22 +421,28 @@ void QMozViewPrivate::sendAsyncMessage(const QString &name, const QVariant &vari
     mView->SendAsyncMessage((const char16_t*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }
 
+void QMozViewPrivate::setMozWindow(QMozWindow* window)
+{
+    Q_ASSERT(!mMozWindow);
+    mMozWindow = window;
+    mMozWindow->setListener(this);
+    if (!mSize.isEmpty()) {
+        mMozWindow->setSize(mSize.toSize());
+    }
+    connect(mMozWindow.data(), &QMozWindow::compositorCreated,
+            this, &QMozViewPrivate::onCompositorCreated);
+}
+
+void QMozViewPrivate::onCompositorCreated()
+{
+    mHasCompositor = true;
+}
+
 void QMozViewPrivate::UpdateViewSize()
 {
-    mSize = mMozWindow->size();
-}
-
-bool QMozViewPrivate::RequestCurrentGLContext()
-{
-    QSize unused;
-    return RequestCurrentGLContext(unused);
-}
-
-bool QMozViewPrivate::RequestCurrentGLContext(QSize& aViewPortSize)
-{
-    bool hasContext = false;
-    mViewIface->requestGLContext(hasContext, aViewPortSize);
-    return hasContext;
+    if (mMozWindow) {
+        mSize = mMozWindow->size();
+    }
 }
 
 void QMozViewPrivate::ViewInitialized()
@@ -500,16 +492,6 @@ QColor QMozViewPrivate::GetBackgroundColor() const
 {
     QMutexLocker locker(&mBgColorMutex);
     return mBgColor;
-}
-
-bool QMozViewPrivate::Invalidate()
-{
-    return mViewIface->Invalidate();
-}
-
-void QMozViewPrivate::CompositingFinished()
-{
-    mViewIface->CompositingFinished();
 }
 
 void QMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)
@@ -624,6 +606,7 @@ void QMozViewPrivate::OnSecurityChanged(const char* aStatus, unsigned int aState
     LOGT();
     mViewIface->securityChanged(aStatus, aState);
 }
+
 void QMozViewPrivate::OnFirstPaint(int32_t aX, int32_t aY)
 {
     LOGT();
@@ -990,4 +973,9 @@ void QMozViewPrivate::ReceiveInputEvent(const InputData& event)
     if (mViewInitialized) {
         mView->ReceiveInputEvent(event);
     }
+}
+
+bool QMozViewPrivate::invalidate()
+{
+    return mViewIface->Invalidate();
 }

@@ -7,11 +7,18 @@
 #define QMOZWINDOW_H
 
 #include <QObject>
+#include <QPointer>
 #include <QRect>
 #include <QScopedPointer>
 #include <QSize>
 
 class QMozWindowPrivate;
+
+class QMozWindowListener
+{
+public:
+    virtual bool invalidate() = 0;
+};
 
 class QMozWindow: public QObject
 {
@@ -21,9 +28,14 @@ public:
     explicit QMozWindow(QObject* parent = nullptr);
     ~QMozWindow();
 
+    void setListener(QMozWindowListener*);
     void setSize(QSize);
     QSize size() const { return mSize; }
     void setContentOrientation(Qt::ScreenOrientation);
+    void* getPlatformImage(int* width, int* height);
+    void suspendRendering();
+    void resumeRendering();
+    void scheduleUpdate();
 
 Q_SIGNALS:
     void requestGLContext();
@@ -36,8 +48,10 @@ Q_SIGNALS:
 private:
     friend class QOpenGLWebPage;
     friend class QuickMozView;
+    friend class QMozWindowPrivate;
 
     QScopedPointer<QMozWindowPrivate> d;
+    QMozWindowListener* mListener;
 
     QSize mSize;
 
