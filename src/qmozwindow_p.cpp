@@ -86,3 +86,11 @@ bool QMozWindowPrivate::Invalidate()
     }
     return EmbedLiteWindowListener::Invalidate();
 }
+
+bool QMozWindowPrivate::PreRender()
+{
+    if (q.mListener) {
+        return q.mListener->preRender();
+    }
+    return EmbedLiteWindowListener::PreRender();
+}

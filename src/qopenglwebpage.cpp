@@ -44,6 +44,7 @@ QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
   , mCompleted(false)
   , mSizeUpdateScheduled(false)
   , mThrottlePainting(false)
+  , mReadyToPaint(true)
 {
     d->mContext = QMozContext::GetInstance();
     d->mHasContext = true;
@@ -217,6 +218,21 @@ void QOpenGLWebPage::setThrottlePainting(bool throttle)
     if (mThrottlePainting != throttle) {
         mThrottlePainting = throttle;
         d->SetThrottlePainting(throttle);
+    }
+}
+
+bool QOpenGLWebPage::readyToPaint() const
+{
+    QMutexLocker lock(&mReadyToPaintMutex);
+    return mReadyToPaint;
+}
+
+void QOpenGLWebPage::setReadyToPaint(bool ready)
+{
+    QMutexLocker lock(&mReadyToPaintMutex);
+    if (mReadyToPaint != ready) {
+        mReadyToPaint = ready;
+        Q_EMIT readyToPaintChanged();
     }
 }
 

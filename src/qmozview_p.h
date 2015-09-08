@@ -106,6 +106,7 @@ protected:
 
     // QMozWindowListener implementation
     bool invalidate() override;
+    bool preRender() override;
 
     IMozQViewIface* mViewIface;
     QPointer<QObject> q;

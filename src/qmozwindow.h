@@ -18,6 +18,7 @@ class QMozWindowListener
 {
 public:
     virtual bool invalidate() = 0;
+    virtual bool preRender() = 0;
 };
 
 class QMozWindow: public QObject

@@ -979,3 +979,8 @@ bool QMozViewPrivate::invalidate()
 {
     return mViewIface->Invalidate();
 }
+
+bool QMozViewPrivate::preRender()
+{
+    return mViewIface->preRender();
+}

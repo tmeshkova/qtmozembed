@@ -345,6 +345,11 @@ bool QuickMozView::Invalidate()
     return false;
 }
 
+bool QuickMozView::preRender()
+{
+    return true;
+}
+
 void QuickMozView::cleanup()
 {
 }

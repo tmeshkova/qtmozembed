@@ -24,6 +24,7 @@ protected:
     void WindowInitialized() override;
     void DrawUnderlay() override;
     void DrawOverlay(const nsIntRect& aRect) override;
+    bool PreRender() override;
     void CompositorCreated() override;
     void CompositingFinished() override;
     bool Invalidate() override;
