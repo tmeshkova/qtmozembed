@@ -98,29 +98,7 @@ void QOpenGLWebPage::processViewInitialization()
     Q_EMIT completedChanged();
 }
 
-#if 0
-/*!
-    \fn void QOpenGLWebPage::afterRendering(const QRect &rect)
-
-    This signal is emitted after web content has been rendered, before swapbuffers
-    has been called.
-
-    This signal can be used to paint using raw GL on top of the web content, or to do
-    screen scraping of the current frame buffer.
-
-    The GL context used for rendering is bound at this point.
-
-    This signal is emitted from the gecko compositor thread, you must make sure that
-    the connection is direct (see Qt::ConnectionType).
-*/
-
-/*!
-    \fn void QOpenGLWebPage::drawOverlay(const QRect &rect)
-
-    Called always from gecko compositor thread. Current context
-    has been made as current by gecko compositor.
-*/
-void QOpenGLWebPage::drawOverlay(const QRect &rect)
+void QOpenGLWebPage::onDrawOverlay(const QRect &rect)
 {
     QMutexLocker lock(&mGrabResultListLock);
     QList<QWeakPointer<QMozGrabResult> >::const_iterator it = mGrabResultList.begin();
@@ -134,7 +112,6 @@ void QOpenGLWebPage::drawOverlay(const QRect &rect)
     }
     mGrabResultList.clear();
 }
-#endif
 
 int QOpenGLWebPage::parentId() const
 {
@@ -206,6 +183,8 @@ QMozWindow *QOpenGLWebPage::mozWindow() const
 void QOpenGLWebPage::setMozWindow(QMozWindow* window)
 {
     d->setMozWindow(window);
+    connect(window, &QMozWindow::drawOverlay,
+            this, &QOpenGLWebPage::onDrawOverlay, Qt::DirectConnection);
 }
 
 bool QOpenGLWebPage::throttlePainting() const

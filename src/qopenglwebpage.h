@@ -105,6 +105,7 @@ private Q_SLOTS:
     void processViewInitialization();
     void updateLoaded();
     void createView();
+    void onDrawOverlay(const QRect &rect);
 
 private:
     QMozViewPrivate* d;

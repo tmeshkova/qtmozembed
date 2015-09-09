@@ -33,6 +33,7 @@ public:
     void setSize(QSize);
     QSize size() const { return mSize; }
     void setContentOrientation(Qt::ScreenOrientation);
+    Qt::ScreenOrientation contentOrientation() const;
     void* getPlatformImage(int* width, int* height);
     void suspendRendering();
     void resumeRendering();
@@ -55,6 +56,7 @@ private:
     QMozWindowListener* mListener;
 
     QSize mSize;
+    Qt::ScreenOrientation mOrientation;
 
     Q_DISABLE_COPY(QMozWindow)
 };

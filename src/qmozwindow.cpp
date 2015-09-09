@@ -40,6 +40,8 @@ mozilla::ScreenRotation QtToMozillaRotation(Qt::ScreenOrientation orientation)
 QMozWindow::QMozWindow(QObject* parent)
     : QObject(parent)
     , d(new QMozWindowPrivate(*this))
+    , mListener(nullptr)
+    , mOrientation(Qt::PrimaryOrientation)
 {
     d->mWindow = QMozContext::GetInstance()->GetApp()->CreateWindow();
     d->mWindow->SetListener(d.data());
@@ -67,7 +69,15 @@ void QMozWindow::setSize(QSize size)
 
 void QMozWindow::setContentOrientation(Qt::ScreenOrientation orientation)
 {
-    d->mWindow->SetContentOrientation(QtToMozillaRotation(orientation));
+    if (orientation != mOrientation) {
+        mOrientation = orientation;
+        d->mWindow->SetContentOrientation(QtToMozillaRotation(orientation));
+    }
+}
+
+Qt::ScreenOrientation QMozWindow::contentOrientation() const
+{
+    return mOrientation;
 }
 
 void* QMozWindow::getPlatformImage(int* width, int* height)
