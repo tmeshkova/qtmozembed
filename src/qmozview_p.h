@@ -104,6 +104,13 @@ protected:
     friend class QOpenGLWebPage;
     friend class QuickMozView;
 
+    void synthTouchBegin(const QVariant& touches);
+    void synthTouchMove(const QVariant& touches);
+    void synthTouchEnd(const QVariant& touches);
+    void recvMouseMove(int posX, int posY);
+    void recvMousePress(int posX, int posY);
+    void recvMouseRelease(int posX, int posY);
+
     // QMozWindowListener implementation
     bool invalidate() override;
     bool preRender() override;

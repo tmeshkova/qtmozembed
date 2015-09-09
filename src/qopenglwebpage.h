@@ -69,15 +69,15 @@ public:
 
     void initialize();
 
-    virtual bool event(QEvent *event) override;
-    virtual QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
-    virtual void inputMethodEvent(QInputMethodEvent* event);
-    virtual void keyPressEvent(QKeyEvent*);
-    virtual void keyReleaseEvent(QKeyEvent*);
-    virtual void focusInEvent(QFocusEvent*);
-    virtual void focusOutEvent(QFocusEvent*);
-    virtual void touchEvent(QTouchEvent*);
-    virtual void timerEvent(QTimerEvent*);
+    bool event(QEvent *event);
+    QVariant inputMethodQuery(Qt::InputMethodQuery property) const;
+    void inputMethodEvent(QInputMethodEvent* event);
+    void keyPressEvent(QKeyEvent*);
+    void keyReleaseEvent(QKeyEvent*);
+    void focusInEvent(QFocusEvent*);
+    void focusOutEvent(QFocusEvent*);
+    void touchEvent(QTouchEvent*);
+    void timerEvent(QTimerEvent*);
 
     QSharedPointer<QMozGrabResult> grabToImage(const QSize &targetSize = QSize());
 

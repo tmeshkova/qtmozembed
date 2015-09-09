@@ -579,17 +579,17 @@ void QOpenGLWebPage::setParentID(unsigned aParentID)
 
 void QOpenGLWebPage::synthTouchBegin(const QVariant& touches)
 {
-    Q_UNUSED(touches);
+    d->synthTouchBegin(touches);
 }
 
 void QOpenGLWebPage::synthTouchMove(const QVariant& touches)
 {
-    Q_UNUSED(touches);
+    d->synthTouchMove(touches);
 }
 
 void QOpenGLWebPage::synthTouchEnd(const QVariant& touches)
 {
-    Q_UNUSED(touches);
+    d->synthTouchEnd(touches);
 }
 
 void QOpenGLWebPage::suspendView()
@@ -612,17 +612,17 @@ void QOpenGLWebPage::resumeView()
 
 void QOpenGLWebPage::recvMouseMove(int posX, int posY)
 {
-    Q_ASSERT_X(false, "QOpenGLWebPage", "calling recvMouseMove not supported!");
+    d->recvMouseMove(posX, posY);
 }
 
 void QOpenGLWebPage::recvMousePress(int posX, int posY)
 {
-    Q_ASSERT_X(false, "QOpenGLWebPage", "calling recvMousePress not supported!");
+    d->recvMousePress(posX, posY);
 }
 
 void QOpenGLWebPage::recvMouseRelease(int posX, int posY)
 {
-    Q_ASSERT_X(false, "QOpenGLWebPage", "calling recvMouseRelease not supported!");
+    d->recvMouseRelease(posX, posY);
 }
 
 /*!
