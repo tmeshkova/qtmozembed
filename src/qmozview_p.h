@@ -29,7 +29,6 @@ class QMozContext;
 class QMozWindow;
 
 class QMozViewPrivate : public QObject,
-                        public QMozWindowListener,
                         public mozilla::embedlite::EmbedLiteViewListener
 {
     Q_OBJECT
@@ -110,10 +109,6 @@ protected:
     void recvMouseMove(int posX, int posY);
     void recvMousePress(int posX, int posY);
     void recvMouseRelease(int posX, int posY);
-
-    // QMozWindowListener implementation
-    bool invalidate() override;
-    bool preRender() override;
 
     IMozQViewIface* mViewIface;
     QPointer<QObject> q;

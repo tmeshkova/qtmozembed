@@ -16,6 +16,8 @@ EGLSurface (EGLAPIENTRY * _eglGetCurrentSurface)(EGLint readdraw) = nullptr;
 
 QMozWindowPrivate::QMozWindowPrivate(QMozWindow& window)
     : q(window)
+    , mWindow(nullptr)
+    , mReadyToPaint(true)
 {
 }
 
@@ -30,12 +32,12 @@ bool QMozWindowPrivate::RequestGLContext(void*& context, void*& surface)
     // The QPA interface does allow us to obtain the EGLContext from the
     // QOpenGLContet, but so far there is now way to do the same for
     // EGLSurface. It seems doing raw EGL calls is the only way.
-    GetEGLContext(context, surface);
+    getEGLContext(context, surface);
 
     return true;
 }
 
-void QMozWindowPrivate::GetEGLContext(void*& context, void*& surface)
+void QMozWindowPrivate::getEGLContext(void*& context, void*& surface)
 {
     if (!_eglGetCurrentContext || !_eglGetCurrentSurface) {
         void* handle = dlopen("libEGL.so.1", RTLD_LAZY);
@@ -52,6 +54,16 @@ void QMozWindowPrivate::GetEGLContext(void*& context, void*& surface)
 
     surface = _eglGetCurrentSurface(EGL_DRAW);
     context = _eglGetCurrentContext();
+}
+
+bool QMozWindowPrivate::setReadyToPaint(bool ready)
+{
+    QMutexLocker lock(&mReadyToPaintMutex);
+    if (mReadyToPaint != ready) {
+        mReadyToPaint = ready;
+	return true;
+    }
+    return false;
 }
 
 void QMozWindowPrivate::WindowInitialized()
@@ -79,18 +91,8 @@ void QMozWindowPrivate::CompositingFinished()
     q.compositingFinished();
 }
 
-bool QMozWindowPrivate::Invalidate()
-{
-    if (q.mListener) {
-        return q.mListener->invalidate();
-    }
-    return EmbedLiteWindowListener::Invalidate();
-}
-
 bool QMozWindowPrivate::PreRender()
 {
-    if (q.mListener) {
-        return q.mListener->preRender();
-    }
-    return EmbedLiteWindowListener::PreRender();
+    QMutexLocker lock(&mReadyToPaintMutex);
+    return mReadyToPaint;
 }

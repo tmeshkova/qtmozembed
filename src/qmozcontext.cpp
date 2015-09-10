@@ -111,6 +111,7 @@ public:
     // App Destroyed, and ready to delete and program exit
     virtual void Destroyed() {
         LOGT("");
+        q->destroyed();
         if (mAsyncContext) {
             mQtPump->deleteLater();
         }

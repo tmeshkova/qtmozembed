@@ -100,9 +100,6 @@ QMozViewPrivate::QMozViewPrivate(IMozQViewIface* aViewIface, QObject *publicPtr)
 QMozViewPrivate::~QMozViewPrivate()
 {
     delete mViewIface;
-    if (mMozWindow) {
-        mMozWindow->setListener(nullptr);
-    }
 }
 
 void QMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY)
@@ -423,14 +420,14 @@ void QMozViewPrivate::sendAsyncMessage(const QString &name, const QVariant &vari
 
 void QMozViewPrivate::setMozWindow(QMozWindow* window)
 {
-    Q_ASSERT(!mMozWindow);
     mMozWindow = window;
-    mMozWindow->setListener(this);
-    if (!mSize.isEmpty()) {
-        mMozWindow->setSize(mSize.toSize());
+    if (mMozWindow) {
+        if (!mSize.isEmpty()) {
+            mMozWindow->setSize(mSize.toSize());
+        }
+        connect(mMozWindow.data(), &QMozWindow::compositorCreated,
+                this, &QMozViewPrivate::onCompositorCreated);
     }
-    connect(mMozWindow.data(), &QMozWindow::compositorCreated,
-            this, &QMozViewPrivate::onCompositorCreated);
 }
 
 void QMozViewPrivate::onCompositorCreated()
@@ -973,16 +970,6 @@ void QMozViewPrivate::ReceiveInputEvent(const InputData& event)
     if (mViewInitialized) {
         mView->ReceiveInputEvent(event);
     }
-}
-
-bool QMozViewPrivate::invalidate()
-{
-    return mViewIface->Invalidate();
-}
-
-bool QMozViewPrivate::preRender()
-{
-    return mViewIface->preRender();
 }
 
 void QMozViewPrivate::synthTouchBegin(const QVariant& touches)

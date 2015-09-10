@@ -14,13 +14,6 @@
 
 class QMozWindowPrivate;
 
-class QMozWindowListener
-{
-public:
-    virtual bool invalidate() = 0;
-    virtual bool preRender() = 0;
-};
-
 class QMozWindow: public QObject
 {
     Q_OBJECT
@@ -29,7 +22,6 @@ public:
     explicit QMozWindow(QObject* parent = nullptr);
     ~QMozWindow();
 
-    void setListener(QMozWindowListener*);
     void setSize(QSize);
     QSize size() const { return mSize; }
     void setContentOrientation(Qt::ScreenOrientation);
@@ -38,6 +30,8 @@ public:
     void suspendRendering();
     void resumeRendering();
     void scheduleUpdate();
+    bool setReadyToPaint(bool ready);
+    bool readyToPaint() const;
 
 Q_SIGNALS:
     void requestGLContext();
@@ -53,7 +47,6 @@ private:
     friend class QMozWindowPrivate;
 
     QScopedPointer<QMozWindowPrivate> d;
-    QMozWindowListener* mListener;
 
     QSize mSize;
     Qt::ScreenOrientation mOrientation;

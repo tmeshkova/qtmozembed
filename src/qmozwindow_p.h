@@ -7,6 +7,7 @@
 #define QMOZWINDOW_PRIVATE_H
 
 #include <QObject>
+#include <QMutex>
 
 #include "mozilla/embedlite/EmbedLiteWindow.h"
 
@@ -27,17 +28,19 @@ protected:
     bool PreRender() override;
     void CompositorCreated() override;
     void CompositingFinished() override;
-    bool Invalidate() override;
 
 private:
     friend class QMozWindow;
     friend class QOpenGLWebPage;
     friend class QuickMozView;
 
-    void GetEGLContext(void*& context, void*& surface);
+    void getEGLContext(void*& context, void*& surface);
+    bool setReadyToPaint(bool ready);
 
     QMozWindow& q;
     mozilla::embedlite::EmbedLiteWindow* mWindow;
+    QMutex mReadyToPaintMutex;
+    bool mReadyToPaint;
 
     Q_DISABLE_COPY(QMozWindowPrivate)
 };

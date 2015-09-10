@@ -340,20 +340,6 @@ void QuickMozView::compositingFinished()
     Q_EMIT dispatchItemUpdate();
 }
 
-bool QuickMozView::Invalidate()
-{
-    return false;
-}
-
-bool QuickMozView::preRender()
-{
-    return true;
-}
-
-void QuickMozView::cleanup()
-{
-}
-
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)
 {
     if (!mUseQmlMouse) {

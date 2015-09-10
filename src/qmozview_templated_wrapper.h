@@ -16,8 +16,6 @@ class IMozQViewIface
 public:
     virtual ~IMozQViewIface() {}
     // Methods
-    virtual bool Invalidate() = 0;
-    virtual bool preRender() = 0;
     virtual void setInputMethodHints(Qt::InputMethodHints hints) = 0;
     virtual void forceViewActiveFocus() = 0;
 
@@ -59,16 +57,6 @@ class IMozQView : public IMozQViewIface
 {
 public:
     IMozQView(TMozQView& aView) : view(aView) {}
-
-    bool Invalidate()
-    {
-        return view.Invalidate();
-    }
-
-    bool preRender()
-    {
-        return view.preRender();
-    }
 
     void setInputMethodHints(Qt::InputMethodHints hints)
     {

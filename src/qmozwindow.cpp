@@ -40,7 +40,6 @@ mozilla::ScreenRotation QtToMozillaRotation(Qt::ScreenOrientation orientation)
 QMozWindow::QMozWindow(QObject* parent)
     : QObject(parent)
     , d(new QMozWindowPrivate(*this))
-    , mListener(nullptr)
     , mOrientation(Qt::PrimaryOrientation)
 {
     d->mWindow = QMozContext::GetInstance()->GetApp()->CreateWindow();
@@ -49,14 +48,9 @@ QMozWindow::QMozWindow(QObject* parent)
 
 QMozWindow::~QMozWindow()
 {
-    QMozContext::GetInstance()->GetApp()->DestroyWindow(d->mWindow);
     d->mWindow->SetListener(nullptr);
+    QMozContext::GetInstance()->GetApp()->DestroyWindow(d->mWindow);
     d->mWindow = nullptr;
-}
-
-void QMozWindow::setListener(QMozWindowListener* listener)
-{
-    mListener = listener;
 }
 
 void QMozWindow::setSize(QSize size)
@@ -98,4 +92,14 @@ void QMozWindow::resumeRendering()
 void QMozWindow::scheduleUpdate()
 {
     d->mWindow->ScheduleUpdate();
+}
+
+bool QMozWindow::setReadyToPaint(bool ready)
+{
+    return d->setReadyToPaint(ready);
+}
+
+bool QMozWindow::readyToPaint() const
+{
+    return d->PreRender();
 }

@@ -91,7 +91,6 @@ protected:
     void componentComplete() override;
 
 public Q_SLOTS:
-    void cleanup();
     void setInputMethodHints(Qt::InputMethodHints hints);
     void updateGLContextInfo(QOpenGLContext*);
 
