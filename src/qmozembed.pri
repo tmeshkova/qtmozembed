@@ -19,6 +19,10 @@ isEmpty(OBJ_PATH) {
   message($$BIN_DIR - binary dir)
 }
 
+!isEmpty(ENABLE_GLX) {
+    DEFINES += ENABLE_GLX
+}
+
 INCLUDEPATH += $$GECKO_INCLUDE_DIR $$GECKO_INCLUDE_DIR/nspr /usr/include/nspr4
 LIBS += -L$$GECKO_LIB_DIR -lxpcomglue -Wl,--whole-archive -lmozglue -lmemory
 LIBS += -Wl,--no-whole-archive -rdynamic -ldl

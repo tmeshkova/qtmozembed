@@ -9,7 +9,11 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#if defined(QT_OPENGL_ES_2)
 #include <QOpenGLFunctions_ES2>
+#else
+#include <QOpenGLFunctions>
+#endif
 #include <QPointer>
 #include <QSharedPointer>
 #include <QWindow>

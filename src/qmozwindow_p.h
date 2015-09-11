@@ -35,6 +35,9 @@ private:
     friend class QuickMozView;
 
     void getEGLContext(void*& context, void*& surface);
+#if defined(ENABLE_GLX)
+    void getGLXContext(void*& context, void*& surface);
+#endif
     bool setReadyToPaint(bool ready);
 
     QMozWindow& q;
