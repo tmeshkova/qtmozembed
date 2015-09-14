@@ -61,7 +61,7 @@ public:
         delete mThread;
     }
 
-    virtual bool ExecuteChildThread() {
+    virtual bool ExecuteChildThread() override {
         if (!getenv("GECKO_THREAD")) {
             LOGT("Execute in child Native thread: %p", (void*)mThread);
             GeckoWorker *worker = new GeckoWorker(mApp);
@@ -77,7 +77,7 @@ public:
         return false;
     }
     // Native thread must be stopped here
-    virtual bool StopChildThread() {
+    virtual bool StopChildThread() override {
         if (mThread) {
             LOGT("Stop Native thread: %p", (void*)mThread);
             mThread->exit(0);
@@ -87,7 +87,7 @@ public:
         return false;
     }
     // App Initialized and ready to API call
-    virtual void Initialized() {
+    virtual void Initialized() override {
         mInitialized = true;
 #if defined(GL_PROVIDER_EGL) || defined(GL_PROVIDER_GLX)
         if (mApp->GetRenderType() == EmbedLiteApp::RENDER_AUTO) {
@@ -109,14 +109,14 @@ public:
         mObserversList.clear();
     }
     // App Destroyed, and ready to delete and program exit
-    virtual void Destroyed() {
+    virtual void Destroyed() override {
         LOGT("");
         q->destroyed();
         if (mAsyncContext) {
             mQtPump->deleteLater();
         }
     }
-    virtual void OnObserve(const char* aTopic, const char16_t* aData) {
+    virtual void OnObserve(const char* aTopic, const char16_t* aData) override {
         // LOGT("aTopic: %s, data: %s", aTopic, NS_ConvertUTF16toUTF8(aData).get());
         QString data((QChar*)aData);
         if (!data.startsWith('{') && !data.startsWith('[') && !data.startsWith('"')) {
@@ -135,6 +135,12 @@ public:
         } else {
             LOGT("parse: s:'%s', err:%s, errLine:%i", data.toUtf8().data(), error.errorString().toUtf8().data(), error.offset);
         }
+    }
+    virtual void LastViewDestroyed() override {
+        Q_EMIT q->lastViewDestroyed();
+    }
+    virtual void LastWindowDestroyed() override {
+        Q_EMIT q->lastWindowDestroyed();
     }
     void setDefaultPrefs()
     {
@@ -157,7 +163,7 @@ public:
     }
     bool IsInitialized() { return mApp && mInitialized; }
 
-    virtual uint32_t CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView)
+    virtual uint32_t CreateNewWindowRequested(const uint32_t& chromeFlags, const char* uri, const uint32_t& contextFlags, EmbedLiteView* aParentView) override
     {
         LOGT("QtMozEmbedContext new Window requested: parent:%p", (void*)aParentView);
         uint32_t viewId = QMozContext::GetInstance()->createView(QString(uri), aParentView ? aParentView->GetUniqueID() : 0);
