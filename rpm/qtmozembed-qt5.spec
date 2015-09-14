@@ -1,8 +1,8 @@
-%global min_xulrunner_version 38.0.5
+%global min_xulrunner_version 38.0.5.3
 
 Name:       qtmozembed-qt5
 Summary:    Qt embeddings for Gecko
-Version:    1.11.8
+Version:    1.13.2
 Release:    1
 Group:      Applications/Internet
 License:    Mozilla License
