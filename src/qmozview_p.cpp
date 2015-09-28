@@ -676,39 +676,10 @@ void QMozViewPrivate::GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intp
     *aNativeIMEContext = (intptr_t)qApp->inputMethod();
 }
 
-void QMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
-{
-    LOGT("sz[%u,%u]", aWidth, aHeight);
-    Q_UNUSED(aWidth)
-    Q_UNUSED(aHeight)
-}
-
-void QMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
-{
-}
-
 void QMozViewPrivate::OnTitleChanged(const char16_t* aTitle)
 {
     mTitle = QString((QChar*)aTitle);
     mViewIface->titleChanged();
-}
-
-void QMozViewPrivate::SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
-                                                    const nsIntRect& aPageRect, const gfxRect& aCssPageRect)
-{
-    LOGT();
-}
-
-void QMozViewPrivate::SyncViewportInfo(const nsIntRect& aDisplayPort,
-                                               float aDisplayResolution, bool aLayersUpdated,
-                                               nsIntPoint& aScrollOffset, float& aScaleX, float& aScaleY)
-{
-    LOGT("viewport display port[%d,%d,%d,%d]", aDisplayPort.x, aDisplayPort.y, aDisplayPort.width, aDisplayPort.height);
-}
-
-void QMozViewPrivate::SetPageRect(const gfxRect& aCssPageRect)
-{
-    LOGT();
 }
 
 bool QMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize)

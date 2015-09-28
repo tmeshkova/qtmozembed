@@ -53,8 +53,6 @@ public:
     void GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext) override;
     void IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
                          const char16_t* inputType, const char16_t* inputMode) override;
-    void OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight) override;
-    void OnScrollChanged(int32_t offSetX, int32_t offSetY) override;
     void OnTitleChanged(const char16_t* aTitle) override;
     bool HandleLongTap(const nsIntPoint& aPoint) override;
     bool HandleSingleTap(const nsIntPoint& aPoint) override;
@@ -63,12 +61,6 @@ public:
 
     void SetMargins(const QMargins& margins);
     QColor GetBackgroundColor() const;
-    void SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
-                               const nsIntRect& aPageRect, const gfxRect& aCssPageRect);
-    void SyncViewportInfo(const nsIntRect& aDisplayPort,
-                          float aDisplayResolution, bool aLayersUpdated,
-                          nsIntPoint& aScrollOffset, float& aScaleX, float& aScaleY);
-    void SetPageRect(const gfxRect& aCssPageRect);
     void SetIsFocused(bool aIsFocused);
     void SetThrottlePainting(bool aThrottle);
     void UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY);
