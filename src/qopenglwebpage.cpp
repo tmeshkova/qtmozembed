@@ -15,6 +15,8 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_ES2>
 #include <QWindow>
+#include <QGuiApplication>
+#include <QScreen>
 
 #include "qmozgrabresult.h"
 #include "qgraphicsmozview_p.h"
@@ -81,6 +83,7 @@ void QOpenGLWebPage::createView()
         d->mContext->GetApp()->SetIsAccelerated(true);
         d->mView = d->mContext->GetApp()->CreateView(mParentID, mPrivateMode);
         d->mView->SetListener(d);
+        d->mView->SetDPI(QGuiApplication::primaryScreen()->physicalDotsPerInch());
     }
 }
 
