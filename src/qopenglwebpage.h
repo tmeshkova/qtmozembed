@@ -93,6 +93,7 @@ Q_SIGNALS:
     void heightChanged();
     void loadedChanged();
     void throttlePaintingChanged();
+    void afterRendering();
 
     Q_MOZ_VIEW_SIGNALS
 
