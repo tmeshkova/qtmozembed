@@ -1,6 +1,8 @@
+%global min_xulrunner_version 38.0.5.3
+
 Name:       qtmozembed-qt5
 Summary:    Qt embeddings for Gecko
-Version:    1.11.8
+Version:    1.13.2
 Release:    1
 Group:      Applications/Internet
 License:    Mozilla License
@@ -13,11 +15,11 @@ BuildRequires:  pkgconfig(Qt5OpenGL)
 BuildRequires:  pkgconfig(Qt5Widgets)
 BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(Qt5QuickTest)
-BuildRequires:  xulrunner-qt5-devel
 BuildRequires:  pkgconfig(nspr)
+BuildRequires:  xulrunner-qt5-devel >= %{min_xulrunner_version}
 BuildRequires:  qt5-default
 BuildRequires:  qt5-qttools
-Requires:       xulrunner-qt5
+Requires:       xulrunner-qt5 >= %{min_xulrunner_version}
 
 %description
 Qt embeddings for Gecko browser engine
