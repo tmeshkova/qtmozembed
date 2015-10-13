@@ -29,6 +29,23 @@
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
+
+/*!
+    \fn void QOpenGLWebPage::afterRendering()
+
+    This signal is emitted after web content has been rendered, before swapbuffers
+    has been called.
+
+    This signal can be used to paint using raw GL on top of the web content, or to do
+    screen scraping of the current frame buffer.
+
+    The GL context used for rendering is bound at this point.
+
+    This signal is emitted from the gecko compositor thread, you must make sure that
+    the connection is direct (see Qt::ConnectionType) in case you are about to paint
+    using raw GL.
+*/
+
 /*!
     \fn void QOpenGLWebPage::QOpenGLWebPage(QObject *parent)
 
@@ -99,17 +116,20 @@ void QOpenGLWebPage::processViewInitialization()
 
 void QOpenGLWebPage::onDrawOverlay(const QRect &rect)
 {
-    QMutexLocker lock(&mGrabResultListLock);
-    QList<QWeakPointer<QMozGrabResult> >::const_iterator it = mGrabResultList.begin();
-    for (; it != mGrabResultList.end(); ++it) {
-        QSharedPointer<QMozGrabResult> result = it->toStrongRef();
-        if (result) {
-            result->captureImage(rect);
-        } else {
-            qWarning() << "QMozGrabResult freed before being realized!";
+    {
+        QMutexLocker lock(&mGrabResultListLock);
+        QList<QWeakPointer<QMozGrabResult> >::const_iterator it = mGrabResultList.begin();
+        for (; it != mGrabResultList.end(); ++it) {
+            QSharedPointer<QMozGrabResult> result = it->toStrongRef();
+            if (result) {
+                result->captureImage(rect);
+            } else {
+                qWarning() << "QMozGrabResult freed before being realized!";
+            }
         }
+        mGrabResultList.clear();
     }
-    mGrabResultList.clear();
+    Q_EMIT afterRendering();
 }
 
 int QOpenGLWebPage::parentId() const
