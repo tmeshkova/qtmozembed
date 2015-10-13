@@ -23,18 +23,19 @@
 #include <QtOpenGLExtensions>
 #include <QQmlInfo>
 
-#include "qgraphicsmozview_p.h"
+#include "qmozview_p.h"
+#include "qmozextmaterialnode.h"
 #include "qmozscrolldecorator.h"
 #include "qmoztexturenode.h"
-#include "qmozextmaterialnode.h"
-#include "assert.h"
+#include "qmozwindow.h"
+#include "qmozwindow_p.h"
 
 using namespace mozilla;
 using namespace mozilla::embedlite;
 
 QuickMozView::QuickMozView(QQuickItem *parent)
   : QQuickItem(parent)
-  , d(new QGraphicsMozViewPrivate(new IMozQView<QuickMozView>(*this), this))
+  , d(new QMozViewPrivate(new IMozQView<QuickMozView>(*this), this))
   , mParentID(0)
   , mPrivateMode(false)
   , mUseQmlMouse(false)
@@ -103,6 +104,9 @@ QuickMozView::contextInitialized()
     LOGT("QuickMozView");
     // We really don't care about SW rendering on Qt5 anymore
     d->mContext->GetApp()->SetIsAccelerated(true);
+    d->setMozWindow(new QMozWindow);
+    connect(d->mMozWindow.data(), &QMozWindow::compositingFinished,
+            this, &QuickMozView::compositingFinished);
     createView();
 }
 
@@ -117,28 +121,6 @@ void QuickMozView::processViewInitialization()
 void QuickMozView::updateEnabled()
 {
     d->mEnabled = QQuickItem::isEnabled();
-}
-
-void QuickMozView::createGeckoGLContext()
-{
-#warning "Unused method, destroy?"
-}
-
-void QuickMozView::requestGLContext(bool& hasContext, QSize& viewPortSize)
-{
-    hasContext = true;
-    viewPortSize = d->mGLSurfaceSize;
-}
-
-void QuickMozView::drawUnderlay()
-{
-    // Do nothing
-}
-
-void QuickMozView::drawOverlay(const QRect &rect)
-{
-    Q_UNUSED(rect);
-    // Do nothing;
 }
 
 void QuickMozView::updateGLContextInfo(QOpenGLContext* ctx)
@@ -177,7 +159,6 @@ void QuickMozView::updateGLContextInfo()
             break;
         }
 
-        d->mGLSurfaceSize = viewPortSize;
         Q_EMIT updateViewSize();
     }
 }
@@ -203,11 +184,11 @@ void QuickMozView::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
                                                                  oldGeometry.size().width(),
                                                                  oldGeometry.size().height());
     QQuickItem::geometryChanged(newGeometry, oldGeometry);
-    // Width and height are updated separately. So we want to avoid cases where width and height
-    // equals or size have not actually changed at all. This will trigger viewport
-    // calculation update.
-    if (newGeometry.width() != newGeometry.height() && d->mSize != newGeometry.size()) {
+    if (newGeometry.size() != d->mSize) {
         d->mSize = newGeometry.size();
+        if (d->mMozWindow) {
+            d->mMozWindow->setSize(d->mSize.toSize());
+        }
         if (mActive) {
             updateGLContextInfo();
         }
@@ -240,7 +221,7 @@ void QuickMozView::clearThreadRenderObject()
 void QuickMozView::createView()
 {
     if (!d->mView) {
-        d->mView = d->mContext->GetApp()->CreateView(mParentID, mPrivateMode);
+        d->mView = d->mContext->GetApp()->CreateView(d->mMozWindow->d->mWindow, mParentID, mPrivateMode);
         d->mView->SetListener(d);
     }
 }
@@ -260,7 +241,11 @@ QuickMozView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
     TextureNodeType* n = static_cast<TextureNodeType*>(oldNode);
     if (!n) {
+#if defined(QT_OPENGL_ES_2)
         n = new TextureNodeType();
+#else
+        n = new TextureNodeType(this);
+#endif
         connect(this, SIGNAL(textureReady(int,QSize)), n, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
         connect(window(), SIGNAL(beforeRendering()), n, SLOT(prepareNode()), Qt::DirectConnection);
     }
@@ -272,7 +257,7 @@ void QuickMozView::refreshNodeTexture()
 {
     QMutexLocker locker(&mRenderMutex);
 
-    if (!d->mViewInitialized || !mActive)
+    if (!d->mViewInitialized || !d->mHasCompositor || !mActive)
         return;
 
     if (d && d->mView)
@@ -284,6 +269,7 @@ void QuickMozView::refreshNodeTexture()
             extension = new QOpenGLExtension_OES_EGL_image();
             extension->initializeOpenGLFunctions();
         }
+        Q_ASSERT(extension);
 
         if (!mConsTex) {
           glGenTextures(1, &mConsTex);
@@ -291,11 +277,13 @@ void QuickMozView::refreshNodeTexture()
           QMetaObject::invokeMethod(this, "resumeRendering", Qt::QueuedConnection);
         }
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, mConsTex);
-        void* image = d->mView->GetPlatformImage(&width, &height);
+        void* image = d->mMozWindow->getPlatformImage(&width, &height);
+        Q_ASSERT(image);
         extension->glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
         Q_EMIT textureReady(mConsTex, QSize(width, height));
 #else
 #warning "Implement me for non ES2 platform"
+        Q_ASSERT(false);
 #endif
     }
 }
@@ -351,18 +339,9 @@ bool QuickMozView::loaded() const
     return mLoaded;
 }
 
-void QuickMozView::CompositingFinished()
+void QuickMozView::compositingFinished()
 {
     Q_EMIT dispatchItemUpdate();
-}
-
-bool QuickMozView::Invalidate()
-{
-    return false;
-}
-
-void QuickMozView::cleanup()
-{
 }
 
 void QuickMozView::mouseMoveEvent(QMouseEvent* e)
@@ -595,6 +574,15 @@ qreal QuickMozView::contentHeight() const
     return d->mScrollableSize.height();
 }
 
+QMargins QuickMozView::margins() const
+{
+    return d->mMargins;
+}
+
+void QuickMozView::setMargins(QMargins margins)
+{
+    d->SetMargins(margins);
+}
 
 void QuickMozView::loadHtml(const QString& html, const QUrl& baseUrl)
 {
@@ -694,62 +682,17 @@ void QuickMozView::setPrivateMode(bool aPrivateMode)
 
 void QuickMozView::synthTouchBegin(const QVariant& touches)
 {
-    QList<QVariant> list = touches.toList();
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START,
-                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
-    int ptId = 0;
-    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
-    {
-        const QPointF pt = (*it).toPointF();
-        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
-        ptId++;
-        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
-                                                           nspt,
-                                                           mozilla::ScreenSize(1, 1),
-                                                           180.0f,
-                                                           1.0f));
-    }
-    d->mView->ReceiveInputEvent(meventStart);
+    d->synthTouchBegin(touches);
 }
 
 void QuickMozView::synthTouchMove(const QVariant& touches)
 {
-    QList<QVariant> list = touches.toList();
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_MOVE,
-                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
-    int ptId = 0;
-    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
-    {
-        const QPointF pt = (*it).toPointF();
-        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
-        ptId++;
-        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
-                                                           nspt,
-                                                           mozilla::ScreenSize(1, 1),
-                                                           180.0f,
-                                                           1.0f));
-    }
-    d->mView->ReceiveInputEvent(meventStart);
+    d->synthTouchMove(touches);
 }
 
 void QuickMozView::synthTouchEnd(const QVariant& touches)
 {
-    QList<QVariant> list = touches.toList();
-    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_END,
-                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
-    int ptId = 0;
-    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
-    {
-        const QPointF pt = (*it).toPointF();
-        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
-        ptId++;
-        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
-                                                           nspt,
-                                                           mozilla::ScreenSize(1, 1),
-                                                           180.0f,
-                                                           1.0f));
-    }
-    d->mView->ReceiveInputEvent(meventStart);
+    d->synthTouchEnd(touches);
 }
 
 void QuickMozView::suspendView()
@@ -759,7 +702,7 @@ void QuickMozView::suspendView()
     }
     setActive(false);
     d->mView->SuspendTimeouts();
-    d->mView->SuspendRendering();
+    d->mMozWindow->suspendRendering();
 }
 
 void QuickMozView::resumeView()
@@ -773,48 +716,17 @@ void QuickMozView::resumeView()
 
 void QuickMozView::recvMouseMove(int posX, int posY)
 {
-    if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE,
-                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
-        event.mTouches.AppendElement(SingleTouchData(0,
-                                     mozilla::ScreenIntPoint(posX, posY),
-                                     mozilla::ScreenSize(1, 1),
-                                     180.0f,
-                                     1.0f));
-        d->ReceiveInputEvent(event);
-    }
+    d->recvMouseMove(posX, posY);
 }
 
 void QuickMozView::recvMousePress(int posX, int posY)
 {
-    forceViewActiveFocus();
-    if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        MultiTouchInput event(MultiTouchInput::MULTITOUCH_START,
-                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
-        event.mTouches.AppendElement(SingleTouchData(0,
-                                     mozilla::ScreenIntPoint(posX, posY),
-                                     mozilla::ScreenSize(1, 1),
-                                     180.0f,
-                                     1.0f));
-        d->ReceiveInputEvent(event);
-    }
+    d->recvMousePress(posX, posY);
 }
 
 void QuickMozView::recvMouseRelease(int posX, int posY)
 {
-    if (d->mViewInitialized && !d->mPendingTouchEvent) {
-        MultiTouchInput event(MultiTouchInput::MULTITOUCH_END,
-                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
-        event.mTouches.AppendElement(SingleTouchData(0,
-                                     mozilla::ScreenIntPoint(posX, posY),
-                                     mozilla::ScreenSize(1, 1),
-                                     180.0f,
-                                     1.0f));
-        d->ReceiveInputEvent(event);
-    }
-    if (d->mPendingTouchEvent) {
-        d->mPendingTouchEvent = false;
-    }
+    d->recvMouseRelease(posX, posY);
 }
 
 void QuickMozView::touchEvent(QTouchEvent *event)
@@ -847,5 +759,5 @@ void QuickMozView::componentComplete()
 
 void QuickMozView::resumeRendering()
 {
-    d->mView->ResumeRendering();
+    d->mMozWindow->resumeRendering();
 }

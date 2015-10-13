@@ -4,14 +4,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#define LOG_COMPONENT "QGraphicsMozViewPrivate"
+#define LOG_COMPONENT "QMozViewPrivate"
 
-#include <QTouchEvent>
 #include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QTouchEvent>
 
-#include "qgraphicsmozview_p.h"
+#include "qmozview_p.h"
 #include "qmozcontext.h"
 #include "EmbedQtKeyUtils.h"
 #include "InputData.h"
@@ -47,9 +47,10 @@ qint64 current_timestamp(QTouchEvent* aEvent)
     return milliseconds;
 }
 
-QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QObject *publicPtr)
+QMozViewPrivate::QMozViewPrivate(IMozQViewIface* aViewIface, QObject *publicPtr)
     : mViewIface(aViewIface)
     , q(publicPtr)
+    , mMozWindow(NULL)
     , mContext(NULL)
     , mView(NULL)
     , mViewInitialized(false)
@@ -84,7 +85,6 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QOb
     , mPreedit(false)
     , mViewIsFocused(false)
     , mHasContext(false)
-    , mGLSurfaceSize(0,0)
     , mOrientation(Qt::PrimaryOrientation)
     , mOrientationDirty(false)
     , mPressed(false)
@@ -93,31 +93,16 @@ QGraphicsMozViewPrivate::QGraphicsMozViewPrivate(IMozQViewIface* aViewIface, QOb
     , mMovingTimerId(0)
     , mOffsetX(0.0)
     , mOffsetY(0.0)
+    , mHasCompositor(false)
 {
 }
 
-QGraphicsMozViewPrivate::~QGraphicsMozViewPrivate()
+QMozViewPrivate::~QMozViewPrivate()
 {
     delete mViewIface;
 }
 
-void QGraphicsMozViewPrivate::CompositorCreated()
-{
-    mViewIface->createGeckoGLContext();
-}
-
-void QGraphicsMozViewPrivate::DrawUnderlay()
-{
-    mViewIface->drawUnderlay();
-}
-
-void QGraphicsMozViewPrivate::DrawOverlay(const nsIntRect& aRect)
-{
-    QRect rect(aRect.x, aRect.y, aRect.width, aRect.height);
-    mViewIface->drawOverlay(rect);
-}
-
-void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY)
+void QMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int aHeight, float aPosX, float aPosY)
 {
     bool widthChanged = false;
     bool heightChanged = false;
@@ -147,14 +132,14 @@ void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int
 
             // Update vertical scroll decorator
             qreal ySizeRatio = mContentRect.height() * mContentResolution / mScrollableSize.height();
-            qreal tmpValue = mSize.height() * ySizeRatio;
+            qreal tmpValue = mMozWindow->size().height() * ySizeRatio;
             mVerticalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.y() * ySizeRatio;
             mVerticalScrollDecorator.setPosition(tmpValue);
 
             // Update horizontal scroll decorator
             qreal xSizeRatio = mContentRect.width() * mContentResolution / mScrollableSize.width();
-            tmpValue = mSize.width() * xSizeRatio;
+            tmpValue = mMozWindow->size().width() * xSizeRatio;
             mHorizontalScrollDecorator.setSize(tmpValue);
             tmpValue = mScrollableOffset.x() * xSizeRatio;
             mHorizontalScrollDecorator.setPosition(tmpValue);
@@ -170,7 +155,7 @@ void QGraphicsMozViewPrivate::UpdateScrollArea(unsigned int aWidth, unsigned int
     }
 }
 
-void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
+void QMozViewPrivate::TestFlickingMode(QTouchEvent *event)
 {
     QPointF touchPoint = event->touchPoints().size() == 1 ? event->touchPoints().at(0).pos() : QPointF();
     // Only for single press point
@@ -208,7 +193,7 @@ void QGraphicsMozViewPrivate::TestFlickingMode(QTouchEvent *event)
     mLastPos = touchPoint;
 }
 
-void QGraphicsMozViewPrivate::HandleTouchEnd(bool &draggingChanged, bool &pinchingChanged)
+void QMozViewPrivate::HandleTouchEnd(bool &draggingChanged, bool &pinchingChanged)
 {
     if (mDragging) {
         mDragging = false;
@@ -226,7 +211,7 @@ void QGraphicsMozViewPrivate::HandleTouchEnd(bool &draggingChanged, bool &pinchi
     }
 }
 
-void QGraphicsMozViewPrivate::ResetState()
+void QMozViewPrivate::ResetState()
 {
     // Invalid initial drag start Y.
     mDragStartY = -1.0;
@@ -238,7 +223,7 @@ void QGraphicsMozViewPrivate::ResetState()
     mHorizontalScrollDecorator.setMoving(false);
 }
 
-void QGraphicsMozViewPrivate::UpdateMoving(bool moving)
+void QMozViewPrivate::UpdateMoving(bool moving)
 {
     if (mMoving != moving) {
         mMoving = moving;
@@ -250,7 +235,7 @@ void QGraphicsMozViewPrivate::UpdateMoving(bool moving)
     }
 }
 
-void QGraphicsMozViewPrivate::ResetPainted()
+void QMozViewPrivate::ResetPainted()
 {
     if (mIsPainted) {
         mIsPainted = false;
@@ -258,7 +243,7 @@ void QGraphicsMozViewPrivate::ResetPainted()
     }
 }
 
-void QGraphicsMozViewPrivate::load(const QString &url)
+void QMozViewPrivate::load(const QString &url)
 {
     if (url.isEmpty())
         return;
@@ -273,7 +258,7 @@ void QGraphicsMozViewPrivate::load(const QString &url)
     mView->LoadURL(url.toUtf8().data());
 }
 
-void QGraphicsMozViewPrivate::loadFrameScript(const QString &frameScript)
+void QMozViewPrivate::loadFrameScript(const QString &frameScript)
 {
     if (!mViewInitialized) {
         mPendingFrameScripts.append(frameScript);
@@ -282,7 +267,7 @@ void QGraphicsMozViewPrivate::loadFrameScript(const QString &frameScript)
     }
 }
 
-void QGraphicsMozViewPrivate::addMessageListener(const QString &name)
+void QMozViewPrivate::addMessageListener(const QString &name)
 {
     if (!mViewInitialized) {
         mPendingMessageListeners.append(name);
@@ -292,7 +277,7 @@ void QGraphicsMozViewPrivate::addMessageListener(const QString &name)
     mView->AddMessageListener(name.toUtf8().data());
 }
 
-void QGraphicsMozViewPrivate::addMessageListeners(const QStringList &messageNamesList)
+void QMozViewPrivate::addMessageListeners(const QStringList &messageNamesList)
 {
     if (!mViewInitialized) {
         mPendingMessageListeners.append(messageNamesList);
@@ -306,7 +291,7 @@ void QGraphicsMozViewPrivate::addMessageListeners(const QStringList &messageName
     mView->AddMessageListeners(messages);
 }
 
-void QGraphicsMozViewPrivate::timerEvent(QTimerEvent *event)
+void QMozViewPrivate::timerEvent(QTimerEvent *event)
 {
     Q_ASSERT(q);
     if (event->timerId() == mMovingTimerId) {
@@ -323,7 +308,7 @@ void QGraphicsMozViewPrivate::timerEvent(QTimerEvent *event)
     }
 }
 
-void QGraphicsMozViewPrivate::startMoveMonitor()
+void QMozViewPrivate::startMoveMonitor()
 {
     Q_ASSERT(q);
     // Kill running move monitor.
@@ -335,7 +320,7 @@ void QGraphicsMozViewPrivate::startMoveMonitor()
     mFlicking = true;
 }
 
-QVariant QGraphicsMozViewPrivate::inputMethodQuery(Qt::InputMethodQuery property) const
+QVariant QMozViewPrivate::inputMethodQuery(Qt::InputMethodQuery property) const
 {
     switch (property) {
     case Qt::ImEnabled:
@@ -347,7 +332,7 @@ QVariant QGraphicsMozViewPrivate::inputMethodQuery(Qt::InputMethodQuery property
     }
 }
 
-void QGraphicsMozViewPrivate::inputMethodEvent(QInputMethodEvent *event)
+void QMozViewPrivate::inputMethodEvent(QInputMethodEvent *event)
 {
     LOGT("cStr:%s, preStr:%s, replLen:%i, replSt:%i", event->commitString().toUtf8().data(), event->preeditString().toUtf8().data(), event->replacementLength(), event->replacementStart());
     mPreedit = !event->preeditString().isEmpty();
@@ -387,7 +372,7 @@ void QGraphicsMozViewPrivate::inputMethodEvent(QInputMethodEvent *event)
     }
 }
 
-void QGraphicsMozViewPrivate::keyPressEvent(QKeyEvent *event)
+void QMozViewPrivate::keyPressEvent(QKeyEvent *event)
 {
     if (!mViewInitialized)
         return;
@@ -404,7 +389,7 @@ void QGraphicsMozViewPrivate::keyPressEvent(QKeyEvent *event)
     mView->SendKeyPress(domKeyCode, gmodifiers, charCode);
 }
 
-void QGraphicsMozViewPrivate::keyReleaseEvent(QKeyEvent *event)
+void QMozViewPrivate::keyReleaseEvent(QKeyEvent *event)
 {
     if (!mViewInitialized)
         return;
@@ -422,7 +407,7 @@ void QGraphicsMozViewPrivate::keyReleaseEvent(QKeyEvent *event)
     mView->SendKeyRelease(domKeyCode, gmodifiers, charCode);
 }
 
-void QGraphicsMozViewPrivate::sendAsyncMessage(const QString &name, const QVariant &variant)
+void QMozViewPrivate::sendAsyncMessage(const QString &name, const QVariant &variant)
 {
     if (!mViewInitialized)
         return;
@@ -433,54 +418,31 @@ void QGraphicsMozViewPrivate::sendAsyncMessage(const QString &name, const QVaria
     mView->SendAsyncMessage((const char16_t*)name.constData(), NS_ConvertUTF8toUTF16(array.constData()).get());
 }
 
-void QGraphicsMozViewPrivate::UpdateViewSize()
+void QMozViewPrivate::setMozWindow(QMozWindow* window)
 {
-    if (mSize.isEmpty())
-        return;
-
-    if (!mViewInitialized) {
-        return;
-    }
-
-    if (mContext->GetApp()->IsAccelerated() && mHasContext) {
-        mView->SetGLViewPortSize(mGLSurfaceSize.width(), mGLSurfaceSize.height());
-    }
-    mView->SetViewSize(mSize.width(), mSize.height());
-
-    if (mOrientationDirty) {
-        ScreenRotation rotation = ROTATION_0;
-        switch (mOrientation) {
-        case Qt::LandscapeOrientation:
-            rotation = mozilla::ROTATION_90;
-            break;
-        case Qt::InvertedLandscapeOrientation:
-            rotation = mozilla::ROTATION_270;
-            break;
-        case Qt::InvertedPortraitOrientation:
-            rotation = mozilla::ROTATION_180;
-            break;
-        default:
-            break;
+    mMozWindow = window;
+    if (mMozWindow) {
+        if (!mSize.isEmpty()) {
+            mMozWindow->setSize(mSize.toSize());
         }
-        mView->SetScreenRotation(rotation);
-        mOrientationDirty = false;
+        connect(mMozWindow.data(), &QMozWindow::compositorCreated,
+                this, &QMozViewPrivate::onCompositorCreated);
     }
 }
 
-bool QGraphicsMozViewPrivate::RequestCurrentGLContext()
+void QMozViewPrivate::onCompositorCreated()
 {
-    QSize unused;
-    return RequestCurrentGLContext(unused);
+    mHasCompositor = true;
 }
 
-bool QGraphicsMozViewPrivate::RequestCurrentGLContext(QSize& aViewPortSize)
+void QMozViewPrivate::UpdateViewSize()
 {
-    bool hasContext = false;
-    mViewIface->requestGLContext(hasContext, aViewPortSize);
-    return hasContext;
+    if (mMozWindow) {
+        mSize = mMozWindow->size();
+    }
 }
 
-void QGraphicsMozViewPrivate::ViewInitialized()
+void QMozViewPrivate::ViewInitialized()
 {
     mViewInitialized = true;
 
@@ -506,31 +468,30 @@ void QGraphicsMozViewPrivate::ViewInitialized()
     mViewIface->canGoForwardChanged();
 }
 
-void QGraphicsMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+void QMozViewPrivate::SetBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     QMutexLocker locker(&mBgColorMutex);
     mBgColor = QColor(r, g, b, a);
     mViewIface->bgColorChanged();
 }
 
+void QMozViewPrivate::SetMargins(const QMargins& margins)
+{
+  if (margins != mMargins) {
+    mMargins = margins;
+    mView->SetMargins(margins.top(), margins.right(), margins.bottom(), margins.left());
+    mViewIface->marginsChanged();
+  }
+}
+
 // Can be read for instance from gecko compositor thread.
-QColor QGraphicsMozViewPrivate::GetBackgroundColor() const
+QColor QMozViewPrivate::GetBackgroundColor() const
 {
     QMutexLocker locker(&mBgColorMutex);
     return mBgColor;
 }
 
-bool QGraphicsMozViewPrivate::Invalidate()
-{
-    return mViewIface->Invalidate();
-}
-
-void QGraphicsMozViewPrivate::CompositingFinished()
-{
-    mViewIface->CompositingFinished();
-}
-
-void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)
+void QMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCanGoBack, bool aCanGoForward)
 {
     if (mCanGoBack != aCanGoBack) {
         mCanGoBack = aCanGoBack;
@@ -548,7 +509,7 @@ void QGraphicsMozViewPrivate::OnLocationChanged(const char* aLocation, bool aCan
     }
 }
 
-void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal)
+void QMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTotal, int32_t aMaxTotal)
 {
     if (mIsLoading) {
         mProgress = aProgress;
@@ -556,7 +517,7 @@ void QGraphicsMozViewPrivate::OnLoadProgress(int32_t aProgress, int32_t aCurTota
     }
 }
 
-void QGraphicsMozViewPrivate::OnLoadStarted(const char* aLocation)
+void QMozViewPrivate::OnLoadStarted(const char* aLocation)
 {
     Q_UNUSED(aLocation);
 
@@ -569,7 +530,7 @@ void QGraphicsMozViewPrivate::OnLoadStarted(const char* aLocation)
     }
 }
 
-void QGraphicsMozViewPrivate::OnLoadFinished(void)
+void QMozViewPrivate::OnLoadFinished(void)
 {
     if (mIsLoading) {
         mProgress = 100;
@@ -578,13 +539,13 @@ void QGraphicsMozViewPrivate::OnLoadFinished(void)
     }
 }
 
-void QGraphicsMozViewPrivate::OnWindowCloseRequested()
+void QMozViewPrivate::OnWindowCloseRequested()
 {
     mViewIface->windowCloseRequested();
 }
 
 // View finally destroyed and deleted
-void QGraphicsMozViewPrivate::ViewDestroyed()
+void QMozViewPrivate::ViewDestroyed()
 {
     LOGT();
     mView = NULL;
@@ -592,7 +553,7 @@ void QGraphicsMozViewPrivate::ViewDestroyed()
     mViewIface->viewDestroyed();
 }
 
-void QGraphicsMozViewPrivate::RecvAsyncMessage(const char16_t* aMessage, const char16_t* aData)
+void QMozViewPrivate::RecvAsyncMessage(const char16_t* aMessage, const char16_t* aData)
 {
     NS_ConvertUTF16toUTF8 message(aMessage);
     NS_ConvertUTF16toUTF8 data(aData);
@@ -611,16 +572,15 @@ void QGraphicsMozViewPrivate::RecvAsyncMessage(const char16_t* aMessage, const c
     }
 }
 
-char* QGraphicsMozViewPrivate::RecvSyncMessage(const char16_t* aMessage, const char16_t*  aData)
+char* QMozViewPrivate::RecvSyncMessage(const char16_t* aMessage, const char16_t*  aData)
 {
     QMozReturnValue response;
     NS_ConvertUTF16toUTF8 message(aMessage);
     NS_ConvertUTF16toUTF8 data(aData);
 
-    bool ok = false;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(QByteArray(data.get()), &error);
-    ok = error.error == QJsonParseError::NoError;
+    Q_ASSERT(error.error == QJsonParseError::NoError);
     QVariant vdata = doc.toVariant();
 
     mViewIface->recvSyncMessage(message.get(), vdata, &response);
@@ -632,25 +592,26 @@ char* QGraphicsMozViewPrivate::RecvSyncMessage(const char16_t* aMessage, const c
     return strdup(array.constData());
 }
 
-void QGraphicsMozViewPrivate::OnLoadRedirect(void)
+void QMozViewPrivate::OnLoadRedirect(void)
 {
     LOGT();
     mViewIface->loadRedirect();
 }
 
-void QGraphicsMozViewPrivate::OnSecurityChanged(const char* aStatus, unsigned int aState)
+void QMozViewPrivate::OnSecurityChanged(const char* aStatus, unsigned int aState)
 {
     LOGT();
     mViewIface->securityChanged(aStatus, aState);
 }
-void QGraphicsMozViewPrivate::OnFirstPaint(int32_t aX, int32_t aY)
+
+void QMozViewPrivate::OnFirstPaint(int32_t aX, int32_t aY)
 {
     LOGT();
     mIsPainted = true;
     mViewIface->firstPaint(aX, aY);
 }
 
-void QGraphicsMozViewPrivate::SetIsFocused(bool aIsFocused)
+void QMozViewPrivate::SetIsFocused(bool aIsFocused)
 {
     mViewIsFocused = aIsFocused;
     if (mViewInitialized) {
@@ -658,14 +619,14 @@ void QGraphicsMozViewPrivate::SetIsFocused(bool aIsFocused)
     }
 }
 
-void QGraphicsMozViewPrivate::SetThrottlePainting(bool aThrottle)
+void QMozViewPrivate::SetThrottlePainting(bool aThrottle)
 {
     if (mViewInitialized) {
         mView->SetThrottlePainting(aThrottle);
     }
 }
 
-void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
+void QMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCause, int aFocusChange,
                                               const char16_t* inputType, const char16_t* inputMode)
 {
     Qt::InputMethodHints hints = Qt::ImhNone;
@@ -710,49 +671,20 @@ void QGraphicsMozViewPrivate::IMENotification(int aIstate, bool aOpen, int aCaus
     mViewIface->imeNotification(aIstate, aOpen, aCause, aFocusChange, imType);
 }
 
-void QGraphicsMozViewPrivate::GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext)
+void QMozViewPrivate::GetIMEStatus(int32_t* aIMEEnabled, int32_t* aIMEOpen, intptr_t* aNativeIMEContext)
 {
     *aNativeIMEContext = (intptr_t)qApp->inputMethod();
 }
 
-void QGraphicsMozViewPrivate::OnScrolledAreaChanged(unsigned int aWidth, unsigned int aHeight)
-{
-    LOGT("sz[%u,%u]", aWidth, aHeight);
-    Q_UNUSED(aWidth)
-    Q_UNUSED(aHeight)
-}
-
-void QGraphicsMozViewPrivate::OnScrollChanged(int32_t offSetX, int32_t offSetY)
-{
-}
-
-void QGraphicsMozViewPrivate::OnTitleChanged(const char16_t* aTitle)
+void QMozViewPrivate::OnTitleChanged(const char16_t* aTitle)
 {
     mTitle = QString((QChar*)aTitle);
     mViewIface->titleChanged();
 }
 
-void QGraphicsMozViewPrivate::SetFirstPaintViewport(const nsIntPoint& aOffset, float aZoom,
-                                                    const nsIntRect& aPageRect, const gfxRect& aCssPageRect)
+bool QMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize)
 {
-    LOGT();
-}
-
-void QGraphicsMozViewPrivate::SyncViewportInfo(const nsIntRect& aDisplayPort,
-                                               float aDisplayResolution, bool aLayersUpdated,
-                                               nsIntPoint& aScrollOffset, float& aScaleX, float& aScaleY)
-{
-    LOGT("viewport display port[%d,%d,%d,%d]", aDisplayPort.x, aDisplayPort.y, aDisplayPort.width, aDisplayPort.height);
-}
-
-void QGraphicsMozViewPrivate::SetPageRect(const gfxRect& aCssPageRect)
-{
-    LOGT();
-}
-
-bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRect, const gfxSize& aScrollableSize)
-{
-    mContentResolution = mSize.width() / aContentRect.width;
+    mContentResolution = mMozWindow->size().width() / aContentRect.width;
 
     if (mContentRect.x() != aContentRect.x || mContentRect.y() != aContentRect.y ||
             mContentRect.width() != aContentRect.width ||
@@ -798,7 +730,7 @@ bool QGraphicsMozViewPrivate::SendAsyncScrollDOMEvent(const gfxRect& aContentRec
     return false;
 }
 
-bool QGraphicsMozViewPrivate::HandleLongTap(const nsIntPoint& aPoint)
+bool QMozViewPrivate::HandleLongTap(const nsIntPoint& aPoint)
 {
     QMozReturnValue retval;
     retval.setMessage(false);
@@ -806,7 +738,7 @@ bool QGraphicsMozViewPrivate::HandleLongTap(const nsIntPoint& aPoint)
     return retval.getMessage().toBool();
 }
 
-bool QGraphicsMozViewPrivate::HandleSingleTap(const nsIntPoint& aPoint)
+bool QMozViewPrivate::HandleSingleTap(const nsIntPoint& aPoint)
 {
     QMozReturnValue retval;
     retval.setMessage(false);
@@ -814,7 +746,7 @@ bool QGraphicsMozViewPrivate::HandleSingleTap(const nsIntPoint& aPoint)
     return retval.getMessage().toBool();
 }
 
-bool QGraphicsMozViewPrivate::HandleDoubleTap(const nsIntPoint& aPoint)
+bool QMozViewPrivate::HandleDoubleTap(const nsIntPoint& aPoint)
 {
     QMozReturnValue retval;
     retval.setMessage(false);
@@ -822,7 +754,7 @@ bool QGraphicsMozViewPrivate::HandleDoubleTap(const nsIntPoint& aPoint)
     return retval.getMessage().toBool();
 }
 
-void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
+void QMozViewPrivate::touchEvent(QTouchEvent* event)
 {
     // QInputMethod sends the QInputMethodEvent. Thus, it will
     // be handled before this touch event. Problem is that
@@ -1004,9 +936,115 @@ void QGraphicsMozViewPrivate::touchEvent(QTouchEvent* event)
     }
 }
 
-void QGraphicsMozViewPrivate::ReceiveInputEvent(const InputData& event)
+void QMozViewPrivate::ReceiveInputEvent(const InputData& event)
 {
     if (mViewInitialized) {
         mView->ReceiveInputEvent(event);
+    }
+}
+
+void QMozViewPrivate::synthTouchBegin(const QVariant& touches)
+{
+    QList<QVariant> list = touches.toList();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_START,
+                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           mozilla::ScreenSize(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    mView->ReceiveInputEvent(meventStart);
+}
+
+void QMozViewPrivate::synthTouchMove(const QVariant& touches)
+{
+    QList<QVariant> list = touches.toList();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_MOVE,
+                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           mozilla::ScreenSize(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    mView->ReceiveInputEvent(meventStart);
+}
+
+void QMozViewPrivate::synthTouchEnd(const QVariant& touches)
+{
+    QList<QVariant> list = touches.toList();
+    MultiTouchInput meventStart(MultiTouchInput::MULTITOUCH_END,
+                                QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
+    int ptId = 0;
+    for(QList<QVariant>::iterator it = list.begin(); it != list.end(); it++)
+    {
+        const QPointF pt = (*it).toPointF();
+        mozilla::ScreenIntPoint nspt(pt.x(), pt.y());
+        ptId++;
+        meventStart.mTouches.AppendElement(SingleTouchData(ptId,
+                                                           nspt,
+                                                           mozilla::ScreenSize(1, 1),
+                                                           180.0f,
+                                                           1.0f));
+    }
+    mView->ReceiveInputEvent(meventStart);
+}
+
+void QMozViewPrivate::recvMouseMove(int posX, int posY)
+{
+    if (mViewInitialized && !mPendingTouchEvent) {
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_MOVE,
+                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
+        event.mTouches.AppendElement(SingleTouchData(0,
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
+                                     180.0f,
+                                     1.0f));
+        ReceiveInputEvent(event);
+    }
+}
+
+void QMozViewPrivate::recvMousePress(int posX, int posY)
+{
+    mViewIface->forceViewActiveFocus();
+    if (mViewInitialized && !mPendingTouchEvent) {
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_START,
+                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
+        event.mTouches.AppendElement(SingleTouchData(0,
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
+                                     180.0f,
+                                     1.0f));
+        ReceiveInputEvent(event);
+    }
+}
+
+void QMozViewPrivate::recvMouseRelease(int posX, int posY)
+{
+    if (mViewInitialized && !mPendingTouchEvent) {
+        MultiTouchInput event(MultiTouchInput::MULTITOUCH_END,
+                              QDateTime::currentMSecsSinceEpoch(), TimeStamp(), 0);
+        event.mTouches.AppendElement(SingleTouchData(0,
+                                     mozilla::ScreenIntPoint(posX, posY),
+                                     mozilla::ScreenSize(1, 1),
+                                     180.0f,
+                                     1.0f));
+        ReceiveInputEvent(event);
+    }
+    if (mPendingTouchEvent) {
+        mPendingTouchEvent = false;
     }
 }

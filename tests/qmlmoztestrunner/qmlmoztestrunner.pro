@@ -19,9 +19,6 @@ isEmpty(DEFAULT_COMPONENT_PATH) {
 
 PKGCONFIG += Qt5QuickTest
 QT += qml quick
-!isEmpty(BUILD_QT5QUICK1) {
-  QT += declarative
-}
 
 target.path = $$[QT_INSTALL_BINS]
 INSTALLS += target

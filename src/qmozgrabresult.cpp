@@ -5,10 +5,15 @@
 
 #include "qopenglwebpage.h"
 #include "qmozgrabresult.h"
+#include "qmozwindow.h"
 
 #include <QCoreApplication>
 #include <QDebug>
+#if defined(QT_OPENGL_ES_2)
 #include <QOpenGLFunctions_ES2>
+#else
+#include <QOpenGLFunctions>
+#endif
 #include <QPointer>
 #include <QSharedPointer>
 #include <QWindow>
@@ -144,7 +149,7 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
 
     QSize size = targetSize;
     if (size.isEmpty()) {
-        size = QSize(webPage->width(), webPage->height());
+        size = webPage->mozWindow()->size();
     }
 
     if (!size.isValid()) {
@@ -152,15 +157,11 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
         return 0;
     }
 
-    if (!webPage->window()) {
+    if (!webPage->mozWindow()) {
         qWarning() << "OpenGLWebPage::grabToImage web page is not attached to a window";
         return 0;
     }
 
-    if (!webPage->window()->isVisible()) {
-        qWarning() << "OpenGLWebPage::grabToImage web page's window is not visible";
-        return 0;
-    }
     if (!webPage->completed()) {
         qWarning() << "OpenGLWebPage::grabToImage web page is not yet completed. Implies that view is not created.";
         return 0;
@@ -175,7 +176,7 @@ QMozGrabResult *QMozGrabResultPrivate::create(QOpenGLWebPage *webPage, const QSi
     QMozGrabResultPrivate *d = result->d_func();
     d->textureSize = size;
     d->webPage = webPage;
-    d->orientation = webPage->window()->contentOrientation();
+    d->orientation = webPage->mozWindow()->contentOrientation();
 
     return result;
 }

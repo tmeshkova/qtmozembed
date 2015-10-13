@@ -1,4 +1,4 @@
-CONFIG += qt thread debug ordered create_pc create_prl no_install_prl
+CONFIG += qt thread debug ordered create_pc create_prl no_install_prl c++11
 QT += openglextensions
 TARGET = qt5embedwidget
 TEMPLATE = lib
@@ -21,9 +21,11 @@ SOURCES += qmozcontext.cpp \
            qmozscrolldecorator.cpp \
            qmessagepump.cpp \
            EmbedQtKeyUtils.cpp \
-           qgraphicsmozview_p.cpp \
+           qmozview_p.cpp \
            geckoworker.cpp \
-           qopenglwebpage.cpp
+           qopenglwebpage.cpp \
+           qmozwindow.cpp \
+           qmozwindow_p.cpp
 
 HEADERS += qmozcontext.h \
            qmozgrabresult.h \
@@ -31,19 +33,16 @@ HEADERS += qmozcontext.h \
            qmozscrolldecorator.h \
            qmessagepump.h \
            EmbedQtKeyUtils.h \
-           qgraphicsmozview_p.h \
+           qmozview_p.h \
            geckoworker.h \
            qmozview_defined_wrapper.h \
            qmozview_templated_wrapper.h \
-           qopenglwebpage.h
+           qopenglwebpage.h \
+           qmozwindow.h \
+           qmozwindow_p.h
 
 SOURCES += quickmozview.cpp qmoztexturenode.cpp qmozextmaterialnode.cpp
 HEADERS += quickmozview.h qmoztexturenode.h qmozextmaterialnode.h
-
-!isEmpty(BUILD_QT5QUICK1) {
-  SOURCES += qdeclarativemozview.cpp qgraphicsmozview.cpp
-  HEADERS += qdeclarativemozview.h qgraphicsmozview.h
-}
 
 include(qmozembed.pri)
 

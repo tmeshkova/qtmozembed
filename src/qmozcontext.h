@@ -42,6 +42,9 @@ public:
 
 Q_SIGNALS:
     void onInitialized();
+    void destroyed();
+    void lastViewDestroyed();
+    void lastWindowDestroyed();
     void recvObserve(const QString message, const QVariant data);
 
 public Q_SLOTS:
